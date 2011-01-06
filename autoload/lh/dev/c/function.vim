@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev/c/function.vim                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.1
+" Version:      0.0.2
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -25,7 +25,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 001
+let s:k_version = 002
 function! lh#dev#c#function#version()
   return s:k_version
 endfunction
@@ -145,14 +145,15 @@ function! lh#dev#c#function#_split_list_of_parameters(sParameters)
 endfunction
 
 " This function will treat C & C++ cases => must recognize
-" [ ] arrays
+" [/] arrays
+" [ ] array-references
 " [ ] function-pointers
 " [X] templates
 " [/] type
 " [X] const
 " [ ] in/out
 " [X] pointer/reference
-" [ ] multiple tokens types (e.g. "unsigned long long int")
+" [X] multiple tokens types (e.g. "unsigned long long int")
 " [X] default value
 " [X] new line before (when analysing non ctags-signatures, but real text)
 " [/] TU
@@ -162,17 +163,67 @@ function! lh#dev#c#function#_analyse_parameter( param )
   " Strip spaces
   let param = substitute(a:param, '\_s\+', ' ', 'g')
   " Extract default value
-  let res.default = matchstr(param, '^.\{-}\s*=\s*\zs.*\ze$')
-  let param = substitute(param, '\s*=\s*'.escape(res.default,'\*'), '', '')
+  if stridx(param, '=') != -1
+    let [all, param, res.default ; rest] = matchlist(param, '^\s*\([^=]\{-}\)\s*=\s*\(.\{-}\)\s*$')
+  else
+    let param = matchstr(param, '^\s*\zs.\{-}\ze\s*$')
+    let res.default = ''
+  endif
   " Type
   let res.type = matchstr(param, '^\s*\zs.*\%(\ze\s\+\|[&*]\ze\s*\)\S\+')
-  " Parameter
+  " Special case for arrays
+  let array = match(param, '\[.*\]$')
+  if array != -1
+    let res.type .= param[array : -1]
+    let param = param[0 : array-1]
+  endif
+  " Parameter name
   let res.name = matchstr(param, '^.*\%(\s\|[&*]\)\s*\zs\S\+')
   " New line before the parameter
   let res.nl = match(a:param, "^\\s*[\n\r]") >= 0
   " Result
   return res
 endfunction
+
+function! lh#dev#c#function#_type(variable_tag)
+  " or should we split-open ?
+  call lh#tags#jump(a:variable_tag)
+  try 
+    let line = getline('.')
+    let sVariables = matchstr(line, '^\s*\zs[^;=]*\ze[;=]\=.*$')
+    echo "l=".line."\n->".sVariables
+    " may be not the best way to split stuff
+    let lVariables = lh#dev#option#call('function#_split_list_of_parameters', &ft, sVariables)
+    let i = lh#list#match(lVariables, '\<'.a:variable_tag.name.'\>')
+    if i == -1
+      throw "lh-dev is unable to parse ``".sVariables."'' to extract ``".(a:variable_tag.name)."'' definition."
+    endif
+    return lh#dev#c#function#_analyse_parameter(lVariables[i]).type
+  finally
+    pop
+  endtry
+endfunction
+
+" [ ] arrays
+" [ ] array-references
+" [ ] function-pointers
+" [X] templates
+" [/] type
+" [X] const
+" [ ] in/out
+" [X] pointer/reference
+" [X] multiple tokens types (e.g. "unsigned long long int")
+" [ ] default value
+" [X] new line before (when analysing non ctags-signatures, but real text)
+" [ ] TU
+function! lh#dev#function#_build_param_decl(param)
+  return a:param.type . ' ' . (a:param.dir =='out' ? '*' : '') .a:param.formal
+endfunction
+
+function! lh#dev#function#_build_param_call(param)
+  return (a:param.dir =='out' ? '&' : '') .a:param.name
+endfunction
+
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
