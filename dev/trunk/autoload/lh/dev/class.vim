@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev/class.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.1
+" Version:      0.0.2
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -16,6 +16,7 @@
 "       Requires Vim7+, exhuberant ctags
 " History:      
 " 	v0.0.1: code moved from lh-cpp
+" 	v0.0.2: Ways to get class separators (mostly for lh-refactor)
 " TODO:         
 " 	- option to return inherited members
 " 	- option to return prototypes or function definitions
@@ -70,6 +71,17 @@ endfunction
 " @todo, may need to adapt f_unction and m_member to other languages
 function! lh#dev#class#members(id)
   return s:FetchMembers(a:id, '[mfp]')
+endfunction
+
+" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+" # Class separators {{{2
+function! lh#dev#class#sep_decl()
+  " sorry, I do C++.
+  return lh#dev#option#get('class_sep_use', &ft, '::')
+endfunction
+
+function! lh#dev#class#sep_use()
+  return lh#dev#option#get('class_sep_use', &ft, '.')
 endfunction
 
 " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
