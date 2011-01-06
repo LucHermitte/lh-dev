@@ -3,7 +3,7 @@
 " File:		autoload/lh/dev/naming.vim                        {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:	0.0.1
+" Version:	0.0.2
 " Created:	05th Oct 2009
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -12,7 +12,8 @@
 " 
 "------------------------------------------------------------------------
 " Installation:	«install details»
-" History:	«history»
+" History:
+" 	v0.0.2: vim parameters specificities taken into account
 " TODO:		
 " }}}1
 "=============================================================================
@@ -148,6 +149,9 @@ function! lh#dev#naming#constant(variable, ...)
 endfunction
 
 " Function: lh#dev#naming#param(variable [, filetype] ) {{{3
+" Example to have parameters post-fixed with '_':
+"   :let b:cpp_naming_param_re = '\(.\{-}\)_\=$'
+"   :let b:cpp_naming_param_subst = '\1_'
 function! lh#dev#naming#param(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let param_re    = s:Option('param_re', ft, '.*')
@@ -160,9 +164,12 @@ endfunction
 " ## Predefined constants {{{1
 
 " todo: differentiate vim arg use from arg names in function signature
-LetIfUndef g:vim_naming_param_subst  'a:&'
-LetIfUndef g:vim_naming_static_subst 's:&'
-LetIfUndef g:vim_naming_global_subst 'g:&'
+LetIfUndef g:vim_naming_param_re     '\%([algsbwt]:\)\=\(.*\)'
+LetIfUndef g:vim_naming_param_subst  'a:\1'
+LetIfUndef g:vim_naming_static_re     '\%([algsbwt]:\)\=\(.*\)'
+LetIfUndef g:vim_naming_static_subst 's:\1'
+LetIfUndef g:vim_naming_global_re     '\%([algsbwt]:\)\=\(.*\)'
+LetIfUndef g:vim_naming_global_subst 'g:\1'
 
 
 "------------------------------------------------------------------------
