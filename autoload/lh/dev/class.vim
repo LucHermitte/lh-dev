@@ -174,7 +174,9 @@ function! lh#dev#class#fetch_direct_children(id, scope_where_to_search, ...)
     let s:instance = {}
   endif
   " 1- Fetch the tags associated to classes names a:id
-  let classes = s:DoFetchClasses(a:scope_where_to_search.k_scope_sep.'.*', s:instance)
+  let scope = (empty(a:scope_where_to_search) || a:scope_where_to_search =~ '^\s*$' ? '' : a:scope_where_to_search.k_scope_sep)
+        \ . '.*'
+  let classes = s:DoFetchClasses(scope, s:instance)
   " select the classes that inherit from another ... in order to found their parents
   call filter(classes,
 	\ 'has_key(v:val, '.string(k_inherits).') && v:val.'.k_inherits.'=~'.string(a:id))
