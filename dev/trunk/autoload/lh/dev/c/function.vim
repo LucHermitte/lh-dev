@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev/c/function.vim                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.2
+" Version:      «0.0.3»
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -15,7 +15,8 @@
 "       Drop this file into {rtp}/autoload/lh/dev/c
 "       Requires Vim7+
 "       «install details»
-" History:      «history»
+" History:      
+"       «v 0.0.3» support for variadic parameters
 " TODO:         «missing features»
 " }}}1
 "=============================================================================
@@ -157,11 +158,19 @@ endfunction
 " [X] default value
 " [X] new line before (when analysing non ctags-signatures, but real text)
 " [/] TU
+" [X] variadic parameter "..."
 function! lh#dev#c#function#_analyse_parameter( param )
   let res = {}
 
   " Strip spaces
   let param = substitute(a:param, '\_s\+', ' ', 'g')
+  " variadic ?
+  if param == '...'
+    let res.type    = 'va_list'
+    let res.default = ''
+    let res.name    = '...'
+    return res
+  endif
   " Extract default value
   if stridx(param, '=') != -1
     let [all, param, res.default ; rest] = matchlist(param, '^\s*\([^=]\{-}\)\s*=\s*\(.\{-}\)\s*$')
