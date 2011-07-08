@@ -63,36 +63,22 @@ let cpp_function_start_pat = '{'
 function! lh#dev#find_function_boundaries(line)
   try 
     let lTags = lh#dev#start_tag_session()
-    if empty(lTags)
-      throw "No tags found, cannot find function boundaries around line ".a:line
-    endif
 
-    " 1- find the last occurrence of "function" before the line
-    let lFunctions = filter(copy(lTags), 'v:val.kind=="f"')
-    " Several cases to consider:
-    " - no function starting before => fail
-    " - the last function before terminates before as well
-    " - the function starting before contains a:line
+    let info = lh#dev#__FindFunctions(a:line)
 
-    if empty(lFunctions)
-      throw "No known function in ctags base"
-    endif
-    let crt_function = lh#list#Find_if(lFunctions, 'v:val.line > '.a:line)
+    let crt_function = info.idx " function starting just after the current line
+    let lFunctions   = info.fn
     if crt_function == 0
       throw "No known function around (before) line ".a:line." in ctags base"
     endif
     " echomsg "first after=="crt_function."->".string(lFunctions[crt_function])
-    " -1 to access the last item in the list
+
+    " decrement by 1 to access the previous function in the list
     let crt_function -= 1
     let first_line = lFunctions[crt_function].line
 
     " 2- find where the function ends
-    " 2.1- get the hook that find the end of a function ; default hook is based
-    " on matchit , we may also want to play with tags kinds
-    let end_func_hook_name = lh#dev#option#get('end_func_hook_name', &ft, 'lh#dev#_end_func')
-    let hook_str = end_func_hook_name.'('.first_line.')'
-    " 2.2- execute the hook => last line
-    let last_line = eval(hook_str)
+    let last_line = lh#dev#__FindEndFunc(first_line)
     "
     let fun = {'lines': [first_line, last_line[1]], 'fn':lFunctions[crt_function]}
     return fun
@@ -192,6 +178,44 @@ if !exists('s:temp_tags')
   let s:temp_tags = tempname()
   " let &tags .= ','.s:temp_tags
 endif
+
+" # lh#dev#__FindFunctions(line) {{{2
+function! lh#dev#__FindFunctions(line)
+  try
+    let lTags = lh#dev#start_tag_session()
+    if empty(lTags)
+      throw "No tags found, cannot find function definitions in ".expand('%')
+    endif
+
+    " 1- filter to keep functions only
+    let lFunctions = filter(copy(lTags), 'v:val.kind=="f"')
+
+    " Several cases to consider:
+    " - no function starting before => fail
+    " - the last function before terminates before as well
+    " - the function starting before contains a:line
+
+    if empty(lFunctions)
+      throw "No known function in ctags base"
+    endif
+    " index of the function starting just after the current line
+    let crt_function = lh#list#Find_if(lFunctions, 'v:val.line > '.a:line)
+    return { 'idx': crt_function, 'fn': lFunctions}
+  finally
+    call lh#dev#end_tag_session()
+  endtry
+endfunction
+
+" # lh#dev#__FindEndFunc() {{{2
+function! lh#dev#__FindEndFunc(first_line)
+  " 2.1- get the hook that find the end of a function ; default hook is based
+  " on matchit , we may also want to play with tags kinds
+  let end_func_hook_name = lh#dev#option#get('end_func_hook_name', &ft, 'lh#dev#_end_func')
+  let hook_str = end_func_hook_name.'('.a:first_line.')'
+  " 2.2- execute the hook => last line
+  let last_line = eval(hook_str)
+  return last_line
+endfunction
 
 " # lh#dev#__BuildCrtBufferCtags(...) {{{2
 function! lh#dev#__BuildCrtBufferCtags(...)
