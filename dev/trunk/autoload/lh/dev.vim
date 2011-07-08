@@ -69,11 +69,20 @@ function! lh#dev#find_function_boundaries(line)
 
     " 1- find the last occurrence of "function" before the line
     let lFunctions = filter(copy(lTags), 'v:val.kind=="f"')
-    let crt_function = lh#list#Find_if(lFunctions, 'v:val.line > '.a:line)
-    if crt_function == -1
-      throw "No known function around line ".a:line." in ctags base"
+    " Several cases to consider:
+    " - no function starting before => fail
+    " - the last function before terminates before as well
+    " - the function starting before contains a:line
+
+    if empty(lFunctions)
+      throw "No known function in ctags base"
     endif
-    " Assert crt_function != -1
+    let crt_function = lh#list#Find_if(lFunctions, 'v:val.line > '.a:line)
+    if crt_function == 0
+      throw "No known function around (before) line ".a:line." in ctags base"
+    endif
+    " echomsg "first after=="crt_function."->".string(lFunctions[crt_function])
+    " -1 to access the last item in the list
     let crt_function -= 1
     let first_line = lFunctions[crt_function].line
 
@@ -93,6 +102,8 @@ function! lh#dev#find_function_boundaries(line)
 endfunction
 
 " # lh#dev#get_variables(function_boundaries [, split points ...]) {{{2
+" NB: In C++, ctags does not understand for (int i=0...), and thus it can't
+" extract "i" as a local variable ...
 let c_ctags_understands_local_variables_in_one_pass = 0
 let cpp_ctags_understands_local_variables_in_one_pass = 0
 function! lh#dev#get_variables(function_boundaries, ...)
@@ -209,7 +220,7 @@ function! lh#dev#__BuildCrtBufferCtags(...)
   let cmd_line = substitute(cmd_line, '-kinds=\S\+\zsp', '', '') " remove prototypes, todo: ft-specific
   if a:0>0 || lh#dev#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
     if stridx(cmd_line, '-kinds=') != -1
-    let cmd_line = substitute(cmd_line, '-kinds=\S\+', '&l', '') " inject local variable, todo: ft-specific
+      let cmd_line = substitute(cmd_line, '-kinds=\S\+', '&l', '') " inject local variable, todo: ft-specific
     else
       let cmd_line .= ' ' . &ft . '-kinds=lv'
     endif
@@ -246,14 +257,14 @@ function! s:EvalLines(list)
     if !has_key(t, 'line') " sometimes, VimL declarations are badly understood
       let fields = split(t.cmd)
       for field in fields
-	if field =~ '^\k\+:'
-	  let [all, key, value; rest ] = matchlist(field, '^\(\k\+\):\(.*\)')
-	  let t[key] = value
-	elseif field =~ '^.$'
-	  let t.kind = field
-	elseif field =~ '/.*/";'
-	  let t.cmd = field
-	endif
+        if field =~ '^\k\+:'
+          let [all, key, value; rest ] = matchlist(field, '^\(\k\+\):\(.*\)')
+          let t[key] = value
+        elseif field =~ '^.$'
+          let t.kind = field
+        elseif field =~ '/.*/";'
+          let t.cmd = field
+        endif
       endfor
       let t.file = fields[0]
     endif
@@ -268,8 +279,8 @@ function! lh#dev#_sort_lines(t1, t2)
   let l1 = a:t1.line
   let l2 = a:t2.line
   return    l1 == l2 ? 0
-	\ : l1 >  l2 ? 1
-	\ :           -1
+        \ : l1 >  l2 ? 1
+        \ :           -1
 endfunction
 
 " # internal: matchit solution to find end of function {{{2
