@@ -103,6 +103,26 @@ function! lh#dev#naming#setter(variable, ...)
   return res
 endfunction
 
+" Function: lh#dev#naming#ref_getter(variable [, filetype] ) {{{3
+" Full getter that gives a total access to everything.
+function! lh#dev#naming#ref_getter(variable, ...)
+  let ft = (a:0 == 1) ? a:1 : &ft
+  let ref_re    = s:Option('ref_re', ft, '.*')
+  let ref_subst = s:Option('ref_subst', ft, 'ref\u&')
+  let res = substitute(a:variable, ref_re, ref_subst, '' )
+  return res
+endfunction
+
+" Function: lh#dev#naming#proxy_getter(variable [, filetype] ) {{{3
+" Getter that gives a total access through a proxy
+function! lh#dev#naming#proxy_getter(variable, ...)
+  let ft = (a:0 == 1) ? a:1 : &ft
+  let proxy_re    = s:Option('proxy_re', ft, '.*')
+  let proxy_subst = s:Option('proxy_subst', ft, 'proxy\u&')
+  let res = substitute(a:variable, proxy_re, proxy_subst, '' )
+  return res
+endfunction
+
 " Function: lh#dev#naming#global(variable [, filetype] ) {{{3
 function! lh#dev#naming#global(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft

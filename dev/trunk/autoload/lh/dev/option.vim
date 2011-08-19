@@ -46,10 +46,11 @@ endfunction
 " ## Exported functions {{{1
 
 " Function: lh#dev#option#get(name, filetype, default [, scope])  {{{2
-" @return b:{name} if it exists, or g:{name} if it exists, or {default}
-" otherwise
-" The order of the variables checked can be specified through the optional
-" argument {scope}
+" @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
+" b:{name}, or g:{name}. {default} is returned if none exists.
+" @note filetype inheritance is supported.
+" The order of the scopes for the variables checked can be specified through
+" the optional argument {scope}
 function! lh#dev#option#get(name, ft, default,...)
   let fts = [a:ft] + s:InheritedFiletypes(a:ft)
   call map(fts, 'v:val."_"')
