@@ -62,6 +62,12 @@ function! lh#dev#function#get_(fn_tag, key)
   return a:fn_tag[a:key]
 endfunction
 
+" Function: lh#dev#function#parameters_to_signature(lParams) {{{3
+function! lh#dev#function#parameters_to_signature(lParams)
+  let res = lh#dev#option#call('function#_parameters_to_signature', &ft, a:lParams)
+  return res
+endfunction
+
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 function! lh#dev#function#_prototype(fn_tag)
