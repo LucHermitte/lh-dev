@@ -47,37 +47,37 @@ Functions~
 Transforms {id} into a:
 
 - variable name:*lh#dev#naming#variable()*
-  Options: *(b|g):{ft_}strip_re* *(b|g):{ft_}strip_subst* 
+  Options: *(bg):{ft_}strip_re* *(bg):{ft_}strip_subst* 
 
 - into a getter name: *lh#dev#naming#getter()*
-  Options: *(b|g):{ft_}get_re* *(b|g):{ft_}get_subst*
+  Options: *(bg):{ft_}get_re* *(bg):{ft_}get_subst*
 
 - into a setter name: *lh#dev#naming#setter()*
-  Options: *(b|g):{ft_}set_re* *(b|g):{ft_}set_subst*
+  Options: *(bg):{ft_}set_re* *(bg):{ft_}set_subst*
 
 - into a full access getter name: *lh#dev#naming#ref_getter()*
-  Options: *(b|g):{ft_}ref_re* *(b|g):{ft_}ref_subst*
+  Options: *(bg):{ft_}ref_re* *(bg):{ft_}ref_subst*
 
 - into a getter (through proxy) name: *lh#dev#naming#proxy_getter()*
-  Options: *(b|g):{ft_}proxy_re* *(b|g):{ft_}proxy_subst*
+  Options: *(bg):{ft_}proxy_re* *(bg):{ft_}proxy_subst*
 
 - into a global variable name: *lh#dev#naming#global()*
-  Options: *(b|g):{ft_}global_re* *(b|g):{ft_}global_subst*
+  Options: *(bg):{ft_}global_re* *(bg):{ft_}global_subst*
 
 - into a local variable name: *lh#dev#naming#local()*
-  Options: *(b|g):{ft_}local_re* *(b|g):{ft_}local_subst*
+  Options: *(bg):{ft_}local_re* *(bg):{ft_}local_subst*
 
 - into a member variable name: *lh#dev#naming#member()*
-  Options: *(b|g):{ft_}member_re* *(b|g):{ft_}member_subst*
+  Options: *(bg):{ft_}member_re* *(bg):{ft_}member_subst*
 
 - into a static variable name: *lh#dev#naming#static()*
-  Options: *(b|g):{ft_}static_re* *(b|g):{ft_}static_subst*
+  Options: *(bg):{ft_}static_re* *(bg):{ft_}static_subst*
 
 - into a constant name: *lh#dev#naming#constant()*
-  Options: *(b|g){ft_}constant_re* *(b|g){ft_}constant_subst*
+  Options: *(bg):{ft_}constant_re* *(bg){ft_}constant_subst*
 
 - into a parameter name: *lh#dev#naming#param()*
-  Options: *(b|g){ft_}param_re* *(b|g){ft_}param_subst*
+  Options: *(bg):{ft_}param_re* *(bg){ft_}param_subst*
 
 
 *lh#dev#naming#to_lower_camel_case()*
@@ -85,7 +85,7 @@ Transforms {id} into a:
 *lh#dev#naming#to_underscore()*
 
 Options~
-Format: (b|g):{ft_}naming_{option}
+Format: (bg):{ft_}naming_{option}
 Examples:
 - g:vim_naming_param_re : global specialization used to extract name to build
   a parameter name, when working on vim-scripts.
