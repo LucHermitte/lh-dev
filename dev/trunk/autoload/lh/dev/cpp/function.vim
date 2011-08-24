@@ -68,8 +68,7 @@ endfunction
 " [ ] TU
 function! lh#dev#cpp#function#_build_param_decl(param)
   if a:param.dir == 'in'
-    " TODO: move lh#cpp#types into lh#dev
-    let type = lh#cpp#types#ConstCorrectType(a:param.type)
+    let type = lh#dev#cpp#types#ConstCorrectType(a:param.type)
   else " if a:param.dir == 'out'
     let type = a:param.type . '&'
   endif
