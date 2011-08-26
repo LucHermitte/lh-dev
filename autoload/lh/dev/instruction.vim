@@ -72,7 +72,7 @@ endfunction
 
 " Function: lh#dev#instruction#_assign(target, source) {{{3
 function! lh#dev#instruction#_assign(target, source)
-  return lh#dev#instruction#single(a:source . ' = ' . a:target)
+  return lh#dev#instruction#single(a:target . ' = ' . a:source)
 endfunction
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
