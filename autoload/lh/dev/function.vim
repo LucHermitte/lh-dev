@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev/function.vim                      {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.2
+" Version:      0.0.3
 " Created:      28th May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -17,6 +17,8 @@
 " History:
 " 	v0.0.1: code moved from lh-cpp
 " 	v0.0.2: signature manipulations made overidable
+" 	v0.0.3: default lh#dev#function#_build_param_decl() uses the parameter
+" 	        type if known
 " TODO:         
 " 	- option to use another code tool analysis that is not ft-dependant
 " }}}1
@@ -145,7 +147,9 @@ endfunction
 
 " Function: lh#dev#function#_build_param_decl(param) {{{2
 function! lh#dev#function#_build_param_decl(param)
-  return a:param.formal
+  let res = has_key(a:param, 'type') ? a:param.type . ' ' : ''  
+  let res .= a:param.formal
+  return res
 endfunction
 
 " Function: lh#dev#function#_build_real_params_list(lParams) {{{2
