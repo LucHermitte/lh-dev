@@ -3,7 +3,7 @@
 " File:		autoload/lh/dev/cpp/types.vim                            {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://code.google.com/p/lh-vim/>
-" Version:	0.2.2
+" Version:	0.0.3
 " Created:	10th Feb 2009
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -11,10 +11,9 @@
 " 	Analysis functions for C++ types.
 " 
 "------------------------------------------------------------------------
-" Installation:	«install details»
 " History:	
 " 	v0.0.0: Creation in lh-cpp
-" 	v0.2.2: Moved to lh-dev
+" 	v0.2.2: Moved to lh-dev v0.0.3
 " }}}1
 "=============================================================================
 
@@ -54,6 +53,7 @@ function! lh#dev#cpp#types#IsBaseType(type, pointerAsWell)
   " C++11 types
   let types.= '\|\<u\=int\%(_least\|_fast\)\=\%(8\|16\|32\|64\)_t\>'
   let types.= '\|\<u\=int\%(max\|ptr\)_t\>'
+  let types.= '\|\<bool\>'
 
   let expr = s:ExtractPattern( a:type, sign )
   let expr = s:ExtractPattern( expr,   size )
