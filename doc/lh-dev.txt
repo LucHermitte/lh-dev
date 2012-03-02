@@ -1,4 +1,4 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v001)
+*lh-dev.txt*            Vim library for development oriented scripts (v1.0.0.)
                         For Vim version 7+.    Last change: $Date$
 
                         By Luc Hermitte
@@ -96,7 +96,7 @@ Examples:
 Mappings~
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2011, http://code.google.com/p/lh-vim/
+ © Luc Hermitte, 2011-2012, http://code.google.com/p/lh-vim/
  $Id$
  VIM: let b:VS_language = 'american' 
  vim:ts=8:sw=4:tw=80:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:fdm=marker:
