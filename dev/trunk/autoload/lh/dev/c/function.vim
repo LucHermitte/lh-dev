@@ -17,7 +17,7 @@
 "       «install details»
 " History:      
 "       «v 0.0.3» support for variadic parameters
-" TODO:         «missing features»
+"       «v GPL» lh#dev#c#function#get_prototype() thakes init-list into account
 " }}}1
 "=============================================================================
 
@@ -53,44 +53,66 @@ endfunction
 " ## Exported functions {{{1
 
 " # Prototype {{{2
+" definitions also in AnalysisLib_Function
+let s:re_operators       = '\<operator\%([=~%+-\*/^&|]\|\[]\|()\|&&\|||\|->\|<<\|>>\|==\| \)'
+"   What looks like to a "space" operator is actually used in next regex to
+"   match convertion operators
+" let s:re_qualified_oper  = '\%('.s:re_qualified_name . '\s*::\s*\)\=' . s:re_operators . '.\{-}\ze('
 
-" lh#dev#c#function#get_prototype(lineNo, onlyDeclaration) " {{{3
+let s:re_funcname_or_operator = '\%(\<\I\i*\>\|'.s:re_operators.'\)\_s*('
+
+" lh#dev#c#function#get_prototype(lineNo, onlyDeclaration [, return_position_end_prototype_as_well=0]) " {{{3
 " Todo: 
 " * Retrieve the type even when it is not on the same line as the function
 "   identifier.
 " * Retrieve the const modifier even when it is not on the same line as the
 "   ')'.
-function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration)
-  let endPattern = a:onlyDeclaration ? ';' : '[;{]'
+function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration,...)
+  let endPattern = a:onlyDeclaration ? ';' : '[;:{]'
+  let return_position_end_prototype_as_well = a:0 > 0 && a:1!=0
   exe a:lineNo
   " 0- Goto end of current line of prototype (stop at the first found)
   normal! 0
+  " Problem with the next search: it may go past the current function if the
+  " cursor is on a line after the ")", and before the "{".
   call search( ')\|\n')
   " 1- Goto start of current prototype
   " let pos = searchpair('\<\i\+\>\%(\n\|\s\)*(', '', ')\%(\n\|[^;]\)*;.*$\ze', 'bW')
   " let pos = searchpair('\<\i\+\>\%(\n\|\s\)*(', '', ')', 'bW')
-  let pos = searchpair('\<\i\+\>\_s*(', '', ')\_[^{};]*'.endPattern, 'bW')
+  let pos = searchpair(s:re_funcname_or_operator, '', ')\(\_[^:{};]\|::\)*'.endPattern, 'bW')
   let l0 = line('.')
   " 2- Goto the "end" of the current prototype
   " let pos = searchpair('\<\i\+\>\%(\n\|\s\)*(', '', ')', 'W')
   " let pos = searchpair('\<\i\+\>\%(\n\|\s\)*(', '', ')\%(\n\|[^;]\)*;\zs','W')
-  let pos = searchpair('\<\i\+\>\_s*(', '', ')\_[^{};]*'.endPattern.'\zs', 'W')
-  let l1 = line('.')
+  let pos = searchpair(s:re_funcname_or_operator, '', ')\(\_[^:{};]\|::\)*'.endPattern.'\zs', 'W')
+  let end_pos = getpos('.')
+  let l1 = line('.')+1
   " Abort if nothing found
   if ((0==pos) || (l0>a:lineNo)) | return '' | endif
   " 3- Build the prototype string
-  let proto = getline(l0)
+  let proto = []
   while l0 < l1
-    let l0 += 1
     " Add the line, and trim any comments ending the line
-    let proto .= "\n" .
-	  \ substitute(getline(l0), '\s*//.*$\|\s*/\*.\{-}\*/\s*$', '', 'g')
-	  " \ substitute(getline(l0), '//.*$', '', 'g')
-	  " \ substitute(getline(l0), '//.*$\|/\*.\{-}\*/', '', 'g')
+    let proto += [
+          \ substitute(getline(l0), '\s*//.*$\|\s*/\*.\{-}\*/\s*$', '', 'g')
+          \ ]
+    " \ substitute(getline(l0), '//.*$', '', 'g')
+    " \ substitute(getline(l0), '//.*$\|/\*.\{-}\*/', '', 'g')
+    let l0 += 1
   endwhile
+  if !empty(proto) && proto[-1][-1] !~ '[;{]'
+    " get rid of the : starting the init-list
+    let proto[-1] = proto[-1][0:end_pos[2]-2]
+  endif
   " 4- and return it.
   exe a:lineNo
-  return proto
+  let s_proto = join(proto, "\n")
+  if return_position_end_prototype_as_well
+    return [end_pos, s_proto]
+  else
+    return s_proto
+  endif
+  return s_proto
 endfunction
 
 
