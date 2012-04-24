@@ -8,16 +8,18 @@
 " Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
-"       «description»
+"       Overridden functions from lh#dev#function, for C and derived languages
 " 
 "------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/autoload/lh/dev/c
-"       Requires Vim7+
-"       «install details»
 " History:      
-"       «v 0.0.3» support for variadic parameters
-"       «v GPL» lh#dev#c#function#get_prototype() thakes init-list into account
+"       «v 0.0.3»
+"       * support for variadic parameters
+"       «v GPL»
+"       * lh#dev#c#function#get_prototype() takes init-list into account
+"       * lh#dev#c#function#_analyse_parameter() support for optional
+"       parameter-name
+" Tests:
+"       * tests/lh/c-function.vim
 " }}}1
 "=============================================================================
 
@@ -197,19 +199,29 @@ function! lh#dev#c#function#_analyse_parameter( param )
   if stridx(param, '=') != -1
     let [all, param, res.default ; rest] = matchlist(param, '^\s*\([^=]\{-}\)\s*=\s*\(.\{-}\)\s*$')
   else
+    " trim spaces
     let param = matchstr(param, '^\s*\zs.\{-}\ze\s*$')
     let res.default = ''
   endif
   " Type
-  let res.type = matchstr(param, '^\s*\zs.*\%(\ze\s\+\|[&*]\ze\s*\)\S\+')
+  let p = matchend(param, '.*[*&]\|.*::\s*\S+')
+  if p != -1
+    " everything till *, or &, or ...::type
+    let res.type =param[:p-1]
+  else
+    " one word only; can't know about "long long int", for now
+    " or two words -> \=
+    let res.type = matchstr(param, '.\{-}\>\ze\(\s\+\S\+\)\=$')
+  endif
+  " Parameter name
+  let res.name = matchstr(param[strlen(res.type):], '\s*\zs.*')
   " Special case for arrays
   let array = match(param, '\[.*\]$')
   if array != -1
     let res.type .= param[array : -1]
     let param = param[0 : array-1]
+    let res.name = matchstr(param, '^.*\%(\s\|[&*]\)\s*\zs\S\+')
   endif
-  " Parameter name
-  let res.name = matchstr(param, '^.*\%(\s\|[&*]\)\s*\zs\S\+')
   " New line before the parameter
   let res.nl = match(a:param, "^\\s*[\n\r]") >= 0
   " Result
