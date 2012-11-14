@@ -3,7 +3,7 @@
 " File:		autoload/lh/dev/cpp/types.vim                            {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://code.google.com/p/lh-vim/>
-" Version:	0.0.3
+" Version:	1.0.1
 " Created:	10th Feb 2009
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -41,21 +41,24 @@ endfunction
 " Function:	s:ExtractPattern(str, pat) : str	{{{3
 " Note:		Internal, used by IsBaseType
 function! s:ExtractPattern(expr, pattern)
-  return substitute(a:expr, '^\s*\('. a:pattern .'\)\s*', '', 'g')
+  return substitute(a:expr, '^\s*\%('. a:pattern .'\)\s*', '', 'g')
 endfunction
 
 " Function:	lh#dev#cpp#types#IsBaseType(typeName) : bool	{{{3
 " Note:		Do not test for aberrations like long float
 function! lh#dev#cpp#types#IsBaseType(type, pointerAsWell)
+  echomsg "Check lh#dev#cpp#types#IsBaseType(".a:type.")"
   let sign  = '\<unsigned\>\|\<signed\>'
   let size  = '\<short\>\|\<long\>\|\<long\s\+long\>\|\<\>'
   let types = '\<void\>\|\<char\>\|\<wchar_t\>\|\<int\>\|\<float\>\|\<double\>\|\<size_t\>\|\<ptrdiff_t\>'
+  let scope = '\(\<\I\i*\s*::\s*\)\+'
   " C++11 types
   let types.= '\|\<u\=int\%(_least\|_fast\)\=\%(8\|16\|32\|64\)_t\>'
   let types.= '\|\<u\=int\%(max\|ptr\)_t\>'
   let types.= '\|\<bool\>'
 
-  let expr = s:ExtractPattern( a:type, sign )
+  let expr = s:ExtractPattern( a:type, scope )
+  let expr = s:ExtractPattern( expr, sign )
   let expr = s:ExtractPattern( expr,   size )
   let expr = s:ExtractPattern( expr,   types )
   if a:pointerAsWell==1
