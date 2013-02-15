@@ -3,7 +3,7 @@
 " File:		autoload/lh/dev/cpp/types.vim                            {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://code.google.com/p/lh-vim/>
-" Version:	1.0.1
+" Version:	1.0.2
 " Created:	10th Feb 2009
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -14,6 +14,8 @@
 " History:	
 " 	v0.0.0: Creation in lh-cpp
 " 	v0.2.2: Moved to lh-dev v0.0.3
+" 	v1.0.2: New function lh#dev#cpp#types#IsPointer(type) for lh-cpp
+" 	        doxygenation.
 " }}}1
 "=============================================================================
 
@@ -83,6 +85,12 @@ function! lh#dev#cpp#types#ConstCorrectType(type)
   else
     return 'const ' . a:type . '&'
   endif
+endfunction
+
+" Various functions {{{2
+" Function: lh#dev#cpp#types#IsPointer(type) : bool {{{3
+function! lh#dev#cpp#types#IsPointer(type)
+  return a:type =~ '\%([*]\|pointer\|_ptr\|Ptr\)\s*$'
 endfunction
 
 " }}}1
