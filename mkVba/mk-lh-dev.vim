@@ -3,8 +3,8 @@
 " File:         mkVba/mk-lh-dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.0.2
-let s:version = '1.0.2'
+" Version:      1.0.3
+let s:version = '1.0.3'
 " Created:      02nd Mar 2012
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -44,6 +44,7 @@ autoload/lh/dev/instruction.vim
 autoload/lh/dev/java/attribute.vim
 autoload/lh/dev/naming.vim
 autoload/lh/dev/option.vim
+autoload/lh/dev/tags.vim
 autoload/lh/dev/vim/function.vim
 doc/lh-dev.txt
 lh-dev-addon-info.txt
