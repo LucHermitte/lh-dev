@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.2
+" Version:      1.0.4
 " Created:      28th May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -11,14 +11,11 @@
 "       «description»
 " 
 "------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/autoload/lh
-"       Requires Vim7+
-"       «install details»
 " History:      
 " 	v0.0.2: + lh#dev#*_comments()
 "		+ ways to extract local variables
 "		- lh#dev#_end_func fixed cursor movements
+"       v1.0.4: ~ bug fixed in lh#dev#__FindFunctions(line)
 " TODO:         «missing features»
 " }}}1
 "=============================================================================
@@ -28,7 +25,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 002
+let s:k_version = 104
 function! lh#dev#version()
   return s:k_version
 endfunction
@@ -200,6 +197,9 @@ function! lh#dev#__FindFunctions(line)
     endif
     " index of the function starting just after the current line
     let crt_function = lh#list#Find_if(lFunctions, 'v:val.line > '.a:line)
+    if crt_function == -1 " We are after the last function
+      let crt_function=len(lFunctions)
+    endif
     return { 'idx': crt_function, 'fn': lFunctions}
   finally
     call lh#dev#end_tag_session()
