@@ -115,6 +115,11 @@ function! s:InheritedFiletypes(fts)
   return res
 endfunction
 
+" Function: lh#dev#option#inherited_filetypes(fts) {{{2
+function! lh#dev#option#inherited_filetypes(fts)
+  return s:InheritedFiletypes(a:fts)
+endfunction
+
 LetIfUndef g:cpp_inherits 'c'
 
 

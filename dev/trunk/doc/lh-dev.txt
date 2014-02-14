@@ -1,4 +1,4 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.0.0.)
+*lh-dev.txt*            Vim library for development oriented scripts (v1.1.0.)
                         For Vim version 7+.    Last change: $Date$
 
                         By Luc Hermitte
@@ -9,6 +9,7 @@
 CONTENTS                                      *lhdev-contents*      {{{1
 |lhdev-presentation|    Presentation
 |lhdev-filetype|        Filetype polymorphism
+|lhdev-style|           Coding style
 |lhdev-naming|          Naming policies
 |add-local-help|        Instructions on installing this file (:helptags %:h)
 
@@ -38,6 +39,50 @@ lh#dev#option#call({name}, {ft} [, parameters])~
 lh#dev#{name}({parameters}) otherwise
 If {name} is a |List|, then the function name used is: {name}[0]#{ft}#{name}[1]
 @note filetype inheritance is supported.
+
+------------------------------------------------------------------------------
+CODING STYLE                            *lhdev-style* {{{1
+
+The aim of |:AddStyle| and of |lh#dev#style#get()| is to define how things
+should get written in source code.
+For instance, some projects will want to have opening curly-brackets on new
+lines (see Allman indenting style), other will prefer to have the opening
+bracket on the same line as the function/constrol-statement/... (see K&R
+indenting style, Java coding style, ...)
+
+This pair doesn't do any replacement by itself. It is expected to used by
+snippet plugins. So far, only |mu-template| exploits this feature.
+
+|:AddStyle| is meant to be used by end users while |lh#dev#style#get()| is
+meant to be used by plugin developpers that want to exploit end-user coding
+style. 
+Note: Naming policies are implemented with |lhdev-naming|.
+
+                                                *:AddStyle*
+:AddStyle {key} [-buffer] [-ft[={ft}]] {Replacement}~
+@param {key} is a regex that will get replaced automatically (by plugins
+supporting this API)
+@param {replacement} is what will be inserted in place of {text}
+@param "-buffer" defines this association only for the current buffer. This
+       option is meant to be used with plugins like |local_vimrc|.
+@param "-ft[={ft}]" defines this association only for the specified filetype.
+       When {ft} is not specified, it applies only to the current filetype.
+       This option is meant to be used in |filetype-plugin|s or possibily in
+       |local_vimrc|s.
+Examples: >
+   " For Java (already defined in ftplugin/java/java-style.vim)
+   AddStyle { -ft {\\n
+   AddStyle } -ft \\n}
+   " When you wish to adopt Allman coding style, in ${project_root}/_vimrc_local.vim
+   AddStyle { -b \\n{\\n
+   AddStyle } -b \\n}
+<
+
+                                                *lh#dev#style#get()*
+lh#dev#style#get({filetype})~
+Returns the coding style to use for the specified {filetype}, and for the
+current |buffer|.
+
 
 ------------------------------------------------------------------------------
 NAMING POLICIES                         *lhdev-naming* {{{1
@@ -96,7 +141,7 @@ Examples:
 Mappings~
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2011-2012, http://code.google.com/p/lh-vim/
+ © Luc Hermitte, 2011-2014, http://code.google.com/p/lh-vim/
  $Id$
  VIM: let b:VS_language = 'american' 
  vim:ts=8:sw=4:tw=80:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:fdm=marker:
