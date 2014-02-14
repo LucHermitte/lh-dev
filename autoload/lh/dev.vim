@@ -169,6 +169,19 @@ function! lh#dev#purge_comments(line, is_continuing_comment, ...)
   return [line, is_continuing_comment]
 endfunction
 
+" Function: lh#dev#reinterpret_escaped_char(seq) {{{3
+" This function transforms '\<cr\>', '\<esc\>', ... '\<{keys}\>' into the
+" interpreted sequences "\<cr>", "\<esc>", ...  "\<{keys}>".
+" It is meant to be used by fonctions like MapNoContext(), InsertSeq(), ... as
+" we can not define mappings (/abbreviations) that contain "\<{keys}>" into the
+" sequence to insert.
+" Note:	It accepts sequences containing double-quotes.
+function! lh#dev#reinterpret_escaped_char(seq)
+  let seq = escape(a:seq, '"')
+  exe 'return "' . 
+    \   substitute( seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+endfunction
+"
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 if !exists('s:temp_tags')

@@ -3,25 +3,17 @@
 " File:         plugin/dev.vim                                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.1
+" Version:      1.1.0
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
-"       «description»
-" 
-"------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/plugin
-"       Requires Vim7+
-"       «install details»
-" History:      «history»
-" TODO:         «missing features»
+"       Global commands and definitions of lh-dev
 " }}}1
 "=============================================================================
 
 " Avoid global reinclusion {{{1
-let s:k_version = 001
+let s:k_version = 110
 if &cp || (exists("g:loaded_dev")
       \ && (g:loaded_dev >= s:k_version)
       \ && !exists('g:force_reload_dev'))
@@ -35,6 +27,9 @@ set cpo&vim
 " Commands and Mappings {{{1
 command! -nargs=1 -complete=custom,s:Convertions
       \ NameConvert call s:ConvertName(<f-args>)
+
+command! -nargs=+
+      \ AddStyle call lh#dev#style#_add(<f-args>)
 " Commands and Mappings }}}1
 "------------------------------------------------------------------------
 " Functions {{{1
@@ -42,10 +37,12 @@ command! -nargs=1 -complete=custom,s:Convertions
 " autoload/«your-initials»/«dev».vim
 " Keep here only the functions are are required when the plugin is loaded,
 " like functions that help building a vim-menu for this plugin.
+" Name transformations {{{2
 let s:k_convertions = [
       \ ['upper_camel_case', 'lh#dev#naming#to_upper_camel_case'],
       \ ['lower_camel_case', 'lh#dev#naming#to_lower_camel_case'],
       \ ['underscore',       'lh#dev#naming#to_underscore'],
+      \ ['snake',            'lh#dev#naming#to_underscore'],
       \ ['variable',         'lh#dev#naming#variable'],
       \ ['getter',           'lh#dev#naming#getter'],
       \ ['setter',           'lh#dev#naming#setter'],
