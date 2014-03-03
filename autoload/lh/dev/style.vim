@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      110
+" Version:      1.1.1
 " Created:      12th Feb 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -29,7 +29,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 110
+let s:k_version = 111
 function! lh#dev#style#version()
   return s:k_version
 endfunction
@@ -152,6 +152,11 @@ function! lh#dev#style#_add(pattern, ...)
   let s:style[a:pattern] = previous + [ {'local': local, 'ft': ft, 'replacement': repl}]
 endfunction
 
+"------------------------------------------------------------------------
+" ## Default definitions {{{1
+
+AddStyle { -ft=java {\n
+AddStyle } -ft=java \n}
 
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save

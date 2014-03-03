@@ -1,4 +1,4 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.1.0.)
+*lh-dev.txt*            Vim library for development oriented scripts (v1.1.1.)
                         For Vim version 7+.    Last change: $Date$
 
                         By Luc Hermitte
@@ -6,7 +6,7 @@
 
 
 ------------------------------------------------------------------------------
-CONTENTS                                      *lhdev-contents*      {{{1
+CONTENTS                                *lhdev-contents*      {{{1
 |lhdev-presentation|    Presentation
 |lhdev-filetype|        Filetype polymorphism
 |lhdev-style|           Coding style
@@ -67,16 +67,20 @@ supporting this API)
        option is meant to be used with plugins like |local_vimrc|.
 @param "-ft[={ft}]" defines this association only for the specified filetype.
        When {ft} is not specified, it applies only to the current filetype.
-       This option is meant to be used in |filetype-plugin|s or possibily in
-       |local_vimrc|s.
+       This option is meant to be used in .vimrc, in the global zone of
+       |filetype-plugin|s or possibily in |local_vimrc|s (when combined with
+       "-buffer"").
 Examples: >
-   " For Java (already defined in ftplugin/java/java-style.vim)
+   " For Java (already defined in autoload/lh/dev/style.vim)
    AddStyle { -ft {\\n
    AddStyle } -ft \\n}
    " When you wish to adopt Allman coding style, in ${project_root}/_vimrc_local.vim
    AddStyle { -b \\n{\\n
    AddStyle } -b \\n}
 <
+Local configuration (with "-buffer") have the priority over filetype
+specialized configuration (with "-ft").
+
 
                                                 *lh#dev#style#get()*
 lh#dev#style#get({filetype})~
