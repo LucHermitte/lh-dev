@@ -91,6 +91,7 @@ function! lh#dev#naming#getter(variable, ...)
   let get_re    = s:Option('get_re', ft, '.*')
   let get_subst = s:Option('get_subst', ft, 'get\u&')
   let res = substitute(a:variable, get_re, get_subst, '' )
+  let res = lh#dev#naming#function(res, ft)
   return res
 endfunction
 
@@ -100,6 +101,7 @@ function! lh#dev#naming#setter(variable, ...)
   let set_re    = s:Option('set_re', ft, '.*')
   let set_subst = s:Option('set_subst', ft, 'set\u&')
   let res = substitute(a:variable, set_re, set_subst, '' )
+  let res = lh#dev#naming#function(res, ft)
   return res
 endfunction
 
@@ -180,6 +182,42 @@ function! lh#dev#naming#param(variable, ...)
   return res
 endfunction
 
+" Function: lh#dev#naming#function(fn, [, filetype]) {{{3
+function! lh#dev#naming#function(fn, ...)
+  let ft = (a:0 == 1) ? a:1 : &ft
+  let naming_policy = s:Option('function', ft, 'lowerCamelCase')
+  return lh#dev#naming#according_to_policy(a:fn, naming_policy)
+endfunction
+
+" Function: lh#dev#naming#function(type, [, filetype]) {{{3
+function! lh#dev#naming#type(type, ...)
+  let ft = (a:0 == 1) ? a:1 : &ft
+  let naming_policy = s:Option('type', ft, 'UpperCamelCase')
+  "  todo: handle prefixs and postfixs
+  let type_re    = s:Option('type_re', ft, '.*')
+  let type_subst = s:Option('type_subst', ft, '&')
+  let res = lh#dev#naming#according_to_policy(a:type, naming_policy)
+  let res = substitute(res, type_re, type_subst, '')
+  return res
+endfunction
+
+" Function: lh#dev#naming#according_to_policy(parts, policy) {{{3
+function! lh#dev#naming#according_to_policy(parts, naming_policy)
+  if type(a:parts) == type([])
+    let parts = copy(a:parts)
+    let case = a:naming_policy == 'UpperCamelCase' ? '\u' : '\l'
+    let parts[0] = substitute(parts[0], '^.', case.'&', 'g')
+    let case = a:naming_policy =~ '.*CamelCase' ? '\u' : '\l'
+    let tail =  map(parts[1:], 'substitute(v:val, "^.", case."&", "g")')
+    let sep = a:naming_policy == 'snake_case' ? '_' : ''
+    let res = join([parts[0]] + tail, sep)
+    return res
+  else " split at '_' and uppercases, ad use this function again.
+    let parts = split(a:parts, '\ze[A-Z]\|_')
+    return lh#dev#naming#according_to_policy(parts, a:naming_policy)
+  endif
+endfunction
+
 "------------------------------------------------------------------------
 " ## Predefined constants {{{1
 
@@ -195,9 +233,11 @@ LetIfUndef g:vim_naming_global_subst 'g:\1'
 " # Java, recommended coding style {{{2
 LetIfUndef g:java_naming_get_subst 'get\u&'
 LetIfUndef g:java_naming_set_subst 'set\u&'
+LetIfUndef g:java_naming_function  'lowerCamelCase'
 " # C#, recommended coding style  {{{2
 LetIfUndef g:cs_naming_get_subst   'Get\u&'
 LetIfUndef g:cs_naming_set_subst   'Set\u&'
+LetIfUndef g:cs_naming_function    'UpperCamelCase'
 
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
