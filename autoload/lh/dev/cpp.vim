@@ -51,6 +51,7 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 " Function: lh#dev#cpp#use_cpp11() {{{3
+" this function is deprecated by the functions lh#cpp#use_cpp*()
 function! lh#dev#cpp#use_cpp11()
   " default is no for the moment (Aug 2011)
   return lh#option#get('cpp_use_cpp11', 0)
