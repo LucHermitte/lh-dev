@@ -211,7 +211,7 @@ function! lh#dev#c#function#_analyse_parameter( param )
   else
     " one word only; can't know about "long long int", for now
     " or two words -> \=
-    let res.type = matchstr(param, '.\{-}\>\ze\(\s\+\S\+\)\=$')
+    let res.type = matchstr(param, '.\{-}\ze\(\s\+\S\+\)\=$')
   endif
   " Parameter name
   let res.name = matchstr(param[strlen(res.type):], '\s*\zs.*')
