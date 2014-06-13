@@ -48,6 +48,7 @@ endfunction
 
 " Function:	lh#dev#cpp#types#IsBaseType(typeName) : bool	{{{3
 " Note:		Do not test for aberrations like long float
+" @todo Check for enumerates in ctags (or other) databases
 function! lh#dev#cpp#types#IsBaseType(type, pointerAsWell)
   echomsg "Check lh#dev#cpp#types#IsBaseType(".a:type.")"
   let sign  = '\<unsigned\>\|\<signed\>'
