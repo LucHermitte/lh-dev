@@ -3,7 +3,7 @@
 " File:         plugin/dev.vim                                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.0
+" Version:      1.1.1
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 "=============================================================================
 
 " Avoid global reinclusion {{{1
-let s:k_version = 110
+let s:k_version = 111
 if &cp || (exists("g:loaded_dev")
       \ && (g:loaded_dev >= s:k_version)
       \ && !exists('g:force_reload_dev'))
@@ -60,7 +60,7 @@ let s:k_entity_pattern.in = '\w'
 let s:k_entity_pattern.out = '\W'
 let s:k_entity_pattern.prev_end = '\zs\w\W\+$'
 
-function! s:ConvertName(convertion_type)
+function! s:ConvertName(convertion_type) abort
   let i = lh#list#find_if(s:k_convertions, 'v:1_[0]=='.string(a:convertion_type))
   if i == -1
     throw "convertion not found"
