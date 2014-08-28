@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.0.4
+" Version:      1.1.1
 " Created:      28th May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 "		+ ways to extract local variables
 "		- lh#dev#_end_func fixed cursor movements
 "       v1.0.4: ~ bug fixed in lh#dev#__FindFunctions(line)
-" TODO:         «missing features»
+"       v1.1.1: ~ bug fixed in lh#dev# comment related functions
 " }}}1
 "=============================================================================
 
@@ -25,7 +25,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 104
+let s:k_version = 111
 function! lh#dev#version()
   return s:k_version
 endfunction
@@ -353,7 +353,7 @@ endfunction
 function! lh#dev#_open_comment()
   " default asks to
   " - EnhancedCommentify
-  if exists('b:ECcommentOpen') && exists('b:ECcommentClose') && !empty(b:ECcommentClose)
+  if exists('b:ECcommentOpen') && !empty(b:ECcommentOpen) && exists('b:ECcommentClose') && !empty(b:ECcommentClose)
     return b:ECcommentOpen
   endif
   " - tComment
@@ -387,14 +387,14 @@ endfunction
 function! lh#dev#_line_comment()
   " default asks to
   " - EnhancedCommentify
-  if exists('b:ECcommentOpen') && (!exists('b:ECcommentClose') || empty(b:ECcommentClose))
+  if exists('b:ECcommentOpen') && !empty(b:ECcommentOpen) && (!exists('b:ECcommentClose') || empty(b:ECcommentClose))
     return b:ECcommentOpen
   endif
   " - tComment
   " - NERDCommenter
   " - &commentstring
   if !empty(&commentstring) && &commentstring =~ '.\+%s$'
-    return matchstr(&commentstring, '.*%s\zs.*')
+    return matchstr(&commentstring, '.*\ze%s.*')
   endif
   return ""
 endfunction
