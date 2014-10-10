@@ -3,7 +3,7 @@
 " File:         plugin/dev.vim                                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.1
+" Version:      1.1.2
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 "=============================================================================
 
 " Avoid global reinclusion {{{1
-let s:k_version = 111
+let s:k_version = 112
 if &cp || (exists("g:loaded_dev")
       \ && (g:loaded_dev >= s:k_version)
       \ && !exists('g:force_reload_dev'))
