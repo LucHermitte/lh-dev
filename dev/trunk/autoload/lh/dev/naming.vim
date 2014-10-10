@@ -79,7 +79,7 @@ endfunction
 " Function: lh#dev#naming#variable(variable [, filetype] ) {{{3
 function! lh#dev#naming#variable(name, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
-  let strip_re    = s:Option('strip_re', ft, '^\%(get\|set\|[mgsp]_\|_\+\)\=\(.\{-}\)\%(_\=\)$')
+  let strip_re    = s:Option('strip_re', ft, '^\%([gG]et\|[sS]et\|[mgsp]_\|_\+\)\=\(.\{-}\)\%(_\=\)$')
   let strip_subst = s:Option('strip_subst', ft, '\l\1')
   let res = substitute(a:name, strip_re, strip_subst, '')
   return res
@@ -90,7 +90,8 @@ function! lh#dev#naming#getter(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let get_re    = s:Option('get_re', ft, '.*')
   let get_subst = s:Option('get_subst', ft, 'get\u&')
-  let res = substitute(a:variable, get_re, get_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, get_re, get_subst, '' )
   let res = lh#dev#naming#function(res, ft)
   return res
 endfunction
@@ -100,7 +101,8 @@ function! lh#dev#naming#setter(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let set_re    = s:Option('set_re', ft, '.*')
   let set_subst = s:Option('set_subst', ft, 'set\u&')
-  let res = substitute(a:variable, set_re, set_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, set_re, set_subst, '' )
   let res = lh#dev#naming#function(res, ft)
   return res
 endfunction
@@ -111,7 +113,8 @@ function! lh#dev#naming#ref_getter(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let ref_re    = s:Option('ref_re', ft, '.*')
   let ref_subst = s:Option('ref_subst', ft, 'ref\u&')
-  let res = substitute(a:variable, ref_re, ref_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, ref_re, ref_subst, '' )
   return res
 endfunction
 
@@ -121,7 +124,8 @@ function! lh#dev#naming#proxy_getter(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let proxy_re    = s:Option('proxy_re', ft, '.*')
   let proxy_subst = s:Option('proxy_subst', ft, 'proxy\u&')
-  let res = substitute(a:variable, proxy_re, proxy_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, proxy_re, proxy_subst, '' )
   return res
 endfunction
 
@@ -130,7 +134,8 @@ function! lh#dev#naming#global(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let global_re    = s:Option('global_re', ft, '.*')
   let global_subst = s:Option('global_subst', ft, 'g_&')
-  let res = substitute(a:variable, global_re, global_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, global_re, global_subst, '' )
   return res
 endfunction
 
@@ -139,7 +144,8 @@ function! lh#dev#naming#local(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let local_re    = s:Option('local_re', ft, '.*')
   let local_subst = s:Option('local_subst', ft, '&')
-  let res = substitute(a:variable, local_re, local_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, local_re, local_subst, '' )
   return res
 endfunction
 
@@ -148,7 +154,8 @@ function! lh#dev#naming#member(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let member_re    = s:Option('member_re', ft, '.*')
   let member_subst = s:Option('member_subst', ft, 'm_&')
-  let res = substitute(a:variable, member_re, member_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, member_re, member_subst, '' )
   return res
 endfunction
 
@@ -157,7 +164,8 @@ function! lh#dev#naming#static(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let static_re    = s:Option('static_re', ft, '.*')
   let static_subst = s:Option('static_subst', ft, 's_&')
-  let res = substitute(a:variable, static_re, static_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, static_re, static_subst, '' )
   return res
 endfunction
 
@@ -166,7 +174,8 @@ function! lh#dev#naming#constant(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let constant_re    = s:Option('constant_re', ft, '.*')
   let constant_subst = s:Option('constant_subst', ft, '\U&\E')
-  let res = substitute(a:variable, constant_re, constant_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, constant_re, constant_subst, '' )
   return res
 endfunction
 
@@ -178,7 +187,8 @@ function! lh#dev#naming#param(variable, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let param_re    = s:Option('param_re', ft, '.*')
   let param_subst = s:Option('param_subst', ft, '&')
-  let res = substitute(a:variable, param_re, param_subst, '' )
+  let variable = lh#dev#naming#variable(a:variable, ft)
+  let res = substitute(variable, param_re, param_subst, '' )
   return res
 endfunction
 
