@@ -1,18 +1,18 @@
 "=============================================================================
 " $Id$
-" File:		autoload/lh/dev/option.vim                        {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://hermitte.free.fr/vim/>
-" Version:	0.0.1
-" Created:	05th Oct 2009
-" Last Update:	$Date$
+" File:         autoload/lh/dev/option.vim                        {{{1
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://hermitte.free.fr/vim/>
+" Version:      0.0.1
+" Created:      05th Oct 2009
+" Last Update:  $Date$
 "------------------------------------------------------------------------
-" Description:	«description»
-" 
+" Description:  «description»
+"
 "------------------------------------------------------------------------
-" Installation:	«install details»
-" History:	«history»
-" TODO:		«missing features»
+" Installation: «install details»
+" History:      «history»
+" TODO:         «missing features»
 " }}}1
 "=============================================================================
 
@@ -61,10 +61,10 @@ function! lh#dev#option#get(name, ft, default,...)
     let i = 0
     while i != strlen(scope)
       if exists(scope[i].':'.ft.name)
-	return {scope[i]}:{ft}{name}
+        return {scope[i]}:{ft}{name}
       endif
       let i += 1
-    endwhile 
+    endwhile
   endfor
   return a:default
 endfunction
@@ -120,6 +120,7 @@ function! lh#dev#option#inherited_filetypes(fts)
   return s:InheritedFiletypes(a:fts)
 endfunction
 
+runtime plugin/let.vim
 LetIfUndef g:cpp_inherits 'c'
 
 
