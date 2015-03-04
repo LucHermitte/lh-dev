@@ -31,7 +31,7 @@ endfunction
 " Function: s:Test_global_all() {{{3
 function! s:Test_global_all()
   " Todo: play with scratch buffer
-  AddStyle ; ;\ 
+  AddStyle ; ;\
   Assert lh#dev#style#get(&ft) == {';': '; '}
   Assert lh#dev#style#get('fake') == {';': '; '}
 
@@ -43,11 +43,11 @@ endfunction
 " Function: s:Test_local_all() {{{3
 function! s:Test_local_all()
   " Todo: play with scratch buffer
-  AddStyle ; ;\  -b 
+  AddStyle ; ;\  -b
   Assert lh#dev#style#get(&ft) == {';': '; '}
   Assert lh#dev#style#get('fake') == {';': '; '}
 
-  AddStyle | |\n -b 
+  AddStyle | |\n -b
   Assert lh#dev#style#get(&ft) == {';': '; ', '|': "|\n"}
   Assert lh#dev#style#get('fake') == {';': '; ', '|': "|\n"}
 endfunction
@@ -109,7 +109,7 @@ function! s:Test_global_over_local()
   Assert lh#dev#style#get('fake') == {';': '; '}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
-  AddStyle ; ; 
+  AddStyle ; ;
   Assert lh#dev#style#get('fake') == {';': '; '}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
@@ -126,7 +126,7 @@ endfunction
 
 " Function: s:Test_local_over_global() {{{3
 function! s:Test_local_over_global()
-  AddStyle ; ;\ 
+  AddStyle ; ;\
   Assert lh#dev#style#get('fake') == {';': '; '}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
@@ -151,7 +151,7 @@ function! s:Test_all_over_this_ft()
   Assert lh#dev#style#get('fake') == {}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
-  AddStyle ; ; 
+  AddStyle ; ;
   Assert lh#dev#style#get('fake') == {';': ';'}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
@@ -172,7 +172,7 @@ function! s:Test_this_ft_over_all()
   Assert lh#dev#style#get('fake') == {}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
-  AddStyle ; ; 
+  AddStyle ; ;
   Assert lh#dev#style#get('fake') == {';': ';'}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
@@ -251,7 +251,7 @@ endfunction
 "------------------------------------------------------------------------
 " # Override last definition {{{2
 function! s:Test_override_global()
-  AddStyle ; ;\ 
+  AddStyle ; ;\
   Assert lh#dev#style#get(&ft) == {';': '; '}
 
   AddStyle ; zz
