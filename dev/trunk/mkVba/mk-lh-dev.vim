@@ -3,14 +3,14 @@
 " File:         mkVba/mk-lh-dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.2
-let s:version = '1.1.2'
+" Version:      1.1.3
+let s:version = '1.1.3'
 " Created:      02nd Mar 2012
 " Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       vimball archive builder for lh-dev
-" 
+"
 "------------------------------------------------------------------------
 " Installation:
 "       Drop this file into {rtp}/mkVba
@@ -20,7 +20,7 @@ let s:version = '1.1.2'
 
 let s:project = 'lh-dev'
 cd <sfile>:p:h
-try 
+try
   let save_rtp = &rtp
   let &rtp = expand('<sfile>:p:h:h').','.&rtp
   exe '33,$MkVimball! '.s:project.'-'.s:version

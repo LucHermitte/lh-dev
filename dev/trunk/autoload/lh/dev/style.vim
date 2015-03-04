@@ -3,7 +3,7 @@
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.1
+" Version:      1.1.3
 " Created:      12th Feb 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -29,7 +29,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 111
+let s:k_version = 113
 function! lh#dev#style#version()
   return s:k_version
 endfunction
@@ -54,9 +54,10 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
-" Function: lh#dev#style#clear() {{{2
+" # Main Style functions {{{2
+" Function: lh#dev#style#clear() {{{3
 function! lh#dev#style#clear()
-  let s:style = {} 
+  let s:style = {}
 endfunction
 
 " Function: lh#dev#style#get(ft) {{{3
@@ -68,6 +69,9 @@ endfunction
 " ...
 " n-1- for all ft && buffer local
 " n- for all ft && global
+"
+" TODO: priority n-1 seems much better than priority 2: I may have to change
+" that
 function! lh#dev#style#get(ft)
   let res = {}
 
@@ -110,6 +114,26 @@ function! lh#dev#style#get(ft)
   return res
 endfunction
 
+" Function: lh#dev#style#apply(text) {{{3
+function! lh#dev#style#apply(text, ...)
+  let ft = a:0 == 0 ? &ft : a:1
+  let styles = lh#dev#style#get(ft)
+  let keys = join(reverse(sort(keys(styles))), '\|')
+  " Using a sorted list of keys permits to avoid triggering "}" style on
+  " "class {};" when there is a "};" style.
+  let res = substitute(a:text, keys, '\=styles[submatch(0)]', 'g')
+  return res
+endfunction
+
+" # lh-brackets Adapters for snippets {{{2
+" Function: lh#dev#style#surround() {{{3
+function! lh#dev#style#surround(
+      \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
+  let begin = lh#dev#style#apply(a:begin)
+  let end   = lh#dev#style#apply(a:end)
+  return call(function('Surround'), [begin, end, a:isLine, a:isIndented, a:goback, a:mustInterpret]+a:000)
+endfunction
+
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 if !exists('s:style')
@@ -145,7 +169,7 @@ function! lh#dev#style#_add(pattern, ...)
   for style in previous
     if style.local == local && style.ft == ft
       let style.replacement = repl
-      return 
+      return
     endif
   endfor
   " This is new => add ;; note the "return" in the search loop
@@ -155,9 +179,32 @@ endfunction
 "------------------------------------------------------------------------
 " ## Default definitions {{{1
 
-AddStyle { -ft=java {\n
+" # Space before open bracket in C & al {{{2
+" A little space before all C constructs in C and child languages
+" NB: the spaces isn't put before all open brackets
+AddStyle if(     -ft=c   if\ (
+AddStyle while(  -ft=c   while\ (
+AddStyle for(    -ft=c   for\ (
+AddStyle switch( -ft=c   switch\ (
+AddStyle catch(  -ft=cpp catch\ (
+
+" Doxygen groups
+Addstyle @{  -ft=c @{
+Addstyle @}  -ft=c @}
+Addstyle \\{ -ft=c \\{
+Addstyle \\} -ft=c \\}
+
+" # Default style in C & al: Stroustrup {{{2
+AddStyle {  -ft=c \ {\n
+AddStyle }; -ft=c \n};\n
+AddStyle }  -ft=c \n}\n
+
+" # Java style {{{2
+" Force Java style in Java
+AddStyle { -ft=java \ {\n
 AddStyle } -ft=java \n}
 
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
