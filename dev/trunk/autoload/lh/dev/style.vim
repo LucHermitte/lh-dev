@@ -3,7 +3,8 @@
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.3
+" Version:      1.1.4
+let s:k_version = 114
 " Created:      12th Feb 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -29,7 +30,6 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 113
 function! lh#dev#style#version()
   return s:k_version
 endfunction
@@ -189,10 +189,10 @@ AddStyle switch( -ft=c   switch\ (
 AddStyle catch(  -ft=cpp catch\ (
 
 " Doxygen groups
-Addstyle @{  -ft=c @{
-Addstyle @}  -ft=c @}
-Addstyle \\{ -ft=c \\{
-Addstyle \\} -ft=c \\}
+AddStyle @{  -ft=c @{
+AddStyle @}  -ft=c @}
+AddStyle \\{ -ft=c \\{
+AddStyle \\} -ft=c \\}
 
 " # Default style in C & al: Stroustrup {{{2
 AddStyle {  -ft=c \ {\n
