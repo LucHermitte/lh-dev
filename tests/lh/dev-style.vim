@@ -3,7 +3,7 @@
 " File:         tests/lh/dev-style.vim                            {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.0
+" Version:      1.1.4
 " Created:      14th Feb 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -31,7 +31,8 @@ endfunction
 " Function: s:Test_global_all() {{{3
 function! s:Test_global_all()
   " Todo: play with scratch buffer
-  AddStyle ; ;\
+  " Yes there is a trailing whitespace
+  AddStyle ; ;\ 
   Assert lh#dev#style#get(&ft) == {';': '; '}
   Assert lh#dev#style#get('fake') == {';': '; '}
 
@@ -126,7 +127,7 @@ endfunction
 
 " Function: s:Test_local_over_global() {{{3
 function! s:Test_local_over_global()
-  AddStyle ; ;\
+  AddStyle ; ;\ 
   Assert lh#dev#style#get('fake') == {';': '; '}
   Assert lh#dev#style#get(&ft)    == {';': '; '}
 
@@ -251,7 +252,8 @@ endfunction
 "------------------------------------------------------------------------
 " # Override last definition {{{2
 function! s:Test_override_global()
-  AddStyle ; ;\
+  " Yes there is a trailing whitespace
+  AddStyle ; ;\ 
   Assert lh#dev#style#get(&ft) == {';': '; '}
 
   AddStyle ; zz
@@ -259,6 +261,7 @@ function! s:Test_override_global()
 endfunction
 
 function! s:Test_override_local()
+  " Yes there is a trailing whitespace
   AddStyle ; ;\  -b
   Assert lh#dev#style#get(&ft) == {';': '; '}
 
