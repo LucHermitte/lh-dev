@@ -3,8 +3,8 @@
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.4
-let s:k_version = 114
+" Version:      1.1.5
+let s:k_version = 115
 " Created:      12th Feb 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -114,11 +114,11 @@ function! lh#dev#style#get(ft)
   return res
 endfunction
 
-" Function: lh#dev#style#apply(text) {{{3
-function! lh#dev#style#apply(text, ...)
+" Function: lh#dev#style#apply(text [, ft]) {{{3
+function! lh#dev#style#apply(text, ...) abort
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
-  let keys = join(reverse(sort(keys(styles))), '\|')
+  let keys = join(reverse(sort(map(keys(styles), 'escape(v:val, "\\")'))), '\|')
   " Using a sorted list of keys permits to avoid triggering "}" style on
   " "class {};" when there is a "};" style.
   let res = substitute(a:text, keys, '\=styles[submatch(0)]', 'g')
@@ -188,11 +188,14 @@ AddStyle for(    -ft=c   for\ (
 AddStyle switch( -ft=c   switch\ (
 AddStyle catch(  -ft=cpp catch\ (
 
-" Doxygen groups
+" # Doxygen {{{2
+" Doxygen Groups
 AddStyle @{  -ft=c @{
 AddStyle @}  -ft=c @}
-AddStyle \\{ -ft=c \\{
-AddStyle \\} -ft=c \\}
+
+" Doxygen Formulas
+AddStyle \\f{ -ft=c \\\\f{
+AddStyle \\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup {{{2
 AddStyle {  -ft=c \ {\n

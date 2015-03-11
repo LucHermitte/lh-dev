@@ -9,17 +9,13 @@
 "------------------------------------------------------------------------
 " Description:
 "       Various helper functions that return ctags information on functions
-" 
-"------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/autoload/lh/dev
-"       Requires Vim7+, exhuberant ctags
+"
 " History:
 " 	v0.0.1: code moved from lh-cpp
 " 	v0.0.2: signature manipulations made overidable
 " 	v0.0.3: default lh#dev#function#_build_param_decl() uses the parameter
 " 	        type if known
-" TODO:         
+" TODO:
 " 	- option to use another code tool analysis that is not ft-dependant
 " }}}1
 "=============================================================================
@@ -29,7 +25,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 002
+let s:k_version = 003
 function! lh#dev#function#version()
   return s:k_version
 endfunction
@@ -58,7 +54,7 @@ endfunction
 " This function returns cached tag-data (from function, variables, ...),
 " If the data is not cached yet, the relevant hook is called to fill it
 function! lh#dev#function#get_(fn_tag, key)
-  if !has_key(a:fn_tag, a:key) 
+  if !has_key(a:fn_tag, a:key)
     let a:fn_tag[a:key] = lh#dev#option#call('function#_'.a:key, &ft, a:fn_tag)
   endif
   return a:fn_tag[a:key]
@@ -103,7 +99,7 @@ function! lh#dev#function#_signature_to_parameters(signature)
   " 2- split it
   let lParameters = lh#dev#option#call('function#_split_list_of_parameters',&ft,sParameters)
 
-  " 3- analyse the parameters ; 
+  " 3- analyse the parameters ;
   "    at least each shall have a name
   "    depending on the language, a type, a direction, etc may be provided
   let res = []
@@ -147,7 +143,7 @@ endfunction
 
 " Function: lh#dev#function#_build_param_decl(param) {{{2
 function! lh#dev#function#_build_param_decl(param)
-  let res = has_key(a:param, 'type') ? a:param.type . ' ' : ''  
+  let res = has_key(a:param, 'type') ? a:param.type . ' ' : ''
   let res .= a:param.formal
   return res
 endfunction
@@ -170,9 +166,9 @@ function! lh#dev#function#_build_param_call(param)
 endfunction
 
 " Function: lh#dev#function#_local_variables(function_boundaries) {{{2
-" Extracts local variables, use ctags data by default. 
+" Extracts local variables, use ctags data by default.
 function! lh#dev#function#_local_variables(function_boundaries)
-  try 
+  try
     let lTags = lh#dev#start_tag_session()
     if ! lh#dev#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
       let lTags = copy(lh#dev#__BuildCrtBufferCtags(a:function_boundaries))

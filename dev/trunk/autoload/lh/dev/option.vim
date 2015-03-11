@@ -1,18 +1,14 @@
 "=============================================================================
 " $Id$
-" File:         autoload/lh/dev/option.vim                        {{{1
-" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://hermitte.free.fr/vim/>
-" Version:      0.0.1
-" Created:      05th Oct 2009
-" Last Update:  $Date$
+" File:		autoload/lh/dev/option.vim                        {{{1
+" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"		<URL:http://hermitte.free.fr/vim/>
+" Version:	1.1.5
+let s:k_version = 115
+" Created:	05th Oct 2009
+" Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:  «description»
-"
-"------------------------------------------------------------------------
-" Installation: «install details»
-" History:      «history»
-" TODO:         «missing features»
+" Description:	«description»
 " }}}1
 "=============================================================================
 
@@ -22,7 +18,6 @@ set cpo&vim
 
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 001
 function! lh#dev#option#version()
   return s:k_version
 endfunction
@@ -52,7 +47,7 @@ endfunction
 " The order of the scopes for the variables checked can be specified through
 " the optional argument {scope}
 function! lh#dev#option#get(name, ft, default,...)
-  let fts = [a:ft] + s:InheritedFiletypes(a:ft)
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
   call map(fts, 'v:val."_"')
   let fts += [ '']
   let scope = (a:0 == 1) ? a:1 : 'bg'
@@ -61,7 +56,7 @@ function! lh#dev#option#get(name, ft, default,...)
     let i = 0
     while i != strlen(scope)
       if exists(scope[i].':'.ft.name)
-        return {scope[i]}:{ft}{name}
+	return {scope[i]}:{ft}{name}
       endif
       let i += 1
     endwhile
@@ -84,7 +79,7 @@ function! lh#dev#option#call(name, ft, ...)
     throw "Unexpected type (".type(a:name).") for name parameter"
   endif
 
-  let fts = [a:ft] + s:InheritedFiletypes(a:ft)
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
   call map(fts, 'v:val."#"')
   let fts += ['']
   for ft in fts
@@ -104,23 +99,18 @@ endfunction
 " ## Internal functions {{{1
 
 " # List of inherited properties between languages {{{2
+" Function: lh#dev#option#inherited_filetypes(fts) {{{3
 " - todo, this may required to be specific to each property considered
-function! s:InheritedFiletypes(fts)
+function! lh#dev#option#inherited_filetypes(fts)
   let res = []
   let lFts = split(a:fts, ',')
   for ft in lFts
     let parents = lh#option#get(ft.'_inherits', '')
-    let res += [ft] + s:InheritedFiletypes(parents)
+    let res += [ft] + lh#dev#option#inherited_filetypes(parents)
   endfor
   return res
 endfunction
 
-" Function: lh#dev#option#inherited_filetypes(fts) {{{2
-function! lh#dev#option#inherited_filetypes(fts)
-  return s:InheritedFiletypes(a:fts)
-endfunction
-
-runtime plugin/let.vim
 LetIfUndef g:cpp_inherits 'c'
 
 

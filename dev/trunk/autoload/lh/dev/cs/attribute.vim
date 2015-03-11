@@ -9,14 +9,6 @@
 "------------------------------------------------------------------------
 " Description:
 "       «description»
-" 
-"------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/autoload/lh/dev/cs
-"       Requires Vim7+
-"       «install details»
-" History:      «history»
-" TODO:         «missing features»
 " }}}1
 "=============================================================================
 

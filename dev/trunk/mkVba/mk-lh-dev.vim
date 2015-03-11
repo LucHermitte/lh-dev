@@ -3,8 +3,8 @@
 " File:         mkVba/mk-lh-dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.4
-let s:version = '1.1.4'
+" Version:      1.1.5
+let s:version = '1.1.5'
 " Created:      02nd Mar 2012
 " Last Update:  $Date$
 "------------------------------------------------------------------------
