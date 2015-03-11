@@ -9,14 +9,6 @@
 "------------------------------------------------------------------------
 " Description:
 "       «description»
-" 
-"------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/autoload/lh/dev
-"       Requires Vim7+
-"       «install details»
-" History:      «history»
-" TODO:         «missing features»
 " }}}1
 "=============================================================================
 
@@ -51,6 +43,11 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 " Function: lh#dev#attribute#analyse(definition) {{{3
+" For an attribute definition, returns a dictionary containing:
+" - "name"      : its name
+" - "type"      : its type
+" - "visibility": "public", "protected", "private"
+" - "static"    : boolean (0/1)
 function! lh#dev#attribute#analyse(definition)
   return lh#dev#option#call('attribute#analyse', &ft, a:definition)
 endfunction

@@ -2,16 +2,16 @@
 " $Id$
 " File:         autoload/lh/dev/c/function.vim                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://code.google.com/p/lh-vim/>
 " Version:      «0.0.3»
 " Created:      31st May 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
-" 
+"
 "------------------------------------------------------------------------
-" History:      
+" History:
 "       «v 0.0.3»
 "       * support for variadic parameters
 "       «v GPL»
@@ -64,7 +64,7 @@ let s:re_operators       = '\<operator\%([=~%+-\*/^&|]\|\[]\|()\|&&\|||\|->\|<<\
 let s:re_funcname_or_operator = '\%(\<\I\i*\>\|'.s:re_operators.'\)\_s*('
 
 " lh#dev#c#function#get_prototype(lineNo, onlyDeclaration [, return_position_end_prototype_as_well=0]) " {{{3
-" Todo: 
+" Todo:
 " * Retrieve the type even when it is not on the same line as the function
 "   identifier.
 " * Retrieve the const modifier even when it is not on the same line as the
@@ -129,10 +129,10 @@ endfunction
 function! lh#dev#c#function#_prototype(fn_tag)
   " or should we split-open ?
   call lh#tags#jump(a:fn_tag)
-  try 
+  try
     return lh#dev#c#function#get_prototype(
-	  \ line('.'),
-	  \ a:fn_tag.kind == 'p' ? 1 : 0)
+          \ line('.'),
+          \ a:fn_tag.kind == 'p' ? 1 : 0)
   finally
     pop
   endtry
@@ -160,7 +160,7 @@ function! lh#dev#c#function#_split_list_of_parameters(sParameters)
       let tpl = tpl2
     endwhile
     if !strlen(tpl) " a complete parameter has been read
-      " => append it to the result list 
+      " => append it to the result list
       let lParameters += [ to_append ]
       let to_append = ''
     endif
@@ -231,7 +231,7 @@ endfunction
 function! lh#dev#c#function#_type(variable_tag)
   " or should we split-open ?
   call lh#tags#jump(a:variable_tag)
-  try 
+  try
     let line = getline('.')
     let sVariables = matchstr(line, '^\s*\zs[^;=]*\ze[;=]\=.*$')
     echo "l=".line."\n->".sVariables

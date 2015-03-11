@@ -7,14 +7,13 @@
 " Created:	05th Oct 2009
 " Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	
+" Description:
 " - Naming policies for programming styles
-" 
+"
 "------------------------------------------------------------------------
-" Installation:	«install details»
 " History:
 " 	v0.0.2: vim parameters specificities taken into account
-" TODO:		
+" TODO:
 " }}}1
 "=============================================================================
 
