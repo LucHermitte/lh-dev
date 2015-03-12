@@ -3,8 +3,8 @@
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.5
-let s:k_version = 115
+" Version:      1.1.6
+let s:k_version = 116
 " Created:      12th Feb 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -118,10 +118,11 @@ endfunction
 function! lh#dev#style#apply(text, ...) abort
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
-  let keys = join(reverse(sort(map(keys(styles), 'escape(v:val, "\\")'))), '\|')
+  let keys = reverse(sort(map(keys(styles), 'escape(v:val, "\\")'), 'lh#dev#style#_str_cmp'))
+  let sKeys = join(keys, '\|')
   " Using a sorted list of keys permits to avoid triggering "}" style on
   " "class {};" when there is a "};" style.
-  let res = substitute(a:text, keys, '\=styles[submatch(0)]', 'g')
+  let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(styles, submatch(0), keys)', 'g')
   return res
 endfunction
 
@@ -140,9 +141,10 @@ if !exists('s:style')
   call lh#dev#style#clear()
 endif
 
-" Function: lh#dev#style#_add(pattern, ...) {{{2
+" :AddStyle API {{{2
+" Function: lh#dev#style#_add(pattern, ...) {{{3
 function! lh#dev#style#_add(pattern, ...)
-  " Analyse params {{{3
+  " Analyse params {{{4
   let local = -1
   let ft = '*'
   for o in a:000
@@ -163,7 +165,7 @@ function! lh#dev#style#_add(pattern, ...)
   " Interpret some escape sequences
   let repl = lh#dev#reinterpret_escaped_char(repl)
 
-  " Add the new style {{{3
+  " Add the new style {{{4
   let previous = get(s:style, a:pattern, [])
   " but first check whether there is already something before adding anything
   for style in previous
@@ -174,6 +176,32 @@ function! lh#dev#style#_add(pattern, ...)
   endfor
   " This is new => add ;; note the "return" in the search loop
   let s:style[a:pattern] = previous + [ {'local': local, 'ft': ft, 'replacement': repl}]
+endfunction
+
+" Internals {{{2
+" Function: lh#dev#style#_get_replacement(styles, match, keys) {{{3
+function! lh#dev#style#_get_replacement(styles, match, keys) abort
+  if has_key(a:styles, a:match)
+    return a:styles[a:match]
+  else
+    " We have been called => there is a match!
+    let idx = lh#list#match_re(a:keys, a:match)
+    return substitute(a:match, a:match, a:styles[a:keys[idx]], '')
+  endif
+endfunction
+
+" Function: lh#dev#style#_str_cmp(lhs, rhs) {{{3
+" For an unknown reason, 
+"    echo sort(['{ *//', '{', 'a', 'b'])
+" gives: ['a', 'b', '{ *//', '{']
+" While
+"    sort(['{ *//', '{', 'a', 'b'], function('lh#dev#style#_str_cmp'))
+" gives the correct: ['a', 'b', '{', '{ *//']
+function! lh#dev#style#_str_cmp(lhs, rhs) abort
+  let res = a:lhs <  a:rhs ? -1
+        \ : a:lhs == a:rhs ? 0
+        \ :                  1
+  return res
 endfunction
 
 "------------------------------------------------------------------------
@@ -187,6 +215,15 @@ AddStyle while(  -ft=c   while\ (
 AddStyle for(    -ft=c   for\ (
 AddStyle switch( -ft=c   switch\ (
 AddStyle catch(  -ft=cpp catch\ (
+
+" # Ignore style in C comments {{{2
+" # Ignore style in comments after curly brackets {{{2
+AddStyle {\ *// -ft=c \ &
+AddStyle }\ *// -ft=c &
+
+" # Multiple C++ namespaces on same line {{{2
+AddStyle {\ *namespace -ft=cpp \ &
+AddStyle }\ *} -ft=cpp &
 
 " # Doxygen {{{2
 " Doxygen Groups
