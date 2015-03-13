@@ -1,5 +1,5 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.1.1.)
-                        For Vim version 7+.    Last change: $Date$
+*lh-dev.txt*            Vim library for development oriented scripts (v1.1.6.)
+                        For Vim version 7+.    Last change: 13th Mar 2015
 
                         By Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -55,7 +55,7 @@ snippet plugins. So far, only |mu-template| exploits this feature.
 
 |:AddStyle| is meant to be used by end users while |lh#dev#style#get()| is
 meant to be used by plugin developpers that want to exploit end-user coding
-style. 
+style.
 Note: Naming policies are implemented with |lhdev-naming|.
 
                                                 *:AddStyle*
@@ -96,7 +96,7 @@ Functions~
 Transforms {id} into a:
 
 - variable name:*lh#dev#naming#variable()*
-  Options: *(bg):{ft_}naming_strip_re* *(bg):{ft_}naming_strip_subst* 
+  Options: *(bg):{ft_}naming_strip_re* *(bg):{ft_}naming_strip_subst*
 
 - into a getter name: *lh#dev#naming#getter()*
   Options: *(bg):{ft_}naming_get_re* *(bg):{ft_}naming_get_subst*
@@ -145,7 +145,6 @@ Examples:
 Mappings~
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2011-2014, http://code.google.com/p/lh-vim/
- $Id$
- VIM: let b:VS_language = 'american' 
+ © Luc Hermitte, 2011-2015, http://github.com/LucHermitte/lh-dev
+ VIM: let b:VS_language = 'american'
  vim:ts=8:sw=4:tw=80:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:fdm=marker:
