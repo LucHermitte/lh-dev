@@ -200,3 +200,5 @@ git clone git@github.com:LucHermitte/lh-vim-lib.git
 git clone git@github.com:LucHermitte/lh-tags.git
 git clone git@github.com:LucHermitte/lh-dev.git
 ```
+
+[![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
