@@ -1,12 +1,12 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.6
-let s:k_version = 116
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:      1.1.7
+let s:k_version = 117
 " Created:      12th Feb 2014
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -118,7 +118,7 @@ endfunction
 function! lh#dev#style#apply(text, ...) abort
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
-  let keys = reverse(sort(map(keys(styles), 'escape(v:val, "\\")'), 'lh#dev#style#_str_cmp'))
+  let keys = reverse(lh#list#sort(map(keys(styles), 'escape(v:val, "\\")')))
   let sKeys = join(keys, '\|')
   " Using a sorted list of keys permits to avoid triggering "}" style on
   " "class {};" when there is a "};" style.
@@ -188,20 +188,6 @@ function! lh#dev#style#_get_replacement(styles, match, keys) abort
     let idx = lh#list#match_re(a:keys, a:match)
     return substitute(a:match, a:match, a:styles[a:keys[idx]], '')
   endif
-endfunction
-
-" Function: lh#dev#style#_str_cmp(lhs, rhs) {{{3
-" For an unknown reason, 
-"    echo sort(['{ *//', '{', 'a', 'b'])
-" gives: ['a', 'b', '{ *//', '{']
-" While
-"    sort(['{ *//', '{', 'a', 'b'], function('lh#dev#style#_str_cmp'))
-" gives the correct: ['a', 'b', '{', '{ *//']
-function! lh#dev#style#_str_cmp(lhs, rhs) abort
-  let res = a:lhs <  a:rhs ? -1
-        \ : a:lhs == a:rhs ? 0
-        \ :                  1
-  return res
 endfunction
 
 "------------------------------------------------------------------------

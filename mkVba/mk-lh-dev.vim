@@ -1,12 +1,12 @@
 "=============================================================================
-" $Id$
 " File:         mkVba/mk-lh-dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.6
-let s:version = '1.1.6'
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:      1.1.7
+let s:version = '1.1.7'
 " Created:      02nd Mar 2012
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       vimball archive builder for lh-dev
