@@ -150,9 +150,24 @@ Most features provided by lh-dev can be specialized according to the filetype, u
 
 ### Options
 
-Options can be obtained with `lh#dev#option#get(name, filetype, default [, scopes])`
+Options can be obtained with:
+ * `lh#dev#option#get(name, filetype [, default [, scopes]])`
 
-This returns which ever exists first among: `b:{filetype}_{name}`, or `g:{filetype}_{name}`, or `b:{name}`, or `g:{name}`. `{default}` is returned if none exists.
+    This returns which ever exists first among: `b:{filetype}_{name}`, or
+    `g:{filetype}_{name}`, or `b:{name}`, or `g:{name}`. `{default}` is
+    returned if none exists. Default value for `{default}` is
+    [`g:lh#option#unset`](http://github.com/LucHermitte/lh-vim-lib).
+
+ * `lh#dev#option#get_postfixed(name, filetype [, default [, scopes]])`
+
+    This returns which ever exists first among: `b:{name}_{filetype}`, or
+    `g:{name}_{filetype}`, or `b:{name}`, or `g:{name}`. `{default}` is
+    returned if none exists. Default value for `{default}` is
+    [`g:lh#option#unset`](http://github.com/LucHermitte/lh-vim-lib).
+
+    This flavour is more suited to variables like
+    `g:airline#extensions#btw#section` and
+    `g:airline#extensions#btw#section_qf`.
 
 #### Notes
   * Filetype inheritance is supported.
@@ -182,7 +197,7 @@ Specialized function: `lh#dev#{filetype}#{theme}#_function()`
 ### Language Analysis
 
 # Installation
-  * Requirements: Vim 7.+, [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), [lh-tags](http://github.com/LucHermitte/lh-tags)
+  * Requirements: Vim 7.+, [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) (v3.2.12), [lh-tags](http://github.com/LucHermitte/lh-tags)
   * Install with [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager) any plugin that requires lh-dev should be enough.
   * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-dev (this is the preferred method because of the [dependencies](http://github.com/LucHermitte/lh-vim-lib/blob/master/addon-info.txt)).
 ```vim

@@ -1,12 +1,13 @@
 "=============================================================================
-" $Id$
 " File:		autoload/lh/dev/option.vim                        {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://hermitte.free.fr/vim/>
-" Version:	1.1.5
-let s:k_version = 115
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:	1.1.8
+let s:k_version = 118
 " Created:	05th Oct 2009
-" Last Update:	$Date$
+" Last Update:	10th Apr 2015
 "------------------------------------------------------------------------
 " Description:	«description»
 " }}}1
@@ -40,17 +41,17 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
-" Function: lh#dev#option#get(name, filetype, default [, scope])  {{{2
+" Function: lh#dev#option#get(name, filetype[, default [, scope]])  {{{2
 " @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
 " b:{name}, or g:{name}. {default} is returned if none exists.
 " @note filetype inheritance is supported.
 " The order of the scopes for the variables checked can be specified through
 " the optional argument {scope}
-function! lh#dev#option#get(name, ft, default,...)
+function! lh#dev#option#get(name, ft,...)
   let fts = lh#dev#option#inherited_filetypes(a:ft)
   call map(fts, 'v:val."_"')
   let fts += [ '']
-  let scope = (a:0 == 1) ? a:1 : 'bg'
+  let scope = (a:0 == 2) ? a:2 : 'bg'
   let name = a:name
   for ft in fts
     let i = 0
@@ -61,7 +62,31 @@ function! lh#dev#option#get(name, ft, default,...)
       let i += 1
     endwhile
   endfor
-  return a:default
+  return a:0 > 0 ? a:1 : lh#option#unset()
+endfunction
+
+" Function: lh#dev#option#get_postfixed(name, filetype, default [, scope])  {{{2
+" @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
+" b:{name}, or g:{name}. {default} is returned if none exists.
+" @note filetype inheritance is supported.
+" The order of the scopes for the variables checked can be specified through
+" the optional argument {scope}
+function! lh#dev#option#get_postfixed(name, ft,...)
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
+  call map(fts, '"_".v:val')
+  let fts += [ '']
+  let scope = (a:0 == 2) ? a:2 : 'bg'
+  let name = a:name
+  for ft in fts
+    let i = 0
+    while i != strlen(scope)
+      if exists(scope[i].':'.name.ft)
+	return {scope[i]}:{name}{ft}
+      endif
+      let i += 1
+    endwhile
+  endfor
+  return a:0 > 0 ? a:1 : lh#option#unset()
 endfunction
 
 " Function: lh#dev#option#call(name, filetype, [, parameters])  {{{2
