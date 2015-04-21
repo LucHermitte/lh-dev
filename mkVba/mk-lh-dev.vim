@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.1.8
-let s:version = '1.1.8'
+" Version:      1.2.0
+let s:version = '1.2.0'
 " Created:      02nd Mar 2012
 "------------------------------------------------------------------------
 " Description:
@@ -44,6 +44,7 @@ autoload/lh/dev/instruction.vim
 autoload/lh/dev/java/attribute.vim
 autoload/lh/dev/naming.vim
 autoload/lh/dev/option.vim
+autoload/lh/dev/snippet.vim
 autoload/lh/dev/style.vim
 autoload/lh/dev/tags.vim
 autoload/lh/dev/vim/function.vim
