@@ -143,6 +143,29 @@ This part is just a draft for the moment.
   * function
   * instruction
   * tags
+  * Import statements can be automatically added in files with
+    `lh#dev#import#add()`.  See the following templates that exploit it:
+
+```
+VimL:" C++ std::vector<> snippet
+VimL: let s:value_start = '¡'
+VimL: let s:value_end   = s:value_start
+VimL: let s:marker_open  = '<+'
+VimL: let s:marker_close = '+>'
+VimL: call s:AddPostExpandCallback('lh#dev#import#add("<vector>")')
+std::vector<¡s:Surround(1, '<+type+>')¡> <++>
+```
+
+```
+VimL:" Python os.path.exists() snippet
+VimL:" hint: os.path.exists()
+VimL: let s:value_start = '¡'
+VimL: let s:value_end   = s:value_start
+VimL: let s:marker_open  = '<+'
+VimL: let s:marker_close = '+>'
+VimL: call s:AddPostExpandCallback('lh#dev#import#add("os", {"symbol": "path"})')
+os.path.exists(¡s:Surround(1, '<+type+>')¡)<++>
+```
 
 ## Filetype polymorphism
 
