@@ -1,5 +1,5 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.1.6.)
-                        For Vim version 7+.    Last change: 13th Mar 2015
+*lh-dev.txt*            Vim library for development oriented scripts (v1.2.1.)
+                        For Vim version 7+.    Last change: 22nd Apr 2015
 
                         By Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -11,6 +11,7 @@ CONTENTS                                *lhdev-contents*      {{{1
 |lhdev-filetype|        Filetype polymorphism
 |lhdev-style|           Coding style
 |lhdev-naming|          Naming policies
+|lhdev-import|          Importing modules/includes
 |add-local-help|        Instructions on installing this file (:helptags %:h)
 
 
@@ -39,6 +40,38 @@ lh#dev#option#call({name}, {ft} [, parameters])~
 lh#dev#{name}({parameters}) otherwise
 If {name} is a |List|, then the function name used is: {name}[0]#{ft}#{name}[1]
 @note filetype inheritance is supported.
+@note This function will try to execute
+    :runtime autoload/lh/dev/({ft}/)/name.vim
+on all files that match
+
+If a function/mapping is likelly to execute several calls to
+|lh#dev#option#call()| with the same {name} and {ft} parameters, you'd rather
+use |lh#dev#option#pre_load_overrides()| and |lh#dev#option#fast_call()|. They
+would avoid to execute several times |:runtime| on the same files.
+
+                                  *lh#dev#option#pre_load_overrides()*
+lh#dev#option#pre_load_overrides({name}, {ft})~
+This function executes >
+    :runtime autoload/lh/dev/({ft}/)/name.vim
+on all files that match
+If {name} is a |List|, then the file name used is: {name}[0]/{ft}/{name}[1]
+@note filetype inheritance is supported.
+
+If a function/mapping is likelly to execute several calls to
+|lh#dev#option#call()| with the same {name} and {ft} parameters, you'd rather
+use |lh#dev#option#pre_load_overrides()| and |lh#dev#option#fast_call()|. They
+would avoid to execute several times |:runtime| on the same files.
+
+                                                *lh#dev#option#fast_call()*
+lh#dev#option#call({name}, {ft} [, parameters])~
+@return lh#dev#{ft}#{name}({parameters}) if it exists, or
+lh#dev#{name}({parameters}) otherwise
+If {name} is a |List|, then the function name used is: {name}[0]#{ft}#{name}[1]
+@note filetype inheritance is supported.
+
+Unlike |lh#dev#option#call()|, this function doesn't try to source the
+autoload plugins where the overrides could be defined. This step is expected
+to have been done earlier with |lh#dev#option#pre_load_overrides()|.
 
 ------------------------------------------------------------------------------
 CODING STYLE                            *lhdev-style* {{{1
@@ -143,6 +176,14 @@ Examples:
 
 
 Mappings~
+
+
+------------------------------------------------------------------------------
+IMPORTING MODULES/INCLUDES              *lhdev-import* {{{1
+
+TBD
+*lh#dev#import#add()*
+*n_CTRL-X_i*  *<Plug>ImportModule*
 
 ------------------------------------------------------------------------------
  © Luc Hermitte, 2011-2015, http://github.com/LucHermitte/lh-dev

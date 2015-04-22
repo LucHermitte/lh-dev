@@ -213,6 +213,9 @@ Specialized function: `lh#dev#{filetype}#{theme}#_function()`
 
 `lh#dev#option#call(name, filetype [, parameters])`
 
+`lh#dev#option#pre_load_overrides(name, filetype [, parameters])`
+`lh#dev#option#fast_call(name, filetype [, parameters])`
+
 ### Filetype inheritance
 `lh#dev#option#inherited_filetypes(filetypes)`
 

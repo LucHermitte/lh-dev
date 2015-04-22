@@ -1,13 +1,13 @@
 "=============================================================================
 " File:		autoload/lh/dev/option.vim                        {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://github.com/LucHermitte>
+"               <URL:http://github.com/LucHermitte/lh-dev>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:	1.1.8
-let s:k_version = 118
+" Version:	1.2.1
+let s:k_version = 121
 " Created:	05th Oct 2009
-" Last Update:	10th Apr 2015
+" Last Update:	22nd Apr 2015
 "------------------------------------------------------------------------
 " Description:	«description»
 " }}}1
@@ -117,7 +117,68 @@ function! lh#dev#option#call(name, ft, ...)
     if exists('*'.fname) | break | endif
   endfor
 
-  return call (function(fname), a:000)
+  call s:Verbose('Calling: '.fname.'('.join(map(copy(a:000), 'string(v:val)'), ', ').')')
+  if s:verbose >= 2
+    debug return call (function(fname), a:000)
+  else
+    return call (function(fname), a:000)
+  endif
+endfunction
+
+" Function: lh#dev#option#pre_load_overrides(name, ft) {{{3
+" @warning {name} hasn't the same syntax as #call() and #fast_call()
+" @warning This function is expected to be executed from
+" autoload/lh/dev/{name}.vim (or equivalent if the prefix is forced to
+" something else)
+function! lh#dev#option#pre_load_overrides(name, ft) abort
+  if type(a:name) == type([])
+    let prefix = a:name[0]
+    let name   = a:name[1]
+  elseif type(a:name) == type('string')
+    let prefix = 'lh/dev'
+    let name   = a:name
+  else
+    throw "Unexpected type (".type(a:name).") for name parameter"
+  endif
+
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
+  let files = map(copy(fts), 'prefix."/".v:val."/".name.".vim"')
+  " let files += [prefix.'/'.name.'.vim'] " Don't load the default again!
+  for file in files
+    " TODO: here, check for timestamps in order to avoir reload files that
+    " haven' changed
+    echo 'runtime autoload/'.file
+  endfor
+endfunction
+
+" Function: lh#dev#option#fast_call(name, ft, ...) {{{3
+" @pre lh#option#dev#pre_load_overrides() must have been called before.
+function! lh#dev#option#fast_call(name, ft, ...) abort
+  if type(a:name) == type([])
+    let prefix = a:name[0]
+    let name   = a:name[1]
+  elseif type(a:name) == type('string')
+    let prefix = 'lh#dev'
+    let name   = a:name
+  else
+    throw "Unexpected type (".type(a:name).") for name parameter"
+  endif
+
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
+  let fnames = map(copy(fts), 'prefix."#".v:val."#".name')
+  let fnames += [prefix.'#'.name]
+
+  let idx = lh#list#find_if(fnames, 'exists("*".v:val)')
+  if idx < 0
+    throw 'No override of '.prefix.'(#{ft})#'.name.' is known'
+  endif
+  let fname = fnames[idx]
+  call s:Verbose('Calling: '.fname.'('.join(map(copy(a:000), 'string(v:val)'), ', ').')')
+  if s:verbose >= 2
+    debug return call (function(fname), a:000)
+  else
+    return call (function(fname), a:000)
+  endif
 endfunction
 
 "------------------------------------------------------------------------
