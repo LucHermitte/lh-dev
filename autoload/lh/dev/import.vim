@@ -2,10 +2,10 @@
 " File:         autoload/lh/dev/import.vim                        {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte/lh-dev>
-" Version:      1.2.0.
-let s:k_version = '120'
+" Version:      1.2.2.
+let s:k_version = '122'
 " Created:      21st Apr 2015
-" Last Update:  21st Apr 2015
+" Last Update:  24th Apr 2015
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -68,6 +68,7 @@ endfunction
 "       - "delim" : "angle"/"quote" (C, C++)
 "       - "symbol": "a-name" (everything by default) (Python)
 function! lh#dev#import#add(filename, ...) abort
+  call lh#dev#option#pre_load_overrides('import', &ft)
   let filename0 = lh#dev#import#_clean_filename(a:filename)
   let options = get(a:000, 0, {})
   let noNeedToProceed = lh#dev#import#is_already_imported(filename0, options)
@@ -126,7 +127,7 @@ LetIfUndef g:c_import_pattern      '^#\s*include\s*["<]${module}\>'
 function! lh#dev#import#_pattern(file, symbol, ...) abort
   let ft = a:0 == 0 ? &ft : a:1
   " Force to pass around the filetype, so that the generic version knows it
-  let res = lh#dev#option#call('import#_do_generate_pattern', ft, a:file, a:symbol, ft)
+  let res = lh#dev#option#fast_call('import#_do_generate_pattern', ft, a:file, a:symbol, ft)
   return res
 endfunction
 
@@ -141,7 +142,7 @@ endfunction
 
 " Function: lh#dev#import#_clean_filename(filename) {{{3
 function! lh#dev#import#_clean_filename(filename) abort
-  let res = lh#dev#option#call('import#_do_clean_filename', &ft, a:filename)
+  let res = lh#dev#option#fast_call('import#_do_clean_filename', &ft, a:filename)
   return res
 endfunction
 
@@ -153,7 +154,7 @@ endfunction
 " # Build import string {{{2
 " Function: lh#dev#import#_build_import_string(filename, options) {{{3
 function! lh#dev#import#_build_import_string(filename, options) abort
-  let res = lh#dev#option#call('import#_do_build_import_string', &ft, a:filename, a:options)
+  let res = lh#dev#option#fast_call('import#_do_build_import_string', &ft, a:filename, a:options)
   return res
 endfunction
 
@@ -171,7 +172,7 @@ endfunction
 " # Search Where to insert {{{2
 " Function: lh#dev#import#_search_where_to_insert(options) {{{3
 function! lh#dev#import#_search_where_to_insert(options) abort
-  let res = lh#dev#option#call('import#_do_search_where_to_insert', &ft, a:options)
+  let res = lh#dev#option#fast_call('import#_do_search_where_to_insert', &ft, a:options)
   return res
 endfunction
 
@@ -223,6 +224,41 @@ function! lh#dev#import#_do_search_where_to_insert(options) abort
 endfunction
 
 " }}}1
+" ## Deported function (for mappings) {{{1
+
+" Function: lh#dev#import#_insert_import(...) {{{3
+function! lh#dev#import#_insert_import(...) abort
+  " If there are several choices, ask which one to use.
+  " But first: check the files.
+  let [id, info] = lh#dev#tags#fetch("insert-include")
+
+  let files = {}
+  for t in info
+    if ! has_key(files, t.filename)
+      let files[t.filename] = {}
+    endif
+    let files[t.filename][t.kind[0]] = ''
+  endfor
+  " NB: there shouldn't be any to prioritize between p and f kinds as the
+  " filtering on include files shall get rid of the f kinds (that exist along
+  " with a prototype)
+  if len(files) > 1
+    call lh#common#error_msg("insert-include: too many acceptable tags for `"
+          \ .id."': ".string(files))
+    return
+  endif
+  mark '
+  let fullfilename = keys(files)[0]
+  let filename = fullfilename " this is the full filename
+  " echo filename
+  try
+    call lh#dev#import#add(filename, fullfilename=~ '\<usr\>\|\<local\>')
+  catch /^insert-include:.* is already included/
+    call lh#common#warning_msg("insert-include: ".filename.", where `"
+          \ .id."' is defined, is already included")
+  endtry
+  echo "Use CTRL-O to go back to previous cursor position"
+endfunction
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

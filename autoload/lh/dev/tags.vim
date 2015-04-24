@@ -1,20 +1,18 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/tags.vim                          {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"		<URL:http://github.com/LucHermitte/lh-dev>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	1.0.3
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:	1.2.2
 " Created:      09th Sep 2013
-" Last Update:  $Date$
+" Last Update:  24th Apr 2015
 "------------------------------------------------------------------------
 " Description:
+"       API functions to obtain symbol declarations
 "       Various functions that parse ctags tags.
-" 
+"
 "------------------------------------------------------------------------
-" Requirements:
-"       Requires Vim7+
 " TODO: use the rigth scope resolution operator (depending on the langage)
 " }}}1
 "=============================================================================
@@ -50,6 +48,7 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
+"------------------------------------------------------------------------
 " Function: lh#dev#tags#keep_full_names(tags_list) {{{3
 function! lh#dev#tags#keep_full_names(tags_list)
   let result_as_dict = {}
@@ -72,8 +71,50 @@ function! lh#dev#tags#keep_full_names(tags_list)
 endfunction
 
 "------------------------------------------------------------------------
+" Function: lh#dev#tags#fetch(feature) {{{3
+function! lh#dev#tags#fetch(feature) abort
+  let id = eval(s:TagsSelectPolicy())
+
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    set isk-=:
+    let info = taglist('.*\<'.id.'$')
+  finally
+    call cleanup.finalize()
+  endtry
+  if len(info) == 0
+    throw a:feature.": no tags for `".id."'"
+  endif
+  " Filter for function definitions and #defines, ...
+  let accepted_kinds = lh#dev#option#get('tag_kinds_for_inclusion', &ft, '[dfptcs]')
+  call filter(info, "v:val.kind =~ ".string(accepted_kinds))
+  " Filter for include files only
+  let accepted_files = lh#dev#option#get('file_regex_for_inclusion', &ft, '\.h')
+  call filter(info, "v:val.filename =~? ".string(accepted_files))
+  " Is there any symbol left ?
+  if len(info) == 0
+    throw a:feature.": no acceptable tag for `".id."'"
+  endif
+
+  " Strip the leading path that won't ever appear in included filename
+  let includes = lh#cpp#tags#get_included_paths()
+  for val in info
+    let val.filename = lh#cpp#tags#strip_included_paths(val.filename, includes)
+  endfor
+  " call map(info, "v:val.filename = lh#cpp#tags#strip_included_paths(v:val.filename, includes)")
+
+  " And remove redundant info
+  let info = lh#tags#uniq_sort(info)
+  return [id, info]
+endfunction
+
 " ## Internal functions {{{1
 
+function! s:TagsSelectPolicy()
+  let select_policy = lh#option#get('tags_select', "expand('<cword>')", 'bg')
+  return select_policy
+endfunction
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

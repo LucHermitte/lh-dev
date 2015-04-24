@@ -4,10 +4,10 @@
 "               <URL:http://github.com/LucHermitte/lh-dev>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:	1.2.1
-let s:k_version = 121
+" Version:	1.2.2
+let s:k_version = 122
 " Created:	05th Oct 2009
-" Last Update:	22nd Apr 2015
+" Last Update:	24th Apr 2015
 "------------------------------------------------------------------------
 " Description:	«description»
 " }}}1
@@ -24,6 +24,10 @@ function! lh#dev#option#version()
 endfunction
 
 " # Debug {{{2
+if !exists('s:verbose')
+  let s:verbose = 0
+endif
+
 function! lh#dev#option#verbose(level)
   let s:verbose = a:level
 endfunction
@@ -147,7 +151,7 @@ function! lh#dev#option#pre_load_overrides(name, ft) abort
   for file in files
     " TODO: here, check for timestamps in order to avoir reload files that
     " haven' changed
-    echo 'runtime autoload/'.file
+    exe 'runtime autoload/'.file
   endfor
 endfunction
 
