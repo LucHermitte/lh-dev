@@ -60,6 +60,8 @@ function! lh#dev#c#import#_do_build_import_string(filename, options) abort
     let useAngleBrackets = 1
   elseif a:filename[0] == '"'
     let useAngleBrackets = 0
+  elseif has_key(a:options, 'fullfilename') && a:options.fullfilename =~ '\<usr\>\|\<local\>'
+    let useAngleBrackets = 1
   else
     let useAngleBrackets = get(a:options, 'delim', 'quote') == "angle"
   endif

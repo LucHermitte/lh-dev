@@ -252,7 +252,7 @@ function! lh#dev#import#_insert_import(...) abort
   let filename = fullfilename " this is the full filename
   " echo filename
   try
-    call lh#dev#import#add(filename, fullfilename=~ '\<usr\>\|\<local\>')
+    call lh#dev#import#add(filename, {'fullfilename': fullfilename})
   catch /^insert-include:.* is already included/
     call lh#common#warning_msg("insert-include: ".filename.", where `"
           \ .id."' is defined, is already included")
