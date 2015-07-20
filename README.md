@@ -13,6 +13,9 @@ lh-dev defines the following commands:
   * `:NameConvert` that converts the identifier under to cursor to one of the following naming policy (the command supports autocompletion):
     * upper\_camel\_case, lower\_camel\_case, underscore/snake, variable,
     * getter, setter, local, global, member, static, constant, param (the exact conversion process can be tuned thanks to the [following options](#naming-conventions)).
+  * `:[range]ConvertNames/pattern/policy/[flags]` that transforms according to the
+    policy all names that match the _pattern_ -- it applies `:NameConvert` on
+    names matched by `:substitute`.
 
 
 # Options
@@ -55,7 +58,7 @@ The aim of `:AddStyle` (and of `lh#dev#style#get()` and `lh#dev#style#apply()`) 
 
 For instance, some projects will want to have open curly-brackets on new lines (see Allman indenting style), other will prefer to have the open bracket on the same line as the function/control-statement/... (see K&R indenting style, Java coding style, ...)
 
-lh-dev doesn't do any replacement by itself. It is expected to used by
+lh-dev doesn't do any replacement by itself. It is expected to b used by
 snippet plugins. So far, only [mu-template](http://github.com/LucHermitte/mu-template) and [lh-cpp](http://github.com/LucHermitte/lh-cpp) exploit this feature.
 
 `:AddStyle` is meant to be used by end users -- while `lh#dev#style#get()` and `lh#dev#style#apply()` are meant to be used by plugin developers that want to exploit end-user coding style.
@@ -194,7 +197,7 @@ Options can be obtained with:
 
 #### Notes
   * Filetype inheritance is supported.
-  * The order of the scopes for the variables checked can be specified through the optional argument {scope}
+  * The order of the scopes for the variables checked can be specified through the optional argument `{scope}`.
 
 #### How to set these variables ?
   * `g:{name}` is a global default option for all filetypes best set from a `.vimrc` or a plugin
@@ -225,7 +228,7 @@ Specialized function: `lh#dev#{filetype}#{theme}#_function()`
 # Installation
   * Requirements: Vim 7.+, [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) (v3.2.12), [lh-tags](http://github.com/LucHermitte/lh-tags)
   * Install with [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager) any plugin that requires lh-dev should be enough.
-  * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-dev (this is the preferred method because of the [dependencies](http://github.com/LucHermitte/lh-vim-lib/blob/master/addon-info.txt)).
+  * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-dev (this is the preferred method because of the [dependencies](http://github.com/LucHermitte/lh-dev/blob/master/addon-info.txt)).
 ```vim
 ActivateAddons lh-dev
 ```

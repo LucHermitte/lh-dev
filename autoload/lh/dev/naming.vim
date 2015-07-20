@@ -1,11 +1,13 @@
 "=============================================================================
-" $Id$
 " File:		autoload/lh/dev/naming.vim                        {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:	0.0.2
+"		<URL:http://github.com/LucHermitte/lh-dev>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:	1.3.0
+let s:k_version = 130
 " Created:	05th Oct 2009
-" Last Update:	$Date$
+" Last Update:	20th Jul 2015
 "------------------------------------------------------------------------
 " Description:
 " - Naming policies for programming styles
@@ -23,7 +25,6 @@ set cpo&vim
 
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 001
 function! lh#dev#naming#version()
   return s:k_version
 endfunction

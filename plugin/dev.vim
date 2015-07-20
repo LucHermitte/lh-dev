@@ -1,11 +1,13 @@
 "=============================================================================
-" $Id$
 " File:         plugin/dev.vim                                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.2
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:      1.3.0
+let s:k_version = 130
 " Created:      31st May 2010
-" Last Update:  $Date$
+" Last Update:  20th Jul 2015
 "------------------------------------------------------------------------
 " Description:
 "       Global commands and definitions of lh-dev
@@ -13,7 +15,6 @@
 "=============================================================================
 
 " Avoid global reinclusion {{{1
-let s:k_version = 112
 if &cp || (exists("g:loaded_dev")
       \ && (g:loaded_dev >= s:k_version)
       \ && !exists('g:force_reload_dev'))
@@ -26,7 +27,9 @@ set cpo&vim
 "------------------------------------------------------------------------
 " Commands and Mappings {{{1
 command! -nargs=1 -complete=custom,s:Convertions
-      \ NameConvert call s:ConvertName(<f-args>)
+      \ NameConvert call s:NameConvert(<f-args>)
+command! -nargs=1 -range -complete=custom,s:CompleteConvertNames
+      \ ConvertNames <line1>,<line2>call s:ConvertNames(<f-args>)
 
 command! -nargs=+
       \ AddStyle call lh#dev#style#_add(<f-args>)
@@ -60,7 +63,48 @@ let s:k_entity_pattern.in = '\w'
 let s:k_entity_pattern.out = '\W'
 let s:k_entity_pattern.prev_end = '\zs\w\W\+$'
 
-function! s:ConvertName(convertion_type) abort
+" Functions {{{2
+" Function: s:ConvertNames(repl_arg) {{{3
+" Syntax: ConvertNames/{regex}/{convertion_type}
+function! s:ConvertNames(repl_arg) range abort
+  let sep = a:repl_arg[0]
+  let fields = split(a:repl_arg, sep)
+  if len(fields) != 2 && len(fields) != 3
+    throw ":NameConvert/{regex}/{convertion_type}/[{opt}] expects exactly two or three parameters"
+  endif
+  let convertion_type = fields[1]
+  let i = lh#list#find_if(s:k_convertions, 'v:1_[0]=='.string(convertion_type))
+  if i == -1
+    throw "convertion (".convertion_type.") not found"
+  endif
+  " build the action to execute
+  let ConvertFunc = function(s:k_convertions[i][1])
+  let action = '\=(ConvertFunc(submatch(0)))'
+  let cmd = a:firstline . ',' . a:lastline . 's'
+	\. sep . fields[0]
+	\. sep . action
+        \. sep.(len(fields)>=3 ? fields[2] : '')
+  " echomsg cmd
+  exe cmd
+endfunction
+
+function! s:CompleteConvertNames(ArgLead, CmdLine, CursorPs)
+  let sep = a:ArgLead[0]
+  let fields = split(a:ArgLead, sep)
+  " call confirm(a:ArgLead . ' --- ' . a:CmdLine . ' --- ' . a:CursorPs
+        " \."\n".string(fields)
+        " \."\n".(len(a:ArgLead)>2 && a:ArgLead[-1:] == sep)
+        " \."\n".string(lh#list#transform(s:k_convertions, [], string(sep.fields[0].sep).'.v:1_[0]'))
+        " \, '&Ok')
+  if len(fields) == 2 || (len(a:ArgLead)>2 && a:ArgLead[-1:] == sep)
+    return join(lh#list#transform(s:k_convertions, [], string(sep.fields[0].sep).'.v:1_[0]'), "\n")
+  endif
+  return ""
+endfunction
+
+
+" Function: s:NameConvert(convertion_type) {{{3
+function! s:NameConvert(convertion_type) abort
   let i = lh#list#find_if(s:k_convertions, 'v:1_[0]=='.string(a:convertion_type))
   if i == -1
     throw "convertion not found"
@@ -81,7 +125,7 @@ function! s:ConvertName(convertion_type) abort
   let s2 = s[:crt_word_start-1]
         \ . new_word
         \ . (crt_word_end==-1 ? '' : s[crt_word_end+1 : -1])
-  call setline(l, s2) 
+  call setline(l, s2)
 endfunction
 
 function! s:Convertions(ArgLead, CmdLine, CursorPs)

@@ -1,5 +1,5 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.2.1.)
-                        For Vim version 7+.    Last change: 22nd Apr 2015
+*lh-dev.txt*            Vim library for development oriented scripts (v1.3.0.)
+                        For Vim version 7+.    Last change: 20th Jul 2015
 
                         By Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -173,6 +173,20 @@ Examples:
   a parameter name, when working on vim-scripts.
 - b:cpp_naming_global_subst : project-local specialization used to produced a
   global variable name from a data name.
+
+
+Commands~
+                                                    *:NameConvert*
+:NameConvert {policy}~
+Applies the selected naming {policy} to the word under the cursor.
+
+                                                    *:ConvertNames*
+:[range]ConvertNames/{pattern}/{policy}/[flags]~
+For each line in [range] replace a match of {pattern} with lh#dev#name#{policy}(match).
+For the {pattern} see |pattern|.
+When [range] is omitted, replace in the current line only.
+Also see |cmdline-ranges|.
+See |:s_flags| for [flags].
 
 
 Mappings~
