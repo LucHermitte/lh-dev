@@ -54,7 +54,9 @@ let s:k_convertions = [
       \ ['member',           'lh#dev#naming#member'],
       \ ['static',           'lh#dev#naming#static'],
       \ ['constant',         'lh#dev#naming#constant'],
-      \ ['param',            'lh#dev#naming#param']
+      \ ['param',            'lh#dev#naming#param'],
+      \ ['type',             'lh#dev#naming#type'],
+      \ ['function',         'lh#dev#naming#function']
       \ ]
 
 " from plugin/vim-tip-swap-word.vim
