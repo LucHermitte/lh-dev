@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.1.7
-let s:k_version = 117
+" Version:      1.3.1
+let s:k_version = 131
 " Created:      12th Feb 2014
 "------------------------------------------------------------------------
 " Description:
@@ -80,7 +80,7 @@ function! lh#dev#style#get(ft)
 
   for [pattern, hows] in items(s:style)
     let new_repl = {}
-    let new_repl[pattern] = ''
+    let new_repl[pattern] = {}
 
     for how in hows
       if how.local != -1 && how.local != bufnr
@@ -91,16 +91,16 @@ function! lh#dev#style#get(ft)
       if ft < 0 | continue | endif
 
       if empty(new_repl[pattern])
-        let new_repl[pattern] = how.replacement
+        let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
         let new_repl.ft = ft
       else
         let old_ft = get(new_repl, 'ft', -1)
         if ft < old_ft
-          let new_repl[pattern] = how.replacement
+          let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
           let new_repl.ft = ft
         elseif ft == old_ft
           if how.local == bufnr " then we override global setting
-            let new_repl[pattern] = how.replacement
+            let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
           endif
         endif " compare fts
       endif " compare to previous definition
@@ -114,15 +114,33 @@ function! lh#dev#style#get(ft)
   return res
 endfunction
 
+" Function: lh#dev#style#_sort_styles(styles) {{{3
+function! lh#dev#style#_sort_styles(styles) abort
+  let prio_lists = {}
+  for [key, style] in items(a:styles)
+    if !has_key(prio_lists, style.prio)
+      let prio_lists[style.prio] = []
+    endif
+    let prio_lists[style.prio] += [key]
+  endfor
+  let keys = []
+  for prio in sort(keys(prio_lists), 'n')
+    let keys += reverse(lh#list#sort(map(prio_lists[prio], 'escape(v:val, "\\")')))
+  endfor
+  return keys
+  " let keys = reverse(lh#list#sort(map(keys(a:styles), 'escape(v:val, "\\")')))
+  " return keys
+endfunction
+
 " Function: lh#dev#style#apply(text [, ft]) {{{3
 function! lh#dev#style#apply(text, ...) abort
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
-  let keys = reverse(lh#list#sort(map(keys(styles), 'escape(v:val, "\\")')))
+  let keys = lh#dev#style#_sort_styles(styles)
   let sKeys = join(keys, '\|')
   " Using a sorted list of keys permits to avoid triggering "}" style on
   " "class {};" when there is a "};" style.
-  let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(styles, submatch(0), keys)', 'g')
+  let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(styles, submatch(0), keys, a:text)', 'g')
   return res
 endfunction
 
@@ -146,10 +164,13 @@ endif
 function! lh#dev#style#_add(pattern, ...)
   " Analyse params {{{4
   let local = -1
-  let ft = '*'
+  let ft    = '*'
+  let prio  = 1
   for o in a:000
     if     o =~ '-b\%[uffer]'
       let local = bufnr('%')
+    elseif o =~ '-pr\%[iority]'
+      let prio = matchstr(o, '.*=\zs.*')
     elseif o =~ '-ft\|-filetype'
       let ft = matchstr(o, '.*=\zs.*')
       if empty(ft)
@@ -175,19 +196,29 @@ function! lh#dev#style#_add(pattern, ...)
     endif
   endfor
   " This is new => add ;; note the "return" in the search loop
-  let s:style[a:pattern] = previous + [ {'local': local, 'ft': ft, 'replacement': repl}]
+  let s:style[a:pattern] = previous +
+        \ [ {'local': local, 'ft': ft, 'replacement': repl, 'prio': prio }]
 endfunction
 
 " Internals {{{2
-" Function: lh#dev#style#_get_replacement(styles, match, keys) {{{3
-function! lh#dev#style#_get_replacement(styles, match, keys) abort
-  if has_key(a:styles, a:match)
-    return a:styles[a:match]
-  else
-    " We have been called => there is a match!
-    let idx = lh#list#match_re(a:keys, a:match)
-    return substitute(a:match, a:match, a:styles[a:keys[idx]], '')
+" Function: lh#dev#style#_get_replacement(styles, match, keys, all_text) {{{3
+function! lh#dev#style#_get_replacement(styles, match, keys, all_text) abort
+  " if has_key(a:styles, a:match)
+  "   return a:styles[a:match].replacement
+  " else
+  "   We have been called => there is a match!
+  let idx = lh#list#match_re(a:keys, a:match)
+  if a:keys[idx] =~ '^^\|$$'
+    " echomsg "match begin/end"
+    " Then, we have to match on all_text as well
+    if a:all_text !~ a:keys[idx]
+      " Search for another index
+      let idx = lh#list#match_re(a:keys, a:match, idx+1)
+    endif
   endif
+  " echomsg "match: ". a:keys[idx] . " -> " . (a:styles[a:keys[idx]].replacement)
+  return substitute(a:match, a:match, a:styles[a:keys[idx]].replacement, '')
+  " endif
 endfunction
 
 "------------------------------------------------------------------------
@@ -221,14 +252,33 @@ AddStyle \\f{ -ft=c \\\\f{
 AddStyle \\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup {{{2
-AddStyle {  -ft=c \ {\n
-AddStyle }; -ft=c \n};\n
-AddStyle }  -ft=c \n}\n
+AddStyle {  -ft=c -prio=10 \ {\n
+AddStyle }; -ft=c -prio=10 \n};\n
+AddStyle }  -ft=c -prio=10 \n}\n
+
+" # Ignore curly-brackets on single lines {{{2
+AddStyle ^\ *{\ *$ -ft=c &
+AddStyle ^\ *}\ *$ -ft=c &
+
+" # Handle specifically empty pairs of curly-brackets {{{2
+" On its own line
+" -> Leave it be
+AddStyle ^\ *{}\ *$ -ft=c &
+" -> Split it
+" AddStyle ^\ *{}\ *$ -ft=c {\n}
+
+" Mixed
+" -> Split it
+" AddStyle {} -ft=c -prio=5 \ {\n}
+" -> On the next line (unsplit)
+AddStyle {} -ft=c -prio=5 \n{}
+" -> On the next line (split)
+" AddStyle {} -ft=c -prio=5 \n{\n}
 
 " # Java style {{{2
 " Force Java style in Java
-AddStyle { -ft=java \ {\n
-AddStyle } -ft=java \n}
+AddStyle { -ft=java -prio=10 \ {\n
+AddStyle } -ft=java -prio=10 \n}
 
 " }}}1
 "------------------------------------------------------------------------
