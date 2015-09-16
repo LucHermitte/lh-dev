@@ -1,11 +1,10 @@
 "=============================================================================
-" $Id$
 " File:         tests/lh/dev-style.vim                            {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.4
+" Version:      1.3.1
 " Created:      14th Feb 2014
-" Last Update:  $Date$
+" Last Update:  17th Aug 2015
 "------------------------------------------------------------------------
 " Description:
 "       Unit tests for lh#dev#style
@@ -18,6 +17,13 @@ set cpo&vim
 UTSuite [lh-dev] Testing lh#dev#style
 
 runtime autoload/lh/dev/style.vim
+
+" ## Helper function
+function! s:GetStyle(...)
+  let style = call('lh#dev#style#get', a:000)
+  let style = map(copy(style), 'v:val.replacement')
+  return style
+endfunction
 
 " ## Tests {{{1
 "------------------------------------------------------------------------
@@ -33,72 +39,72 @@ function! s:Test_global_all()
   " Todo: play with scratch buffer
   " Yes there is a trailing whitespace
   AddStyle ; ;\ 
-  Assert lh#dev#style#get(&ft) == {';': '; '}
-  Assert lh#dev#style#get('fake') == {';': '; '}
+  Assert s:GetStyle(&ft) == {';': '; '}
+  Assert s:GetStyle('fake') == {';': '; '}
 
   AddStyle | |\n
-  Assert lh#dev#style#get(&ft) == {';': '; ', '|': "|\n"}
-  Assert lh#dev#style#get('fake') == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle(&ft) == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle('fake') == {';': '; ', '|': "|\n"}
 endfunction
 
 " Function: s:Test_local_all() {{{3
 function! s:Test_local_all()
   " Todo: play with scratch buffer
   AddStyle ; ;\  -b
-  Assert lh#dev#style#get(&ft) == {';': '; '}
-  Assert lh#dev#style#get('fake') == {';': '; '}
+  Assert s:GetStyle(&ft) == {';': '; '}
+  Assert s:GetStyle('fake') == {';': '; '}
 
   AddStyle | |\n -b
-  Assert lh#dev#style#get(&ft) == {';': '; ', '|': "|\n"}
-  Assert lh#dev#style#get('fake') == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle(&ft) == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle('fake') == {';': '; ', '|': "|\n"}
 endfunction
 
 " Function: s:Test_global_this_ft() {{{3
 function! s:Test_global_this_ft()
   AddStyle ; ;\  -ft
-  Assert lh#dev#style#get(&ft) == {';': '; '}
-  Assert lh#dev#style#get('fake') == {}
+  Assert s:GetStyle(&ft) == {';': '; '}
+  Assert s:GetStyle('fake') == {}
 
   AddStyle | |\n -ft
-  Assert lh#dev#style#get(&ft) == {';': '; ', '|': "|\n"}
-  Assert lh#dev#style#get('fake') == {}
+  Assert s:GetStyle(&ft) == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle('fake') == {}
 endfunction
 
 " Function: s:Test_global_SOME_ft() {{{3
 function! s:Test_global_SOME_ft()
   AddStyle ; ;\  -ft=SOME
-  Assert lh#dev#style#get('SOME') == {';': '; '}
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft) == {}
+  Assert s:GetStyle('SOME') == {';': '; '}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft) == {}
 
   AddStyle | |\n -ft=SOME
-  Assert lh#dev#style#get('SOME') == {';': '; ', '|': "|\n"}
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft) == {}
+  Assert s:GetStyle('SOME') == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft) == {}
 endfunction
 
 " Function: s:Test_local_this_ft() {{{3
 function! s:Test_local_this_ft()
   AddStyle ; ;\  -ft -b
-  Assert lh#dev#style#get(&ft) == {';': '; '}
-  Assert lh#dev#style#get('fake') == {}
+  Assert s:GetStyle(&ft) == {';': '; '}
+  Assert s:GetStyle('fake') == {}
 
   AddStyle | |\n -ft -b
-  Assert lh#dev#style#get(&ft) == {';': '; ', '|': "|\n"}
-  Assert lh#dev#style#get('fake') == {}
+  Assert s:GetStyle(&ft) == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle('fake') == {}
 endfunction
 
 " Function: s:Test_local_SOME_ft() {{{3
 function! s:Test_local_SOME_ft()
   AddStyle ; ;\  -ft=SOME -b
-  Assert lh#dev#style#get('SOME') == {';': '; '}
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft) == {}
+  Assert s:GetStyle('SOME') == {';': '; '}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft) == {}
 
   AddStyle | |\n -ft=SOME -b
-  Assert lh#dev#style#get('SOME') == {';': '; ', '|': "|\n"}
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft) == {}
+  Assert s:GetStyle('SOME') == {';': '; ', '|': "|\n"}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft) == {}
 endfunction
 
 " }}}2
@@ -107,104 +113,104 @@ endfunction
 " Function: s:Test_global_over_local() {{{3
 function! s:Test_global_over_local()
   AddStyle ; ;\  -b
-  Assert lh#dev#style#get('fake') == {';': '; '}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': '; '}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   AddStyle ; ;
-  Assert lh#dev#style#get('fake') == {';': '; '}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': '; '}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   try
     new
-    Assert lh#dev#style#get('fake') == {';': ';'}
-    Assert lh#dev#style#get(&ft)    == {';': ';'}
+    Assert s:GetStyle('fake') == {';': ';'}
+    Assert s:GetStyle(&ft)    == {';': ';'}
   finally
     bw
   endtry
-  Assert lh#dev#style#get('fake') == {';': '; '}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': '; '}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 endfunction
 
 " Function: s:Test_local_over_global() {{{3
 function! s:Test_local_over_global()
   AddStyle ; ;\ 
-  Assert lh#dev#style#get('fake') == {';': '; '}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': '; '}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   AddStyle ; ;  -b
-  Assert lh#dev#style#get('fake') == {';': ';'}
-  Assert lh#dev#style#get(&ft)    == {';': ';'}
+  Assert s:GetStyle('fake') == {';': ';'}
+  Assert s:GetStyle(&ft)    == {';': ';'}
 
   try
     new
-    Assert lh#dev#style#get('fake') == {';': '; '}
-    Assert lh#dev#style#get(&ft)    == {';': '; '}
+    Assert s:GetStyle('fake') == {';': '; '}
+    Assert s:GetStyle(&ft)    == {';': '; '}
   finally
     bw
   endtry
-  Assert lh#dev#style#get('fake') == {';': ';'}
-  Assert lh#dev#style#get(&ft)    == {';': ';'}
+  Assert s:GetStyle('fake') == {';': ';'}
+  Assert s:GetStyle(&ft)    == {';': ';'}
 endfunction
 
 " Function: s:Test_all_over_this_ft() {{{3
 function! s:Test_all_over_this_ft()
   AddStyle ; ;\  -ft
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   AddStyle ; ;
-  Assert lh#dev#style#get('fake') == {';': ';'}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': ';'}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   try
     new
-    Assert lh#dev#style#get('fake') == {';': ';'}
-    Assert lh#dev#style#get(&ft)    == {';': ';'}
+    Assert s:GetStyle('fake') == {';': ';'}
+    Assert s:GetStyle(&ft)    == {';': ';'}
   finally
     bw
   endtry
-  Assert lh#dev#style#get('fake') == {';': ';'}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': ';'}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 endfunction
 
 " Function: s:Test_this_ft_over_all() {{{3
 function! s:Test_this_ft_over_all()
   AddStyle ; ;\  -ft
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   AddStyle ; ;
-  Assert lh#dev#style#get('fake') == {';': ';'}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': ';'}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 
   try
     new
-    Assert lh#dev#style#get('fake') == {';': ';'}
-    Assert lh#dev#style#get(&ft)    == {';': ';'}
+    Assert s:GetStyle('fake') == {';': ';'}
+    Assert s:GetStyle(&ft)    == {';': ';'}
   finally
     bw
   endtry
-  Assert lh#dev#style#get('fake') == {';': ';'}
-  Assert lh#dev#style#get(&ft)    == {';': '; '}
+  Assert s:GetStyle('fake') == {';': ';'}
+  Assert s:GetStyle(&ft)    == {';': '; '}
 endfunction
 
 " Function: s:Test_mix_everything() {{{3
 function! s:Test_mix_everything()
   AddStyle T 1 -ft -b
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft)    == {'T': '1'}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft)    == {'T': '1'}
 
   AddStyle T 2 -ft
-  Assert lh#dev#style#get('fake') == {}
-  Assert lh#dev#style#get(&ft)    == {'T': '1'}
+  Assert s:GetStyle('fake') == {}
+  Assert s:GetStyle(&ft)    == {'T': '1'}
 
   AddStyle T 3 -b
-  Assert lh#dev#style#get('fake') == {'T': '3'}
-  Assert lh#dev#style#get(&ft)    == {'T': '1'}
+  Assert s:GetStyle('fake') == {'T': '3'}
+  Assert s:GetStyle(&ft)    == {'T': '1'}
 
   AddStyle T 4
-  Assert lh#dev#style#get('fake') == {'T': '3'}
-  Assert lh#dev#style#get(&ft)    == {'T': '1'}
+  Assert s:GetStyle('fake') == {'T': '3'}
+  Assert s:GetStyle(&ft)    == {'T': '1'}
 
   " Check this is correctly filled
   let bufnr = bufnr('%')
@@ -228,21 +234,21 @@ function! s:Test_mix_everything()
   Assert style.T[3].replacement == '4'
 
   " Check this is correctly restituted
-  Assert lh#dev#style#get('fake') == {'T': '3'}
-  Assert lh#dev#style#get(&ft)    == {'T': '1'}
+  Assert s:GetStyle('fake') == {'T': '3'}
+  Assert s:GetStyle(&ft)    == {'T': '1'}
   Assert &ft == 'vim'
   try
     new " other ft
-    Assert lh#dev#style#get('fake') == {'T': '4'}
-    Assert lh#dev#style#get('vim')    == {'T': '2'}
+    Assert s:GetStyle('fake') == {'T': '4'}
+    Assert s:GetStyle('vim')    == {'T': '2'}
   finally
     bw
   endtry
   try
     new " same ft
     set ft=vim
-    Assert lh#dev#style#get('fake') == {'T': '4'}
-    Assert lh#dev#style#get('vim')    == {'T': '2'}
+    Assert s:GetStyle('fake') == {'T': '4'}
+    Assert s:GetStyle('vim')    == {'T': '2'}
   finally
     bw
   endtry
@@ -254,19 +260,19 @@ endfunction
 function! s:Test_override_global()
   " Yes there is a trailing whitespace
   AddStyle ; ;\ 
-  Assert lh#dev#style#get(&ft) == {';': '; '}
+  Assert s:GetStyle(&ft) == {';': '; '}
 
   AddStyle ; zz
-  Assert lh#dev#style#get(&ft) == {';': 'zz'}
+  Assert s:GetStyle(&ft) == {';': 'zz'}
 endfunction
 
 function! s:Test_override_local()
   " Yes there is a trailing whitespace
   AddStyle ; ;\  -b
-  Assert lh#dev#style#get(&ft) == {';': '; '}
+  Assert s:GetStyle(&ft) == {';': '; '}
 
   AddStyle ; zz -b
-  Assert lh#dev#style#get(&ft) == {';': 'zz'}
+  Assert s:GetStyle(&ft) == {';': 'zz'}
 endfunction
 
 " }}}1

@@ -1,5 +1,5 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.3.0.)
-                        For Vim version 7+.    Last change: 20th Jul 2015
+*lh-dev.txt*            Vim library for development oriented scripts (v1.3.1.)
+                        For Vim version 7+.    Last change: 17th Aug 2015
 
                         By Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -92,7 +92,7 @@ style.
 Note: Naming policies are implemented with |lhdev-naming|.
 
                                                 *:AddStyle*
-:AddStyle {key} [-buffer] [-ft[={ft}]] {Replacement}~
+:AddStyle {key} [-buffer] [-ft[={ft}]] [-prio={prio}] {Replacement}~
 @param {key} is a regex that will get replaced automatically (by plugins
 supporting this API)
 @param {replacement} is what will be inserted in place of {text}
@@ -103,6 +103,11 @@ supporting this API)
        This option is meant to be used in .vimrc, in the global zone of
        |filetype-plugin|s or possibily in |local_vimrc|s (when combined with
        "-buffer"").
+@param "`-prio={prio}`" Sets a priority that'll be used to determine which key
+       is matching the text to enhance. By default all style have a priority
+       of 1.  The typical application is to have template expander ignore
+       single curly brackets.
+
 Examples: >
    " For Java (already defined in autoload/lh/dev/style.vim)
    AddStyle { -ft {\\n

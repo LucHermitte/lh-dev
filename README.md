@@ -64,11 +64,12 @@ snippet plugins. So far, only [mu-template](http://github.com/LucHermitte/mu-tem
 `:AddStyle` is meant to be used by end users -- while `lh#dev#style#get()` and `lh#dev#style#apply()` are meant to be used by plugin developers that want to exploit end-user coding style.
 
 
-`:AddStyle {key} [-buffer] [-ft[={ft}]] {Replacement}`
+`:AddStyle {key} [-buffer] [-ft[={ft}]] [-prio={prio}] {Replacement}`
   * `{key}` is a regex that will get replaced automatically (by plugins supporting this API)
   * `{replacement}` is what will be inserted in place of `{key}`
   * "`-buffer`" defines this association only for the current buffer. This option is meant to be used with plugins like [local\_vimrc](https://github.com/LucHermitte/local_vimrc).
   * "`-ft[={ft}]`" defines this association only for the specified filetype. When `{ft}` is not specified, it applies only to the current filetype. This option is meant to be used in .vimrc, in the global zone of |filetype-plugin|s or possibily in [local\_vimrcs](https://github.com/LucHermitte/local_vimrc) (when combined with "`-buffer`").
+  * "`-prio={prio}`" Sets a priority that'll be used to determine which key is matching the text to enhance. By default all style have a priority of 1. The typical application is to have template expander ignore single curly brackets.
 
 Examples:
 
@@ -100,14 +101,33 @@ AddStyle \\f{ -ft=c \\\\f{
 AddStyle \\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup {{{2
-AddStyle {  -ft=c \ {\n
-AddStyle }; -ft=c \n};\n
-AddStyle }  -ft=c \n}\n
+AddStyle {  -ft=c -prio=10 \ {\n
+AddStyle }; -ft=c -prio=10 \n};\n
+AddStyle }  -ft=c -prio=10 \n}\n
+
+" # Ignore curly-brackets on single lines {{{2
+AddStyle ^\ *{\ *$ -ft=c &
+AddStyle ^\ *}\ *$ -ft=c &
+
+" # Handle specifically empty pairs of curly-brackets {{{2
+" On its own line
+" -> Leave it be
+AddStyle ^\ *{}\ *$ -ft=c &
+" -> Split it
+" AddStyle ^\ *{}\ *$ -ft=c {\n}
+
+" Mixed
+" -> Split it
+" AddStyle {} -ft=c -prio=5 \ {\n}
+" -> On the next line (unsplit)
+AddStyle {} -ft=c -prio=5 \n{}
+" -> On the next line (split)
+" AddStyle {} -ft=c -prio=5 \n{\n}
 
 " # Java style {{{2
 " Force Java style in Java
-AddStyle { -ft=java \ {\n
-AddStyle } -ft=java \n}
+AddStyle { -ft=java -prio=10 \ {\n
+AddStyle } -ft=java -prio=10 \n}
 ```
 
 When you wish to adopt Allman coding style, in `${project_root}/_vimrc_local.vim`
