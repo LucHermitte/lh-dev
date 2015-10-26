@@ -1,12 +1,13 @@
 "=============================================================================
-" $Id$
 " File:		autoload/lh/dev/cpp/types.vim                            {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-" 		<URL:http://code.google.com/p/lh-vim/>
-" Version:	1.1.3
-let s:k_version = '1.1.3'
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
+" Version:	1.3.2
+let s:k_version = '1.3.2'
 " Created:	10th Feb 2009
-" Last Update:	$Date$
+" Last Update:	27th Oct 2015
 "------------------------------------------------------------------------
 " Description:
 " 	Analysis functions for C++ types.
@@ -18,6 +19,7 @@ let s:k_version = '1.1.3'
 " 	v1.0.2: New function lh#dev#cpp#types#IsPointer(type) for lh-cpp
 " 	        doxygenation.
 " 	v1.1.3: New function specialization: lh#dev#types#deduce()
+" 	v1.3.2: New types added to is_pointer
 " }}}1
 "=============================================================================
 
@@ -106,7 +108,7 @@ endfunction
 " # Various functions {{{2
 " Function: lh#dev#cpp#types#IsPointer(type) : bool {{{3
 function! lh#dev#cpp#types#IsPointer(type)
-  return a:type =~ '\%([*]\|pointer\|_ptr\|Ptr\)\s*$'
+  return a:type =~ '\%([*]\|pointer\|_ptr\|Ptr\|non_null<.*>\)\s*$'
 endfunction
 
 " ## Overridden functions {{{1
