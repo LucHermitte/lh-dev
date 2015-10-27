@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.1
-let s:k_version = 131
+" Version:      1.3.3
+let s:k_version = 133
 " Created:      12th Feb 2014
 "------------------------------------------------------------------------
 " Description:
@@ -18,6 +18,8 @@ let s:k_version = 131
 "       - lh#dev#style#get() that returns the style chosen for the given
 "         filetype
 "
+" Requires:
+"       - lh-vim-lib v3.3.7
 " Tests:
 "       See tests/lh/dev-style.vim
 " }}}1
@@ -124,7 +126,7 @@ function! lh#dev#style#_sort_styles(styles) abort
     let prio_lists[style.prio] += [key]
   endfor
   let keys = []
-  for prio in sort(keys(prio_lists), 'n')
+  for prio in lh#list#sort(keys(prio_lists), 'n')
     let keys += reverse(lh#list#sort(map(prio_lists[prio], 'escape(v:val, "\\")')))
   endfor
   return keys
