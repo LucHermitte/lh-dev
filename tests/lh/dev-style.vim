@@ -42,9 +42,19 @@ function! s:Test_global_all()
   Assert s:GetStyle(&ft) == {';': '; '}
   Assert s:GetStyle('fake') == {';': '; '}
 
+  AssertEqual(lh#dev#style#apply('toto;titi'), 'toto; titi')
+  " Shall the function be idempotent?
+  " AssertEqual(lh#dev#style#apply('toto; titi'), 'toto; titi')
+  " AssertEqual(lh#dev#style#apply('toto  ;   titi'), 'toto; titi')
+
   AddStyle | |\n
   Assert s:GetStyle(&ft) == {';': '; ', '|': "|\n"}
   Assert s:GetStyle('fake') == {';': '; ', '|': "|\n"}
+
+  AssertEqual(lh#dev#style#apply("toto|titi"), "toto|\ntiti")
+  " Shall the function be idempotent?
+  " AssertEqual(lh#dev#style#apply("toto|\ntiti"), "toto|\ntiti")
+  " AssertEqual(lh#dev#style#apply("toto  |\n   titi"), "toto|\ntiti")
 endfunction
 
 " Function: s:Test_local_all() {{{3
