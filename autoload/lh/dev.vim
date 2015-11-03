@@ -1,22 +1,23 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"		<URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
 " Version:      1.1.1
 " Created:      28th May 2010
-" Last Update:  $Date$
+" Last Update:  03rd Nov 2015
 "------------------------------------------------------------------------
 " Description:
 "       «description»
-" 
+"
 "------------------------------------------------------------------------
-" History:      
+" History:
+"       v1.1.1: ~ bug fixed in lh#dev# comment related functions
+"       v1.0.4: ~ bug fixed in lh#dev#__FindFunctions(line)
 " 	v0.0.2: + lh#dev#*_comments()
 "		+ ways to extract local variables
 "		- lh#dev#_end_func fixed cursor movements
-"       v1.0.4: ~ bug fixed in lh#dev#__FindFunctions(line)
-"       v1.1.1: ~ bug fixed in lh#dev# comment related functions
 " }}}1
 "=============================================================================
 
@@ -58,7 +59,7 @@ let cpp_function_start_pat = '{'
 " # Find the function that starts before {line}, and finish after. {{{2
 " @todo: check monoline functions
 function! lh#dev#find_function_boundaries(line)
-  try 
+  try
     let lTags = lh#dev#start_tag_session()
 
     let info = lh#dev#__FindFunctions(a:line)
@@ -110,7 +111,7 @@ function! lh#dev#get_variables(function_boundaries, ...)
   return res
 endfunction
 
-"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 " # Tags sessions {{{2
 let s:tags = {
       \ 'tags': [],
@@ -176,9 +177,9 @@ endfunction
 " we can not define mappings (/abbreviations) that contain "\<{keys}>" into the
 " sequence to insert.
 " Note:	It accepts sequences containing double-quotes.
-function! lh#dev#reinterpret_escaped_char(seq)
+function! lh#dev#reinterpret_escaped_char(seq) abort
   let seq = escape(a:seq, '"')
-  exe 'return "' . 
+  exe 'return "' .
     \   substitute( seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
 endfunction
 "
@@ -269,7 +270,7 @@ function! lh#dev#__BuildCrtBufferCtags(...)
   call s:Verbose(cmd_line)
   call system(cmd_line)
 
-  try 
+  try
     let tags_save = &tags
     let &tags = s:temp_tags
     let lTags = taglist('.')
@@ -322,7 +323,7 @@ endfunction
 
 " # internal: matchit solution to find end of function {{{2
 function! lh#dev#_end_func(line)
-  try 
+  try
     let pos0 = getpos('.')
     :exe a:line
     let start_pat = lh#dev#option#get('function_start_pat', &ft, '')
