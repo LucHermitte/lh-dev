@@ -4,15 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.1.1
+" Version:      1.3.4
+let s:k_version = 134
 " Created:      28th May 2010
-" Last Update:  03rd Nov 2015
+" Last Update:  04th Nov 2015
 "------------------------------------------------------------------------
 " Description:
 "       «description»
 "
 "------------------------------------------------------------------------
 " History:
+"       v1.3.4: ~ bug fix in lh#dev#reinterpret_escaped_char
 "       v1.1.1: ~ bug fixed in lh#dev# comment related functions
 "       v1.0.4: ~ bug fixed in lh#dev#__FindFunctions(line)
 " 	v0.0.2: + lh#dev#*_comments()
@@ -26,7 +28,6 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 111
 function! lh#dev#version()
   return s:k_version
 endfunction
@@ -178,9 +179,16 @@ endfunction
 " sequence to insert.
 " Note:	It accepts sequences containing double-quotes.
 function! lh#dev#reinterpret_escaped_char(seq) abort
-  let seq = escape(a:seq, '"')
-  exe 'return "' .
-    \   substitute( seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+  try
+    let seq = escape(a:seq, '"\')
+    " let seq = (substitute( seq, '\\\\<\(.\{-}\)\\\\>', "\\\\<\\1>", 'g' ))
+    " exe 'return "'.seq.'"'
+    exe 'return "' .
+          \   substitute( seq, '\\\\<\(.\{-}\)\\\\>', '"."\\<\1>"."', 'g' ) .  '"'
+  catch /.*/
+    let g:rec_error = a:seq
+    throw v:exception
+  endtry
 endfunction
 "
 "------------------------------------------------------------------------
