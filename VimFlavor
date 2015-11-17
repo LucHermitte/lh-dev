@@ -1,2 +1,2 @@
-flavor 'LucHermitte/lh-vim-lib.git', '>= 3.3.10'
-flavor 'LucHermitte/lh-tags.git', '>= 1.4.1'
+flavor 'LucHermitte/lh-vim-lib', '>= 3.3.10'
+flavor 'LucHermitte/lh-tags', '>= 1.4.1'
