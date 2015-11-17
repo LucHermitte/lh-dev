@@ -4,10 +4,10 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.4
-let s:k_version = 134
+" Version:      1.3.5
+let s:k_version = 135
 " Created:      28th May 2010
-" Last Update:  04th Nov 2015
+" Last Update:  17th Nov 2015
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -45,7 +45,7 @@ function! s:Verbose(expr)
   endif
 endfunction
 
-function! lh#dev#debug(expr)
+function! lh#dev#debug(expr) abort
   return eval(a:expr)
 endfunction
 
@@ -59,7 +59,7 @@ let cpp_function_start_pat = '{'
 
 " # Find the function that starts before {line}, and finish after. {{{2
 " @todo: check monoline functions
-function! lh#dev#find_function_boundaries(line)
+function! lh#dev#find_function_boundaries(line) abort
   try
     let lTags = lh#dev#start_tag_session()
 
@@ -91,7 +91,7 @@ endfunction
 " extract "i" as a local variable ...
 let c_ctags_understands_local_variables_in_one_pass = 0
 let cpp_ctags_understands_local_variables_in_one_pass = 0
-function! lh#dev#get_variables(function_boundaries, ...)
+function! lh#dev#get_variables(function_boundaries, ...) abort
   let lVariables = lh#dev#option#call('function#_local_variables', &ft, a:function_boundaries)
 
   " split at given split-points
@@ -118,7 +118,7 @@ let s:tags = {
       \ 'tags': [],
       \ 'count': 0
       \ }
-function! lh#dev#start_tag_session()
+function! lh#dev#start_tag_session() abort
   if s:tags.count < 0
     let s:tags.count = 0
   endif
@@ -129,7 +129,7 @@ function! lh#dev#start_tag_session()
   return s:tags.tags
 endfunction
 
-function! lh#dev#end_tag_session()
+function! lh#dev#end_tag_session() abort
   let s:tags.count -= 1
   if s:tags.count == 0
     let s:tags.tags = []
@@ -138,7 +138,7 @@ endfunction
 
 " # lh#dev#purge_comments(line, is_continuing_comment [, ft]) {{{2
 " @return [fixed_line, is_continuing_comment]
-function! lh#dev#purge_comments(line, is_continuing_comment, ...)
+function! lh#dev#purge_comments(line, is_continuing_comment, ...) abort
   let ft = (a:0 > 0) ? (a:1) : &ft
   let line = a:line
   let open_comment  = escape(lh#dev#option#call('_open_comment', ft), '*\[')
@@ -171,7 +171,7 @@ function! lh#dev#purge_comments(line, is_continuing_comment, ...)
   return [line, is_continuing_comment]
 endfunction
 
-" Function: lh#dev#reinterpret_escaped_char(seq) {{{3
+" Function: lh#dev#reinterpret_escaped_char(seq) {{{2
 " This function transforms '\<cr\>', '\<esc\>', ... '\<{keys}\>' into the
 " interpreted sequences "\<cr>", "\<esc>", ...  "\<{keys}>".
 " It is meant to be used by fonctions like MapNoContext(), InsertSeq(), ... as
@@ -199,7 +199,7 @@ if !exists('s:temp_tags')
 endif
 
 " # lh#dev#__FindFunctions(line) {{{2
-function! lh#dev#__FindFunctions(line)
+function! lh#dev#__FindFunctions(line) abort
   try
     let lTags = lh#dev#start_tag_session()
     if empty(lTags)
@@ -229,7 +229,7 @@ function! lh#dev#__FindFunctions(line)
 endfunction
 
 " # lh#dev#__FindEndFunc() {{{2
-function! lh#dev#__FindEndFunc(first_line)
+function! lh#dev#__FindEndFunc(first_line) abort
   " 2.1- get the hook that find the end of a function ; default hook is based
   " on matchit , we may also want to play with tags kinds
   let end_func_hook_name = lh#dev#option#get('end_func_hook_name', &ft, 'lh#dev#_end_func')
@@ -240,7 +240,7 @@ function! lh#dev#__FindEndFunc(first_line)
 endfunction
 
 " # lh#dev#__BuildCrtBufferCtags(...) {{{2
-function! lh#dev#__BuildCrtBufferCtags(...)
+function! lh#dev#__BuildCrtBufferCtags(...) abort
   " let temp_tags = tempname()
   let ctags_dirname = fnamemodify(s:temp_tags, ':h')
 
@@ -298,7 +298,7 @@ function! lh#dev#__BuildCrtBufferCtags(...)
 endfunction
 
 " # s:EvalLines(list) {{{2
-function! s:EvalLines(list)
+function! s:EvalLines(list) abort
   for t in a:list
     if !has_key(t, 'line') " sometimes, VimL declarations are badly understood
       let fields = split(t.cmd)
@@ -321,7 +321,7 @@ function! s:EvalLines(list)
 endfunction
 
 " # lh#dev#_sort_lines(t1, t2) {{{2
-function! lh#dev#_sort_lines(t1, t2)
+function! lh#dev#_sort_lines(t1, t2) abort
   let l1 = a:t1.line
   let l2 = a:t2.line
   return    l1 == l2 ? 0
@@ -330,7 +330,7 @@ function! lh#dev#_sort_lines(t1, t2)
 endfunction
 
 " # internal: matchit solution to find end of function {{{2
-function! lh#dev#_end_func(line)
+function! lh#dev#_end_func(line) abort
   try
     let pos0 = getpos('.')
     :exe a:line
@@ -359,7 +359,7 @@ endfunction
 " @move to lh/dev/comments/
 " # lh#dev#_open_comment() {{{3
 " @todo cache the results until :source that clear the table
-function! lh#dev#_open_comment()
+function! lh#dev#_open_comment() abort
   " default asks to
   " - EnhancedCommentify
   if exists('b:ECcommentOpen') && !empty(b:ECcommentOpen) && exists('b:ECcommentClose') && !empty(b:ECcommentClose)
@@ -376,7 +376,7 @@ endfunction
 
 " # lh#dev#_close_comment() {{{3
 " @todo cache the results until :source that clear the table
-function! lh#dev#_close_comment()
+function! lh#dev#_close_comment() abort
   " default asks to
   " - EnhancedCommentify
   if exists('b:ECcommentClose') && !empty(b:ECcommentClose)
@@ -393,7 +393,7 @@ endfunction
 
 " # lh#dev#_line_comment() {{{3
 " @todo cache the results until :source that clear the table
-function! lh#dev#_line_comment()
+function! lh#dev#_line_comment() abort
   " default asks to
   " - EnhancedCommentify
   if exists('b:ECcommentOpen') && !empty(b:ECcommentOpen) && (!exists('b:ECcommentClose') || empty(b:ECcommentClose))
