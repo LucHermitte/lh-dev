@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.4
-let s:version = '1.3.4'
+" Version:      1.3.5
+let s:version = '1.3.5'
 " Created:      02nd Mar 2012
 "------------------------------------------------------------------------
 " Description:
@@ -58,3 +58,4 @@ tests/lh/dev-option.vim
 tests/lh/dev-params.vim
 tests/lh/dev-reinterpret_escaped_chars.vim
 tests/lh/dev-style.vim
+VimFlavor
