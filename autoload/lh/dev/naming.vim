@@ -200,7 +200,7 @@ function! lh#dev#naming#function(fn, ...)
 endfunction
 
 " Function: lh#dev#naming#type(type, [, filetype]) {{{3
-function! lh#dev#naming#type(type, ...)
+function! lh#dev#naming#type(type, ...) abort
   let ft = (a:0 == 1) ? a:1 : &ft
   let naming_policy = s:Option('type', ft, 'UpperCamelCase')
   "  todo: handle prefixs and postfixs
@@ -212,7 +212,8 @@ function! lh#dev#naming#type(type, ...)
 endfunction
 
 " Function: lh#dev#naming#according_to_policy(parts, policy) {{{3
-function! lh#dev#naming#according_to_policy(parts, naming_policy)
+function! lh#dev#naming#according_to_policy(parts, naming_policy) abort
+  if empty(a:parts) | return "" | endif
   if type(a:parts) == type([])
     let parts = copy(a:parts)
     let case = a:naming_policy == 'UpperCamelCase' ? '\u' : '\l'
@@ -222,7 +223,7 @@ function! lh#dev#naming#according_to_policy(parts, naming_policy)
     let sep = a:naming_policy == 'snake_case' ? '_' : ''
     let res = join([parts[0]] + tail, sep)
     return res
-  else " split at '_' and uppercases, ad use this function again.
+  else " split at '_' and uppercases, and use this function again.
     let parts = split(a:parts, '\ze[A-Z]\|_')
     return lh#dev#naming#according_to_policy(parts, a:naming_policy)
   endif
