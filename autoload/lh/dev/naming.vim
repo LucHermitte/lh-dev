@@ -199,7 +199,7 @@ function! lh#dev#naming#function(fn, ...)
   return lh#dev#naming#according_to_policy(a:fn, naming_policy)
 endfunction
 
-" Function: lh#dev#naming#function(type, [, filetype]) {{{3
+" Function: lh#dev#naming#type(type, [, filetype]) {{{3
 function! lh#dev#naming#type(type, ...)
   let ft = (a:0 == 1) ? a:1 : &ft
   let naming_policy = s:Option('type', ft, 'UpperCamelCase')
