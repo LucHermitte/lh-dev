@@ -1,23 +1,22 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/class.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.2
+"		<URL:http://github.com/LucHermitte/lh-dev>
+" Version:      1.3.6
 " Created:      31st May 2010
-" Last Update:  $Date$
+" Last Update:  01st Dec 2015
 "------------------------------------------------------------------------
 " Description:
 "       Various helper functions that return ctags information on (OO) classes
-" 
+"
 "------------------------------------------------------------------------
 " Installation:
 "       Drop this file into {rtp}/autoload/lh/dev
 "       Requires Vim7+, exhuberant ctags
-" History:      
+" History:
 " 	v0.0.1: code moved from lh-cpp
 " 	v0.0.2: Ways to get class separators (mostly for lh-refactor)
-" TODO:         
+" TODO:
 " 	- option to return inherited members
 " 	- option to return prototypes or function definitions
 " 	- option to use another code tool analysis that is not ft-dependant
@@ -137,15 +136,16 @@ endfunction
 
 function! lh#dev#class#ancestors(id)
   try
+    let id = type(a:id) == type([]) ? a:id : [a:id]
     let s:instance = {}
-    let parents = lh#graph#tsort#depth(function('lh#dev#class#fetch_direct_parents'), [a:id])
+    let parents = lh#graph#tsort#depth(function('lh#dev#class#fetch_direct_parents'), id)
     " and then remove the first node: a:id
     call remove(parents, 0)
     " echomsg string(parents)
     return parents
   catch /Tsort.*/
     let cycle = matchstr(v:exception, '.*: \zs.*')
-    throw "Cycle in ".a:id." inheritance tree detected: ".cycle
+    throw "Cycle in ".string(a:id)." inheritance tree detected: ".cycle
   finally
     unlet s:instance
   endtry
@@ -157,7 +157,7 @@ endfunction
 "   struct C2 : virtual V {};
 "   struct C3 : C2{};
 "   struct D : C1, C3 {};
-" ":Parent D" must return: [C1, C3, C2, V] 
+" ":Parent D" must return: [C1, C3, C2, V]
 " (at least, we must see: C1 < V, and C3 < C2 < V)
 
 " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

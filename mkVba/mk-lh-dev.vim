@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.5
-let s:version = '1.3.5'
+" Version:      1.3.6
+let s:version = '1.3.6'
 " Created:      02nd Mar 2012
 "------------------------------------------------------------------------
 " Description:
