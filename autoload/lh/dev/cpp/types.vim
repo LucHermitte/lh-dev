@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:	1.3.2
-let s:k_version = '1.3.2'
+" Version:	1.3.6
+let s:k_version = '1.3.6'
 " Created:	10th Feb 2009
 " Last Update:	27th Oct 2015
 "------------------------------------------------------------------------
@@ -20,6 +20,7 @@ let s:k_version = '1.3.2'
 " 	        doxygenation.
 " 	v1.1.3: New function specialization: lh#dev#types#deduce()
 " 	v1.3.2: New types added to is_pointer
+" 	v1.3.6: lh#dev#cpp#types#IsPointer supports "_ptr<.*>"
 " }}}1
 "=============================================================================
 
@@ -108,7 +109,7 @@ endfunction
 " # Various functions {{{2
 " Function: lh#dev#cpp#types#IsPointer(type) : bool {{{3
 function! lh#dev#cpp#types#IsPointer(type)
-  return a:type =~ '\%([*]\|pointer\|_ptr\|Ptr\|non_null<.*>\)\s*$'
+  return a:type =~ '\v([*]|(pointer|_ptr|Ptr|non_null)(\<.*\>)=)\s*$'
 endfunction
 
 " ## Overridden functions {{{1
