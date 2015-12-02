@@ -23,8 +23,10 @@ let s:k_version = '1.3.6'
 " 	v1.3.6: lh#dev#cpp#types#IsPointer supports "_ptr<.*>"
 " 	        lh#dev#cpp#types#ConstCorrectType supports smart-pointers and
 " 	        pointers
-" 	        + lh#dev#cpp#type#is_smart_ptr
-" 	        + lh#dev#cpp#type#remove_ptr
+" 	        + lh#dev#cpp#types#is_smart_ptr
+" 	        + lh#dev#cpp#types#remove_ptr
+" 	        + lh#dev#cpp#types#is_not_owning_ptr
+" 	        + draft detection of some CppCoreGuideLines pointer types
 " }}}1
 "=============================================================================
 
@@ -125,16 +127,31 @@ endfunction
 " # Various functions {{{2
 " Function: lh#dev#cpp#types#IsPointer(type) : bool {{{3
 function! lh#dev#cpp#types#IsPointer(type)
-  return a:type =~ '\v([*]|(pointer|_ptr|Ptr|non_null)(\<.*\>)=)\s*$'
+  return a:type =~ '\v([*]|(pointer|_ptr|Ptr|<not_null>|<own(er)=>)(\<.*\>)=)\s*$'
 endfunction
 
 " Function: lh#dev#cpp#types#is_smart_ptr(type) : bool {{{3
+" TODO: test owner<T*>, not_null<T*>, auto_ptr, unique_ptr & co
 function! lh#dev#cpp#types#is_smart_ptr(type) abort
   let regex = lh#dev#option#get('smart_ptr_pattern', 'cpp')
   if lh#option#is_set(regex) && a:type =~ regex
     return 1
   endif
-  return a:type =~ '\v(_ptr|non_null)(\<.*\>)=\s*$'
+  return a:type =~ '\v(_ptr|not_null)(\<.*\>)=\s*$'
+endfunction
+
+" Function: lh#dev#cpp#types#is_not_owning_ptr(type) {{{3
+function! lh#dev#cpp#types#is_not_owning_ptr(type) abort
+  if     a:type =~ '\v\*\s*$'
+    return lh#dev#options#get('is_following_CppCoreGuideline', cpp, 0)
+    " Meaning, own<T*> is defined, and no own<> <=> no need to copy
+  elseif a:type =~ '\v(auto|unique|scoped)_ptr'
+    return 0
+  elseif a:type =~ '\v<own(er)=>'
+    return 0
+  else
+    return 1
+  endif
 endfunction
 
 " Function: lh#dev#cpp#types#remove_ptr(type) :string {{{3
@@ -142,8 +159,10 @@ endfunction
 function! lh#dev#cpp#types#remove_ptr(type) abort
   if     a:type =~ '\v\*\s*$'
     return substitute(a:type, '\v\*\s*$', '', '')
+  elseif a:type =~ '\v<(own(er)=|not_null)\<.*\>\s*$' " <- CppCoreGuidelines
+    return matchstr(a:type, '\v<(own(er)=|not_null)\<\zs.*\ze\s*\*\s*\>\s*$')
   elseif a:type =~ '\v\<.*\>\s*$'
-    return matchstr(a:type, '\v\<\zs.*\ze\>\s*$')
+    return matchstr(a:type, '\v\<\zs.{-}\ze\s*\>\s*$')
   endif
   " TODO: have an option to help get the right trait, or a substitte expression
   throw "lh#dev#cpp#remove_ptr: don't know how to remove pointer qualification from type"
