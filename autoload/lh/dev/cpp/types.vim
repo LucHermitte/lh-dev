@@ -23,6 +23,8 @@ let s:k_version = '1.3.6'
 " 	v1.3.6: lh#dev#cpp#types#IsPointer supports "_ptr<.*>"
 " 	        lh#dev#cpp#types#ConstCorrectType supports smart-pointers and
 " 	        pointers
+" 	        + lh#dev#cpp#type#is_smart_ptr
+" 	        + lh#dev#cpp#type#remove_ptr
 " }}}1
 "=============================================================================
 
@@ -124,6 +126,27 @@ endfunction
 " Function: lh#dev#cpp#types#IsPointer(type) : bool {{{3
 function! lh#dev#cpp#types#IsPointer(type)
   return a:type =~ '\v([*]|(pointer|_ptr|Ptr|non_null)(\<.*\>)=)\s*$'
+endfunction
+
+" Function: lh#dev#cpp#types#is_smart_ptr(type) : bool {{{3
+function! lh#dev#cpp#types#is_smart_ptr(type) abort
+  let regex = lh#dev#option#get('smart_ptr_pattern', 'cpp')
+  if lh#option#is_set(regex) && a:type =~ regex
+    return 1
+  endif
+  return a:type =~ '\v(_ptr|non_null)(\<.*\>)=\s*$'
+endfunction
+
+" Function: lh#dev#cpp#types#remove_ptr(type) :string {{{3
+" @pre: type is a pointer type
+function! lh#dev#cpp#types#remove_ptr(type) abort
+  if     a:type =~ '\v\*\s*$'
+    return substitute(a:type, '\v\*\s*$', '', '')
+  elseif a:type =~ '\v\<.*\>\s*$'
+    return matchstr(a:type, '\v\<\zs.*\ze\>\s*$')
+  endif
+  " TODO: have an option to help get the right trait, or a substitte expression
+  throw "lh#dev#cpp#remove_ptr: don't know how to remove pointer qualification from type"
 endfunction
 
 " ## Overridden functions {{{1
