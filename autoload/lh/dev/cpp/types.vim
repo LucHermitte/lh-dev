@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:	1.3.6
-let s:k_version = '1.3.6'
+" Version:	1.3.7
+let s:k_version = '1.3.7'
 " Created:	10th Feb 2009
 " Last Update:	27th Oct 2015
 "------------------------------------------------------------------------
@@ -20,7 +20,7 @@ let s:k_version = '1.3.6'
 " 	        doxygenation.
 " 	v1.1.3: New function specialization: lh#dev#types#deduce()
 " 	v1.3.2: New types added to is_pointer
-" 	v1.3.6: lh#dev#cpp#types#IsPointer supports "_ptr<.*>"
+" 	v1.3.7: lh#dev#cpp#types#IsPointer supports "_ptr<.*>"
 " 	        lh#dev#cpp#types#ConstCorrectType supports smart-pointers and
 " 	        pointers
 " 	        + lh#dev#cpp#types#is_smart_ptr
