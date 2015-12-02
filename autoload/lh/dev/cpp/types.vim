@@ -21,6 +21,8 @@ let s:k_version = '1.3.6'
 " 	v1.1.3: New function specialization: lh#dev#types#deduce()
 " 	v1.3.2: New types added to is_pointer
 " 	v1.3.6: lh#dev#cpp#types#IsPointer supports "_ptr<.*>"
+" 	        lh#dev#cpp#types#ConstCorrectType supports smart-pointers and
+" 	        pointers
 " }}}1
 "=============================================================================
 
@@ -96,13 +98,25 @@ endfunction
 " 		const-correctness issue ; cf Herb Sutter's
 " 		_Exceptional_C++_ - Item 43.
 " Option:       (b|g):{cpp_}place_const_after_type : boolean, default: true
+" Note:         Badly named: it build types for parameters
 function! lh#dev#cpp#types#ConstCorrectType(type)
   if lh#dev#cpp#types#IsBaseType(a:type,1) == 1
     return a:type
-  elseif lh#dev#option#get('place_const_after_type', 'cpp', 1)
-    return a:type . ' const&'
+  endif
+  if lh#dev#option#get('place_const_after_type', 'cpp', 1)
+    let fmt = '%1 const%2'
   else
-    return 'const ' . a:type . '&'
+    let fmt = 'const %1 %2'
+  endif
+  if a:type =~ '\v\*\s*$'
+    " raw pointers
+    return lh#fmt#printf(fmt, matchstr(a:type, '\v.*\ze\*\s*$'), '*')
+  elseif lh#dev#cpp#types#IsPointer(a:type)
+    " Other pointer types: smart pointers are taken by copy
+    " No need to add const?
+    return a:type
+  else
+    return lh#fmt#printf(fmt, a:type, '&')
   endif
 endfunction
 
