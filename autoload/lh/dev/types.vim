@@ -1,12 +1,13 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/types.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} gmail {dot} com>
-"		<URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
 " Version:      1.1.3.
 let s:k_version = '1.1.3'
 " Created:      26th Feb 2015
-" Last Update:  $Date$
+" Last Update:  03rd Dec 2015
 "------------------------------------------------------------------------
 " Description:
 "       Generic functions related to types.
