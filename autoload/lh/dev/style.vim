@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.3
-let s:k_version = 133
+" Version:      1.3.8
+let s:k_version = 138
 " Created:      12th Feb 2014
 "------------------------------------------------------------------------
 " Description:
@@ -126,7 +126,8 @@ function! lh#dev#style#_sort_styles(styles) abort
     let prio_lists[style.prio] += [key]
   endfor
   let keys = []
-  for prio in lh#list#sort(keys(prio_lists), 'n')
+  let prios_as_numbers = map(copy(keys(prio_lists)), 'eval(v:val)')
+  for prio in lh#list#sort(prios_as_numbers, 'n')
     let keys += reverse(lh#list#sort(map(prio_lists[prio], 'escape(v:val, "\\")')))
   endfor
   return keys
@@ -135,7 +136,9 @@ function! lh#dev#style#_sort_styles(styles) abort
 endfunction
 
 " Function: lh#dev#style#apply(text [, ft]) {{{3
+let g:applyied_on=[]
 function! lh#dev#style#apply(text, ...) abort
+  let g:applyied_on += [a:text]
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
   let keys = lh#dev#style#_sort_styles(styles)
