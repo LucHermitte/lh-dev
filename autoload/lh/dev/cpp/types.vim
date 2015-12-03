@@ -74,7 +74,7 @@ endfunction
 " Note:		Do not test for aberrations like long float
 " @todo Check for enumerates in ctags (or other) databases
 function! lh#dev#cpp#types#IsBaseType(type, pointerAsWell)
-  echomsg "Check lh#dev#cpp#types#IsBaseType(".a:type.")"
+  " echomsg "Check lh#dev#cpp#types#IsBaseType(".a:type.")"
   let sign  = '\<unsigned\>\|\<signed\>'
   let size  = '\<short\>\|\<long\>\|\<long\s\+long\>\|\<\>'
   let types = '\<void\>\|\<char\>\|\<wchar_t\>\|\<int\>\|\<float\>\|\<double\>\|\<size_t\>\|\<ptrdiff_t\>'
