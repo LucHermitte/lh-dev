@@ -1,20 +1,23 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/c/function.vim                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
-" Version:      «0.0.3»
+"               <URL:http://github.com/LucHermitte/lh-dev>
+" Version:      1.3.9
+let s:k_version = 1309
 " Created:      31st May 2010
-" Last Update:  $Date$
+" Last Update:  06th Dec 2015
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
 "
 "------------------------------------------------------------------------
 " History:
-"       «v 0.0.3»
+"       1.3.9
+"       * lh#dev#c#function#_analyse_parameter() supports arrays and function
+"       pointers
+"       ?v 0.0.3?
 "       * support for variadic parameters
-"       «v GPL»
+"       ?v GPL?
 "       * lh#dev#c#function#get_prototype() takes init-list into account
 "       * lh#dev#c#function#_analyse_parameter() support for optional
 "       parameter-name
@@ -28,7 +31,6 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 002
 function! lh#dev#c#function#version()
   return s:k_version
 endfunction
@@ -170,9 +172,9 @@ function! lh#dev#c#function#_split_list_of_parameters(sParameters)
 endfunction
 
 " This function will treat C & C++ cases => must recognize
-" [/] arrays
+" [X] arrays
 " [ ] array-references
-" [ ] function-pointers
+" [X] function-pointers
 " [X] templates
 " [/] type
 " [X] const
@@ -183,11 +185,11 @@ endfunction
 " [X] new line before (when analysing non ctags-signatures, but real text)
 " [/] TU
 " [X] variadic parameter "..."
-function! lh#dev#c#function#_analyse_parameter( param )
+function! lh#dev#c#function#_analyse_parameter( param ) abort
   let res = {}
 
   " Strip spaces
-  let param = substitute(a:param, '\_s\+', ' ', 'g')
+  let param = substitute(a:param, '\v\_s+', ' ', 'g')
   " variadic ?
   if param == '...'
     let res.type    = 'va_list'
@@ -195,35 +197,52 @@ function! lh#dev#c#function#_analyse_parameter( param )
     let res.name    = '...'
     return res
   endif
-  " Extract default value
+  " Default Value: after = sign
   if stridx(param, '=') != -1
-    let [all, param, res.default ; rest] = matchlist(param, '^\s*\([^=]\{-}\)\s*=\s*\(.\{-}\)\s*$')
+    let [all, param, res.default ; rest] = matchlist(param, '\v^\s*([^=]{-})\s*\=\s*(.{-})\s*$')
   else
     " trim spaces
-    let param = matchstr(param, '^\s*\zs.\{-}\ze\s*$')
+    let param = matchstr(param, '\v^\s*\zs.{-}\ze\s*$')
     let res.default = ''
   endif
-  " Type
-  let p = matchend(param, '.*[*&]\|.*::\s*\S+')
-  if p != -1
-    " everything till *, or &, or ...::type
-    let res.type =param[:p-1]
-  else
-    " one word only; can't know about "long long int", for now
-    " or two words -> \=
-    let res.type = matchstr(param, '.\{-}\ze\(\s\+\S\+\)\=$')
-  endif
-  " Parameter name
-  let res.name = matchstr(param[strlen(res.type):], '\s*\zs.*')
-  " Special case for arrays
-  let array = match(param, '\[.*\]$')
+  " Special Case: array
+  let purge_inner_dimension = 1
+  let array = match(param, '\v(\s*\[.*\])+$')
   if array != -1
-    let res.type .= param[array : -1]
-    let param = param[0 : array-1]
-    let res.name = matchstr(param, '^.*\%(\s\|[&*]\)\s*\zs\S\+')
+    let array_spec = matchstr(param[array : -1], '\v\s*\zs.*')
+    let param = param[ : array-1]
+  else
+    let array_spec = ''
   endif
+  " Special Case: function pointer
+  if param =~ '\v(.{-})\s*\(\s*\*(\S{-})\s*\)\s*(\(.*\))'
+    let [all, ret_type, res.name, func_type; rest] = matchlist(param, '\v(.{-})\s*\(\s*\*(\S{-})\s*\)\s*(\(.*\))')
+    let res.type = ret_type.' (*)'.func_type
+  elseif param =~ '\v(.{-})\s*\(\s*\*(\S{-})\s*\)'
+    " Special Case: array, (*name)[] syntax
+    let [all, ret_type, res.name; rest] = matchlist(param, '\v(.{-})\s*\(\s*\*(\S{-})\s*\)')
+    let res.type = ret_type.'(*)'
+    let purge_inner_dimension = 0
+  else
+    " Name: last part in usual case
+    let res.name = matchstr(param, '\v\S\s*\zs\S+$')
+    " unless the last part is
+    " - "int", "float", "char", "short", ...
+    " - or "something>(::othething)="
+    " - or everything
+    if res.name =~ '\v<(int|char|short|long|float|double)>'
+      let res.name = ''
+    endif
+    " Type:
+    let res.type = matchstr(param[:strlen(param)-strlen(res.name)-1], '\v.*\S')
+  endif
+
+  if purge_inner_dimension
+    let array_spec = substitute(array_spec, '\v^\[\zs\d+\ze\]', '', '')
+  endif
+  let res.type .= array_spec
   " New line before the parameter
-  let res.nl = match(a:param, "^\\s*[\n\r]") >= 0
+  let res.nl = match(a:param, "\\v^\\s*[\n\r]") >= 0
   " Result
   return res
 endfunction
