@@ -5,7 +5,7 @@
 " Version:      1.3.9
 let s:k_version = 1309
 " Created:      31st May 2010
-" Last Update:  06th Dec 2015
+" Last Update:  07th Dec 2015
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
@@ -225,16 +225,21 @@ function! lh#dev#c#function#_analyse_parameter( param ) abort
     let purge_inner_dimension = 0
   else
     " Name: last part in usual case
-    let res.name = matchstr(param, '\v\S\s*\zs\S+$')
+    let res.name = matchstr(param, '\v\S\s+\zs\S+$')
     " unless the last part is
     " - "int", "float", "char", "short", ...
     " - or "something>(::othething)="
     " - or everything
-    if res.name =~ '\v<(int|char|short|long|float|double)>'
+    if res.name =~ '\v<(int|char|short|long|float|double)>|\>'
+          " \ || res.type =~ '\v(::)$'   " doesn't exist yet
       let res.name = ''
     endif
     " Type:
     let res.type = matchstr(param[:strlen(param)-strlen(res.name)-1], '\v.*\S')
+    if res.type =~ '\v(::)$' " merge back
+      let res.name = ''
+      let res.type = param
+    endif
   endif
 
   if purge_inner_dimension
