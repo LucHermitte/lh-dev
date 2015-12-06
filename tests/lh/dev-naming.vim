@@ -1,5 +1,4 @@
 "=============================================================================
-" $Id$
 " File:		tests/lh/dev-naming.vim                           {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://hermitte.free.fr/vim/>
@@ -8,7 +7,7 @@
 " Last Update:	$Date$
 "------------------------------------------------------------------------
 " Description:	«description»
-" 
+"
 "------------------------------------------------------------------------
 " Installation:	«install details»
 " History:	«history»
@@ -24,67 +23,82 @@ runtime autoload/lh/dev/naming.vim
 let s:cpo_save=&cpo
 set cpo&vim
 "------------------------------------------------------------------------
+function! s:Setup()
+  silent! unlet b:FT_naming_function
+  silent! unlet b:FT_naming_get_subst
+endfunction
+
+"------------------------------------------------------------------------
 function! s:Test_2_name()
-  Assert 'name' == lh#dev#naming#variable('name', '')
-  Assert 'name' == lh#dev#naming#variable('_name')
-  Assert 'name' == lh#dev#naming#variable('name_')
-  Assert 'name' == lh#dev#naming#variable('getName')
-  Assert 'name' == lh#dev#naming#variable('setName')
-  Assert 'name' == lh#dev#naming#variable('g_name')
-  Assert 'name' == lh#dev#naming#variable('m_name')
+  AssertEqual('name', lh#dev#naming#variable('name', ''))
+  AssertEqual('name', lh#dev#naming#variable('_name'))
+  AssertEqual('name', lh#dev#naming#variable('name_'))
+  AssertEqual('name', lh#dev#naming#variable('getName'))
+  AssertEqual('name', lh#dev#naming#variable('setName'))
+  AssertEqual('name', lh#dev#naming#variable('g_name'))
+  AssertEqual('name', lh#dev#naming#variable('m_name'))
 endfunction
 
 function! s:Test_2_getter()
-  Assert 'getName' == lh#dev#naming#getter('name', '')
-  let b:FT_naming_get_subst = 'get_&'
-  Assert 'get_name' == lh#dev#naming#getter('name', 'FT')
+  AssertEqual('getName', lh#dev#naming#getter('name', ''))
+  " let b:FT_naming_get_subst = 'get_&'
+  let b:FT_naming_function = 'snake_case'
+  AssertEqual('get_name', lh#dev#naming#getter('name', 'FT'))
+
+  let b:FT_naming_function = 'UpperCamelCase'
+  AssertEqual('GetName', lh#dev#naming#getter('name', 'FT'))
+
+  let b:FT_naming_get_subst = '&'
+  AssertEqual('Name', lh#dev#naming#getter('name', 'FT'))
 endfunction
 
 function! s:Test_2_setter()
-  Assert 'setName' == lh#dev#naming#setter('name', '')
-  let b:FT_naming_set_subst = 'set_&'
-  Assert 'set_name' == lh#dev#naming#setter('name', 'FT')
+  AssertEqual('setName', lh#dev#naming#setter('name', ''))
+  " let b:FT_naming_set_subst = 'set_&'
+  let b:FT_naming_function = 'snake_case'
+
+  AssertEqual('set_name', lh#dev#naming#setter('name', 'FT'))
 endfunction
 
 function! s:Test_2_local()
-  Assert 'name' == lh#dev#naming#local('name', '')
+  AssertEqual('name', lh#dev#naming#local('name', ''))
   let b:FT_naming_local_subst = 'l_&'
-  Assert 'l_name' == lh#dev#naming#local('name', 'FT')
+  AssertEqual('l_name', lh#dev#naming#local('name', 'FT'))
 endfunction
 
 function! s:Test_2_global()
-  Assert 'g_name' == lh#dev#naming#global('name', '')
+  AssertEqual('g_name', lh#dev#naming#global('name', ''))
   let b:FT_naming_global_subst = '&'
-  Assert 'name' == lh#dev#naming#global('name', 'FT')
-  Assert 'g:name' == lh#dev#naming#global('name', 'vim')
+  AssertEqual('name', lh#dev#naming#global('name', 'FT'))
+  AssertEqual('g:name', lh#dev#naming#global('name', 'vim'))
 endfunction
 
 function! s:Test_2_param()
-  Assert 'name' == lh#dev#naming#param('name', '')
+  AssertEqual('name', lh#dev#naming#param('name', ''))
   let b:FT_naming_param_subst = '&_'
-  Assert 'name_' == lh#dev#naming#param('name', 'FT')
-  Assert 'a:name' == lh#dev#naming#param('name', 'vim')
+  AssertEqual('name_', lh#dev#naming#param('name', 'FT'))
+  AssertEqual('a:name', lh#dev#naming#param('name', 'vim'))
 endfunction
 
 function! s:Test_2_static()
-  Assert 's_name' == lh#dev#naming#static('name', '')
+  AssertEqual('s_name', lh#dev#naming#static('name', ''))
   let b:FT_naming_static_subst = '::&'
-  Assert '::name' == lh#dev#naming#static('name', 'FT')
-  Assert 's:name' == lh#dev#naming#static('name', 'vim')
+  AssertEqual('::name', lh#dev#naming#static('name', 'FT'))
+  AssertEqual('s:name', lh#dev#naming#static('name', 'vim'))
 endfunction
 
 function! s:Test_2_constant()
-  Assert 'NAME' == lh#dev#naming#constant('name', '')
+  AssertEqual('NAME', lh#dev#naming#constant('name', ''))
   let b:FT_naming_constant_subst = 'k_&'
-  Assert 'k_name' == lh#dev#naming#constant('name', 'FT')
+  AssertEqual('k_name', lh#dev#naming#constant('name', 'FT'))
 endfunction
 
 function! s:Test_2_member()
-  Assert 'm_name' == lh#dev#naming#member('name', '')
+  AssertEqual('m_name', lh#dev#naming#member('name', ''))
   let b:FT_naming_member_subst = 'm\u&'
-  Assert 'mName' == lh#dev#naming#member('name', 'FT')
+  AssertEqual('mName', lh#dev#naming#member('name', 'FT'))
   let b:FT_naming_member_subst = 'this->&'
-  Assert 'this->name' == lh#dev#naming#member('name', 'FT')
+  AssertEqual('this->name', lh#dev#naming#member('name', 'FT'))
 endfunction
 
 
