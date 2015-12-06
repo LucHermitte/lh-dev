@@ -2,9 +2,9 @@
 " File:         tests/lh/dev-style.vim                            {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://github.com/LucHermitte/lh-dev>
-" Version:      1.3.1
+" Version:      1.3.9
 " Created:      14th Feb 2014
-" Last Update:  17th Aug 2015
+" Last Update:  06th Dec 2015
 "------------------------------------------------------------------------
 " Description:
 "       Unit tests for lh#dev#style
