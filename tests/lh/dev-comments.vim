@@ -1,15 +1,14 @@
 "=============================================================================
-" $Id$
 " File:         tests/lh/dev-comments.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      0.0.2
+"		<URL:http://github.com/LucHermitte/lh-dev/>
+" Version:      1.3.9
 " Created:      05th Nov 2010
-" Last Update:  $Date$
+" Last Update:  06th Dec 2015
 "------------------------------------------------------------------------
 " Description:
-"       «description»
-" 
+"       UT tests regardint comment manipulations
+"
 "------------------------------------------------------------------------
 " Installation:
 "       Drop this file into {rtp}/tests/lh
@@ -28,15 +27,14 @@ let s:cpo_save=&cpo
 set cpo&vim
 "------------------------------------------------------------------------
 function! s:Setup()
-  let s:ECcommentOpen  = b:ECcommentOpen
-  let s:ECcommentClose = b:ECcommentClose
-  let s:commentstring  = &commentstring
+  let s:cleanup = lh#on#exit()
+        \.restore_option('ECcommentOpen')
+        \.restore_option('ECcommentClose')
+        \.restore('&commentstring')
 endfunction
 
 function! s:Teardown()
-  let b:ECcommentOpen  = s:ECcommentOpen
-  let b:ECcommentClose = s:ECcommentClose
-  let  &commentstring  = s:commentstring
+  call s:cleanup.finalize()
 endfunction
 
 function! s:Test_mono_line_cpp()
@@ -44,12 +42,12 @@ function! s:Test_mono_line_cpp()
   let b:ECcommentClose = ''
   let  &commentstring  = '/*%s*/'
 
-  Assert ['', 0] == lh#dev#purge_comments('', 0, 'cpp')
-  Assert ['', 1] == lh#dev#purge_comments('', 1, 'cpp')
-  Assert ['', 0] == lh#dev#purge_comments('// toto', 0, 'cpp')
-  Assert ['', 1] == lh#dev#purge_comments('// toto', 1, 'cpp')
-  Assert ['titi tutu ', 0] == lh#dev#purge_comments('titi tutu // toto', 0, 'cpp')
-  Assert ['', 1] == lh#dev#purge_comments('titi tutu // toto', 1, 'cpp')
+  AssertEqual(['', 0], lh#dev#purge_comments('', 0, 'cpp'))
+  AssertEqual(['', 1], lh#dev#purge_comments('', 1, 'cpp'))
+  AssertEqual(['', 0], lh#dev#purge_comments('// toto', 0, 'cpp'))
+  AssertEqual(['', 1], lh#dev#purge_comments('// toto', 1, 'cpp'))
+  AssertEqual(['titi tutu ', 0], lh#dev#purge_comments('titi tutu // toto', 0, 'cpp'))
+  AssertEqual(['', 1], lh#dev#purge_comments('titi tutu // toto', 1, 'cpp'))
 endfunction
 
 function! s:Test_region_cpp()
@@ -57,23 +55,23 @@ function! s:Test_region_cpp()
   let b:ECcommentClose = ''
   let  &commentstring  = '/*%s*/'
 
-  Assert ['', 0] == lh#dev#purge_comments('/**/', 0, 'cpp')
-  Assert ['', 1] == lh#dev#purge_comments('/*', 1, 'cpp')
-  Assert ['', 0] == lh#dev#purge_comments('/* toto*/', 0, 'cpp')
-  Assert ['', 0] == lh#dev#purge_comments('/* toto*/', 1, 'cpp')
-  Assert ['titi  foo ', 0] == lh#dev#purge_comments('titi /*tutu*/ foo // toto', 0, 'cpp')
-  Assert [' foo ', 0] == lh#dev#purge_comments('titi /*tutu*/ foo // toto', 1, 'cpp')
-  Assert [' foo ', 0] == lh#dev#purge_comments('titi /*tutu*/ foo // toto /*', 1, 'cpp')
-  Assert [' foo ', 1] == lh#dev#purge_comments('titi /*tutu*/ foo /* toto /*', 1, 'cpp')
+  AssertEqual(['', 0], lh#dev#purge_comments('/**/', 0, 'cpp'))
+  AssertEqual(['', 1], lh#dev#purge_comments('/*', 1, 'cpp'))
+  AssertEqual(['', 0], lh#dev#purge_comments('/* toto*/', 0, 'cpp'))
+  AssertEqual(['', 0], lh#dev#purge_comments('/* toto*/', 1, 'cpp'))
+  AssertEqual(['titi  foo ', 0], lh#dev#purge_comments('titi /*tutu*/ foo // toto', 0, 'cpp'))
+  AssertEqual([' foo ', 0], lh#dev#purge_comments('titi /*tutu*/ foo // toto', 1, 'cpp'))
+  AssertEqual([' foo ', 0], lh#dev#purge_comments('titi /*tutu*/ foo // toto /*', 1, 'cpp'))
+  AssertEqual([' foo ', 1], lh#dev#purge_comments('titi /*tutu*/ foo /* toto /*', 1, 'cpp'))
 endfunction
 
 function! s:Test_mono_line_vim()
   let b:ECcommentOpen  = '"'
   let b:ECcommentClose = ''
   let  &commentstring  = '"%s'
-  Assert ['', 0] == lh#dev#purge_comments('', 0, 'vim')
-  Assert ['', 0] == lh#dev#purge_comments('" toto', 0, 'vim')
-  Assert ['toto ', 0] == lh#dev#purge_comments('toto " toto', 0, 'vim')
+  AssertEqual(['', 0], lh#dev#purge_comments('', 0, 'vim'))
+  AssertEqual(['', 0], lh#dev#purge_comments('" toto', 0, 'vim'))
+  AssertEqual(['toto ', 0], lh#dev#purge_comments('toto " toto', 0, 'vim'))
 
   " ouch! it also purge string ...
 endfunction
