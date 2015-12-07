@@ -234,11 +234,11 @@ endfunction
 
 " # VimL {{{2
 " todo: differentiate vim arg use from arg names in function signature
-LetIfUndef g:vim_naming_param_re     '\%([algsbwt]:\)\=\(.*\)'
+LetIfUndef g:vim_naming_param_re     '\v%([algsbwt]:)=(.*)'
 LetIfUndef g:vim_naming_param_subst  'a:\1'
-LetIfUndef g:vim_naming_static_re     '\%([algsbwt]:\)\=\(.*\)'
+LetIfUndef g:vim_naming_static_re    '\v%([algsbwt]:)=(.*)'
 LetIfUndef g:vim_naming_static_subst 's:\1'
-LetIfUndef g:vim_naming_global_re     '\%([algsbwt]:\)\=\(.*\)'
+LetIfUndef g:vim_naming_global_re    '\v%([algsbwt]:)=(.*)'
 LetIfUndef g:vim_naming_global_subst 'g:\1'
 
 " # Java, recommended coding style {{{2

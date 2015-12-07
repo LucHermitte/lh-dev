@@ -70,6 +70,12 @@ function! s:Test_2_global()
   AssertEqual('g_name', lh#dev#naming#global('name', ''))
   let b:FT_naming_global_subst = '&'
   AssertEqual('name', lh#dev#naming#global('name', 'FT'))
+  AssertEqual!(g:vim_naming_global_re, '\v%([algsbwt]:)=(.*)')
+  AssertEqual!(g:vim_naming_global_subst, 'g:\1')
+
+  AssertEqual!(lh#dev#naming#variable('name', 'vim'), 'name')
+  AssertEqual!(lh#dev#naming#debug("s:Option('global_subst', 'vim', 'g_')"), 'g:\1')
+
   AssertEqual('g:name', lh#dev#naming#global('name', 'vim'))
 endfunction
 
