@@ -27,6 +27,8 @@ runtime autoload/lh/dev/cpp/types.vim
 
 let s:cpo_save=&cpo
 set cpo&vim
+let s:isk_save=&cpo
+set isk&vim
 
 "------------------------------------------------------------------------
 " Base types examples {{{1
@@ -137,7 +139,7 @@ function! s:Test_const_correct_type() abort
   let cleanup = lh#on#exit()
         \.restore_option('cpp_base_type_pattern')
   try
-    AssertDiffer(lh#dev#cpp#types#const_correct_type(type), type.' const&')
+    AssertEqual(lh#dev#cpp#types#const_correct_type(type), type.' const&')
     let b:cpp_base_type_pattern = '<SizeType>'
     AssertEqual(lh#dev#cpp#types#const_correct_type(type), type)
   finally
@@ -146,7 +148,7 @@ function! s:Test_const_correct_type() abort
 
   " Other types {{{2
   let cleanup = lh#on#exit()
-        \.restore_option('place_const_after_type')
+        \.restore_option('cpp_place_const_after_type')
   try
     let b:cpp_place_const_after_type = 1
     AssertEqual(lh#dev#cpp#types#const_correct_type('std::string'), 'std::string const&')
@@ -237,5 +239,6 @@ endfunction
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
+let &isk=s:cpo_save
 "=============================================================================
 " vim600: set fdm=marker:
