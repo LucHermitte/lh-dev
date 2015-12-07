@@ -19,6 +19,7 @@ task :spec do
 end
 
 task :install do
+  sh 'cat VimFlavor >> tests/VimFlavor'
   sh 'cd tests && bundle exec vim-flavor install'
 end
 
