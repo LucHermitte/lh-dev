@@ -250,7 +250,6 @@ function! s:Test_remove_ptr() abort
     for ptr in s:k_smart_ptr
       AssertEquals(lh#dev#cpp#types#remove_ptr(ptr), 'FooBar')
     endfor
-    :AssertThrows 0 + [0]
 endfunction
 
 " }}}1
