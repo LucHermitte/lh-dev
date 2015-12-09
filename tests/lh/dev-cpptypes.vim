@@ -53,7 +53,7 @@ let s:k_smart_ptr = s:k_owning_ptr +
       \ , 'std::weak_ptr<FooBar>'
       \ , 'not_null<FooBar*>'
       \ , 'owner<FooBar*>'
-      \ , 'span<char>'
+      \ , 'span<FooBar>'
       \ , 'not_null<FooBar*>'
       \ ]
 let s:k_views =
@@ -93,6 +93,7 @@ function! s:Test_is_base_type() abort " {{{1
   let cleanup = lh#on#exit()
         \.restore_option('cpp_base_type_pattern')
   try
+    let b:cpp_base_type_pattern = ''
     AssertTxt(! lh#dev#cpp#types#is_base_type(type, 1), type .' recognized as a base type')
     let b:cpp_base_type_pattern = '<SizeType>'
     AssertTxt(lh#dev#cpp#types#is_base_type(type, 1), type .' not recognized as a base type')
@@ -138,7 +139,10 @@ function! s:Test_const_correct_type() abort
   let type = 'domain::Vector<FooBar>::SizeType'
   let cleanup = lh#on#exit()
         \.restore_option('cpp_base_type_pattern')
+        \.restore_option('cpp_place_const_after_type')
   try
+    let b:cpp_base_type_pattern = ''
+    let b:cpp_place_const_after_type = 1
     AssertEqual(lh#dev#cpp#types#const_correct_type(type), type.' const&')
     let b:cpp_base_type_pattern = '<SizeType>'
     AssertEqual(lh#dev#cpp#types#const_correct_type(type), type)
@@ -182,6 +186,7 @@ function! s:Test_is_pointer() abort
     " Non pointers
     Assert !lh#dev#cpp#types#is_pointer('std::string')
     Assert !lh#dev#cpp#types#is_pointer('owner<T&>')
+    Assert !lh#dev#cpp#types#is_pointer('int')
 endfunction
 
 " Function: s:Test_is_smart_ptr() {{{1
@@ -231,9 +236,21 @@ function! s:Test_is_not_owning_ptr() abort
   " Assert !lh#dev#cpp#types#is_not_owning_ptr('owner<T&>')
 endfunction
 
-" Function: s:Test_remove_ptr() {{{3
+" Function: s:Test_remove_ptr() {{{1
 function! s:Test_remove_ptr() abort
+    AssertEqual (lh#dev#cpp#types#remove_ptr('void *'), 'void')
+    AssertEqual (lh#dev#cpp#types#remove_ptr('void **'), 'void *')
+    AssertEqual (lh#dev#cpp#types#remove_ptr('std::string*'), 'std::string')
+    AssertEqual (lh#dev#cpp#types#remove_ptr('std::unique_ptr<TT>'), 'TT')
+    AssertEqual (lh#dev#cpp#types#remove_ptr('std::unique_ptr< TT >'), 'TT')
+    AssertThrows lh#dev#cpp#types#remove_ptr('nullptr_t')
+    AssertThrows lh#dev#cpp#types#remove_ptr('std::string')
+    AssertThrows lh#dev#cpp#types#remove_ptr('int')
 
+    for ptr in s:k_smart_ptr
+      AssertEquals(lh#dev#cpp#types#remove_ptr(ptr), 'FooBar')
+    endfor
+    :AssertThrows 0 + [0]
 endfunction
 
 " }}}1

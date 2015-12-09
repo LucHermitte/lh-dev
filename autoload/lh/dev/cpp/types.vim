@@ -160,7 +160,7 @@ function! lh#dev#cpp#types#is_pointer(type) abort
 endfunction
 
 function! lh#dev#cpp#types#IsPointer(type) abort
-  return lh#dev#cpp#types#IsPointer(a:type)
+  return lh#dev#cpp#types#is_pointer(a:type)
 endfunction
 
 " Function: lh#dev#cpp#types#is_view(type)                    : bool {{{3
@@ -199,11 +199,11 @@ endfunction
 " @pre: type is a pointer type
 function! lh#dev#cpp#types#remove_ptr(type) abort
   if     a:type =~ '\v\*\s*$'
-    return substitute(a:type, '\v\*\s*$', '', '')
+    return substitute(a:type, '\v\s*\*\s*$', '', '')
   elseif a:type =~ '\v<(owner|not_null)\<.*\>\s*$' " <- CppCoreGuidelines
     return matchstr(a:type, '\v<(owner|not_null)\<\zs.*\ze\s*\*\s*\>\s*$')
   elseif a:type =~ '\v\<.*\>\s*$'
-    return matchstr(a:type, '\v\<\zs.{-}\ze\s*\>\s*$')
+    return matchstr(a:type, '\v\<\s*\zs.{-}\ze\s*\>\s*$')
   endif
   " TODO: have an option to help get the right trait, or a substitte expression
   throw "lh#dev#cpp#remove_ptr: don't know how to remove pointer qualification from type"
@@ -225,6 +225,7 @@ endfunction
 " ## Internal functions {{{1
 
 "------------------------------------------------------------------------
+" }}}1
 let &cpo=s:cpo_save
 "=============================================================================
 " Vim: let b:UTfiles = 'tests/lh/dev-cpptypes.vim'
