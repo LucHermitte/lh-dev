@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.9
-let s:k_version = 139
+" Version:      1.3.10
+let s:k_version = 1310
 " Created:      12th Feb 2014
 "------------------------------------------------------------------------
 " Description:
@@ -163,7 +163,7 @@ if !exists('s:style')
   call lh#dev#style#clear()
 endif
 
-" :AddStyle API {{{2
+" # :AddStyle API {{{2
 " Function: lh#dev#style#_add(pattern, ...) {{{3
 function! lh#dev#style#_add(pattern, ...)
   " Analyse params {{{4
@@ -196,6 +196,7 @@ function! lh#dev#style#_add(pattern, ...)
   for style in previous
     if style.local == local && style.ft == ft
       let style.replacement = repl
+      let style.prio = prio
       return
     endif
   endfor
@@ -204,7 +205,7 @@ function! lh#dev#style#_add(pattern, ...)
         \ [ {'local': local, 'ft': ft, 'replacement': repl, 'prio': prio }]
 endfunction
 
-" Internals {{{2
+" # Internals {{{2
 " Function: lh#dev#style#_get_replacement(styles, match, keys, all_text) {{{3
 function! lh#dev#style#_get_replacement(styles, match, keys, all_text) abort
   " if has_key(a:styles, a:match)
