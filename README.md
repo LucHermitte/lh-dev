@@ -1,4 +1,6 @@
-# lh-dev [![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
+# lh-dev
+[![Build Status](https://secure.travis-ci.org/LucHermitte/lh-dev.png?branch=master)](http://travis-ci.org/LucHermitte/lh-dev)
+[![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
 
 ## Introduction
 
@@ -143,8 +145,8 @@ AddStyle } -ft=java -prio=10 \n}
 
 When you wish to adopt Allman coding style, in `${project_root}/_vimrc_local.vim`
 ```vim
-   AddStyle { -b \n{\n
-   AddStyle } -b \n}
+   AddStyle { -b -ft=c -prio=10 \n{\n
+   AddStyle } -b -ft=c -prio=10 \n}
 ```
 
 
