@@ -1,5 +1,5 @@
-*lh-dev.txt*            Vim library for development oriented scripts (v1.3.10.)
-                        For Vim version 7+.    Last change: 14th Dec 2015
+*lh-dev.txt*            Vim library for development oriented scripts (v1.4.0.)
+                        For Vim version 7+.    Last change: 15th Dec 2015
 
                         By Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -233,6 +233,7 @@ IMPORTING MODULES/INCLUDES              *lhdev-import* {{{1
 
 TBD
 *lh#dev#import#add()*
+*lh#dev#import#add_any()*
 *n_CTRL-X_i*  *<Plug>ImportModule*
 
 ------------------------------------------------------------------------------

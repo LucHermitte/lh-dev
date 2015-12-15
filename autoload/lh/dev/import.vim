@@ -2,17 +2,18 @@
 " File:         autoload/lh/dev/import.vim                        {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte/lh-dev>
-" Version:      1.2.2.
-let s:k_version = '122'
+" Version:      1.4.0.
+let s:k_version = '140'
 " Created:      21st Apr 2015
-" Last Update:  24th Apr 2015
+" Last Update:  15th Dec 2015
 "------------------------------------------------------------------------
 " Description:
-"       «description»
+"       Generic insertion of import/#include statements
 "
 "------------------------------------------------------------------------
 " History:      «history»
-" TODO:         «missing features»
+" TODO:
+" * In case of C++, search first the id in lh#cpp#types#get_headers()
 " }}}1
 "=============================================================================
 
@@ -76,22 +77,32 @@ function! lh#dev#import#add(filename, ...) abort
     call lh#common#warning_msg(filename0." is already ".lh#dev#import#_preterit())
     return 0
   endif
+  return lh#dev#import#_do_add(a:filename, filename0, options)
+endfunction
 
-  let options.filename = a:filename " This may be useful for python
-  let line = lh#dev#import#_search_where_to_insert(options)
-  let options.line = line " This may be useful for python
-  let text = lh#dev#import#_build_import_string(a:filename, options)
-  if lh#option#is_unset(text)
-    call lh#common#warning_msg(filename0." is already ".lh#dev#import#_preterit().' through ``'.getline(line)."''")
+" Function: lh#dev#import#add_any(filenames, ...) {{{3
+" @return if anything was added
+" @param options : Dict
+"       - "where" : "first"/"last"/language-specific
+"       - "delim" : "angle"/"quote" (C, C++)
+"       - "symbol": "a-name" (everything by default) (Python)
+" @version 1.4.0
+function! lh#dev#import#add_any(filenames, ...) abort
+  if empty(a:filenames) | return | endif
+  call lh#dev#option#pre_load_overrides('import', &ft)
+  let options = get(a:000, 0, {})
+
+  let filenames = copy(a:filenames)
+  let filenames0 = map(filenames, 'lh#dev#import#_clean_filename(v:val)')
+  let pred = lh#function#bind('lh#dev#import#is_already_imported(v:1_, v:2_)', 'v:1_', options)
+  let idx = lh#list#find_if(filenames0, pred)
+  let noNeedToProceed = idx != -1
+  if noNeedToProceed
+    call lh#common#warning_msg(filenames0[idx]." is already ".lh#dev#import#_preterit())
     return 0
-  elseif type(text) == type({})
-    call setline(line, getline(line). text.append)
-    call lh#common#warning_msg(text.append . ' added')
-  else
-    call append(line, text)
-    call lh#common#warning_msg(text . ' added')
   endif
-  return 1
+
+  return lh#dev#import#_do_add(a:filenames[0], filenames0[0], options)
 endfunction
 
 "------------------------------------------------------------------------
@@ -149,6 +160,26 @@ endfunction
 " Function: lh#dev#import#_do_clean_filename(filename) {{{3
 function! lh#dev#import#_do_clean_filename(filename) abort
   return a:filename
+endfunction
+
+" # The import! {{{2
+" Function: lh#dev#import#_do_add(filename, filename0, options) {{{3
+function! lh#dev#import#_do_add(filename, filename0, options) abort
+  let a:options.filename = a:filename " This may be useful for python
+  let line = lh#dev#import#_search_where_to_insert(a:options)
+  let a:options.line = line " This may be useful for python
+  let text = lh#dev#import#_build_import_string(a:filename, a:options)
+  if lh#option#is_unset(text)
+    call lh#common#warning_msg(a:filename0." is already ".lh#dev#import#_preterit().' through ``'.getline(line)."''")
+    return 0
+  elseif type(text) == type({})
+    call setline(line, getline(line). text.append)
+    call lh#common#warning_msg(text.append . ' added')
+  else
+    call append(line, text)
+    call lh#common#warning_msg(text . ' added')
+  endif
+  return 1
 endfunction
 
 " # Build import string {{{2
