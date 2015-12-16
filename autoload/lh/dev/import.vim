@@ -27,16 +27,16 @@ function! lh#dev#import#version()
 endfunction
 
 " # Debug   {{{2
-if !exists('s:preteritose')
-  let s:preteritose = 0
+if !exists('s:verbose')
+  let s:verbose = 0
 endif
-function! lh#dev#import#preteritose(...)
-  if a:0 > 0 | let s:preteritose = a:1 | endif
-  return s:preteritose
+function! lh#dev#import#verbose(...)
+  if a:0 > 0 | let s:verbose = a:1 | endif
+  return s:verbose
 endfunction
 
 function! s:Verbose(expr)
-  if s:preteritose
+  if s:verbose
     echomsg a:expr
   endif
 endfunction
