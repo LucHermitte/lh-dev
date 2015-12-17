@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.3.10
-let s:k_version = 1310
+" Version:      1.4.1
+let s:k_version = 1401
 " Created:      12th Feb 2014
 "------------------------------------------------------------------------
 " Description:
@@ -256,10 +256,15 @@ AddStyle @}  -ft=c @}
 AddStyle \\f{ -ft=c \\\\f{
 AddStyle \\f} -ft=c \\\\f}
 
-" # Default style in C & al: Stroustrup {{{2
+" # Default style in C & al: Stroustrup/K&R {{{2
 AddStyle {  -ft=c -prio=10 \ {\n
 AddStyle }; -ft=c -prio=10 \n};\n
-AddStyle }  -ft=c -prio=10 \n}\n
+AddStyle }  -ft=c -prio=10 \n}
+
+" # Inhibated style in C & al: Allman, Whitesmiths, Pico {{{2
+" AddStyle {  -ft=c -prio=10 \n{\n
+" AddStyle }; -ft=c -prio=10 \n};\n
+" AddStyle }  -ft=c -prio=10 \n}\n
 
 " # Ignore curly-brackets on single lines {{{2
 AddStyle ^\ *{\ *$ -ft=c &

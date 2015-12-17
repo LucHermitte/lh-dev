@@ -111,10 +111,15 @@ AddStyle @}  -ft=c @}
 AddStyle \\f{ -ft=c \\\\f{
 AddStyle \\f} -ft=c \\\\f}
 
-" # Default style in C & al: Stroustrup {{{2
+" # Default style in C & al: Stroustrup/K&R {{{2
 AddStyle {  -ft=c -prio=10 \ {\n
 AddStyle }; -ft=c -prio=10 \n};\n
-AddStyle }  -ft=c -prio=10 \n}\n
+AddStyle }  -ft=c -prio=10 \n}
+
+" # Inhibated style in C & al: Allman, Whitesmiths, Pico {{{2
+" AddStyle {  -ft=c -prio=10 \n{\n
+" AddStyle }; -ft=c -prio=10 \n};\n
+" AddStyle }  -ft=c -prio=10 \n}\n
 
 " # Ignore curly-brackets on single lines {{{2
 AddStyle ^\ *{\ *$ -ft=c &
