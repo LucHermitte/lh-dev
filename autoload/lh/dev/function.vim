@@ -111,7 +111,7 @@ function! lh#dev#function#_signature_to_parameters(signature, ...)
   "    depending on the language, a type, a direction, etc may be provided
   let res = []
   for p in lParameters
-    let ap = lh#dev#option#call('function#_analyse_parameter', &ft, p, a:mustCleanSpace)
+    let ap = lh#dev#option#call('function#_analyse_parameter', &ft, p, mustCleanSpace)
     let res += [ap]
   endfor
   return res
