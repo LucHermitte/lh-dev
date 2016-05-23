@@ -1,11 +1,11 @@
 "=============================================================================
 " File:         autoload/lh/dev/style.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://github.com/LucHermitte>
+"               <URL:http://github.com/LucHermitte/lh-dev/>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.4.1
-let s:k_version = 1401
+"               <URL:http://github.com/LucHermitte/lh-dev/tree/master/License.md>
+" Version:      1.5.1
+let s:k_version = 1501
 " Created:      12th Feb 2014
 "------------------------------------------------------------------------
 " Description:
@@ -154,7 +154,7 @@ function! lh#dev#style#surround(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
   let begin = lh#dev#style#apply(a:begin)
   let end   = lh#dev#style#apply(a:end)
-  return call(function('Surround'), [begin, end, a:isLine, a:isIndented, a:goback, a:mustInterpret]+a:000)
+  return call(function('lh#map#surround'), [begin, end, a:isLine, a:isIndented, a:goback, a:mustInterpret]+a:000)
 endfunction
 
 "------------------------------------------------------------------------
