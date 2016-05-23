@@ -101,7 +101,7 @@ function! lh#dev#function#_signature_to_parameters(signature, ...)
   " Most languages are free of pointer to function types, or even templates
   " Finding each parameter == spliting the string on commas
   " 1- find the list of formal parameters
-  let sParameters = matchstr(a:signature, '(\zs.*\ze)')
+  let sParameters = matchstr(a:signature, '(\s*\zs.*\ze\s*)')
 
   " 2- split it
   let lParameters = lh#dev#option#call('function#_split_list_of_parameters',&ft,sParameters)
