@@ -3,9 +3,9 @@
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:      1.4.1
-let s:version = '1.4.01'
+"               <URL:http://github.com/LucHermitte/lh-dev/blob/master/License.md>
+" Version:      1.5.1
+let s:version = '1.5.01'
 " Created:      02nd Mar 2012
 "------------------------------------------------------------------------
 " Description:
