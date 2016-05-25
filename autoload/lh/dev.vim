@@ -4,10 +4,10 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/tree/master/License.md>
-" Version:      1.5.1
-let s:k_version = 151
+" Version:      1.5.2
+let s:k_version = 152
 " Created:      28th May 2010
-" Last Update:  23rd May 2016
+" Last Update:  25th May 2016
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -353,7 +353,8 @@ function! lh#dev#_end_func(line) abort
     let line = getline(l)
     let c = match(line, start_pat) " todo: check in utf-8
     " this keepjumps seems useless
-    keepjumps exe l.'normal! 0'.c.'l'
+    keepjumps call cursor(l, c)
+    " keepjumps exe l.'normal! 0'.c.'l'
     " assert l < next func start
     " use matchit g%, to cycle backward => jump to the end of the function from
     " the beginning, avoiding any return instruction on the way
@@ -417,6 +418,13 @@ function! lh#dev#_line_comment() abort
   return ""
 endfunction
 
+" Function: lh#dev#_select_current_function() {{{3
+function! lh#dev#_select_current_function() abort
+  let fn = lh#dev#find_function_boundaries(line('.'))
+  exe fn.lines[0]
+  normal! v
+  exe fn.lines[1]
+endfunction
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
