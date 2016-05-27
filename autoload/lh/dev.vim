@@ -4,8 +4,8 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-dev/tree/master/License.md>
-" Version:      1.5.3
-let s:k_version = 153
+" Version:      1.6.1
+let s:k_version = 161
 " Created:      28th May 2010
 " Last Update:  27th May 2016
 "------------------------------------------------------------------------
@@ -14,6 +14,7 @@ let s:k_version = 153
 "
 "------------------------------------------------------------------------
 " History:
+"       v1.6.1: + lh#dev#_goto_function_begin and end
 "       v1.5.3: ~ enh: have lh#dev#find_function_boundaries support any
 "                 language
 "       v1.5.0: ~ Adapt c(pp)_ctags_understands_local_variables_in_one_pass to
@@ -437,8 +438,20 @@ endfunction
 " Function: lh#dev#_select_current_function() {{{3
 function! lh#dev#_select_current_function() abort
   let fn = lh#dev#find_function_boundaries(line('.'))
-  exe fn.lines[0]
+  call lh#dev#_goto_function_begin(fn)
   normal! v
+  call lh#dev#_goto_function_end(fn)
+endfunction
+
+" Function: lh#dev#_goto_function_begin() {{{3
+function! lh#dev#_goto_function_begin(...) abort
+  let fn = a:0>0 ? a:1 : lh#dev#find_function_boundaries(line('.'))
+  exe fn.lines[0]
+endfunction
+
+" Function: lh#dev#_goto_function_end() {{{3
+function! lh#dev#_goto_function_end(...) abort
+  let fn = a:0>0 ? a:1 : lh#dev#find_function_boundaries(line('.'))
   exe fn.lines[1]
 endfunction
 " }}}1
