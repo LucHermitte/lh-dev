@@ -205,6 +205,8 @@ function! lh#dev#option#inherited_filetypes(fts)
   return res
 endfunction
 
+" Be sure lh-vim-lib :LetIfUndef command is correctly defined.
+runtime plugin/let.vim
 LetIfUndef g:cpp_inherits 'c'
 
 " }}}1
