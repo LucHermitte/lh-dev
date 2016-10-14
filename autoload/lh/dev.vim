@@ -120,7 +120,7 @@ endfunction
 " Function: lh#dev#get_variables(function_boundaries [, split points ...]) {{{2
 " NB: In C++, ctags does not understand for (int i=0...), and thus it can't
 " extract "i" as a local variable ...
-if lh#tags#ctags_flavor() == 'utags'
+if lh#tags#ctags_flavour() == 'utags'
   let c_ctags_understands_local_variables_in_one_pass = 1
   let cpp_ctags_understands_local_variables_in_one_pass = 1
 else
