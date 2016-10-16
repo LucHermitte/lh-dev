@@ -1,11 +1,13 @@
 "=============================================================================
-" $Id$
 " File:		tests/lh/dev-option.vim                           {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://hermitte.free.fr/vim/>
-" Version:	1.1.5
+"               <URL:http://github.com/LucHermitte/lh-dev>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-dev/tree/master/License.md>
+" Version:      2.0.0
+let s:k_version = 200
 " Created:	05th Oct 2009
-" Last Update:	$Date$
+" Last Update:	16th Oct 2016
 "------------------------------------------------------------------------
 " Description:
 "       Test lh#dev#options#*() functions
