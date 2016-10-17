@@ -33,6 +33,7 @@ function! s:Test_global()
     Unlet g:FT_foo
     Unlet b:FT_foo
     let g:foo = 42
+    AssertEquals(lh#ft#option#get('foo', 'FT', 12) , 42)
     AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 42)
     AssertEquals(lh#dev#option#get('bar', 'FT', 12) , 12)
 
