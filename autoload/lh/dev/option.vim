@@ -15,8 +15,9 @@ let s:k_version = 200
 
 let s:cpo_save=&cpo
 set cpo&vim
-"------------------------------------------------------------------------
+runtime autoload/lh/ft/option.vim
 
+"------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
 function! lh#dev#option#version()
