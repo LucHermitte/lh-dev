@@ -3,10 +3,11 @@
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://github.com/LucHermitte/lh-dev>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-dev/License.md>
-" Version:	1.2.2
+"               <URL:http://github.com/LucHermitte/lh-dev/tree/master/License.md>
+" Version:	2.0.0
+let s:k_version = 200
 " Created:      09th Sep 2013
-" Last Update:  24th Apr 2015
+" Last Update:  17th Oct 2016
 "------------------------------------------------------------------------
 " Description:
 "       API functions to obtain symbol declarations
@@ -22,30 +23,31 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 103
 function! lh#dev#tags#version()
   return s:k_version
 endfunction
 
 " # Debug   {{{2
-let s:verbose = 0
+let s:verbose = get(s:, 'verbose', 0)
 function! lh#dev#tags#verbose(...)
   if a:0 > 0 | let s:verbose = a:1 | endif
   return s:verbose
 endfunction
 
-function! s:Verbose(expr)
+function! s:Log(expr, ...)
+  call call('lh#log#this',[a:expr]+a:000)
+endfunction
+
+function! s:Verbose(expr, ...)
   if s:verbose
-    echomsg a:expr
+    call call('s:Log',[a:expr]+a:000)
   endif
 endfunction
 
-function! lh#dev#tags#debug(expr)
+function! lh#dev#tags#debug(expr) abort
   return eval(a:expr)
 endfunction
 
-
-"------------------------------------------------------------------------
 " ## Exported functions {{{1
 
 "------------------------------------------------------------------------
@@ -87,10 +89,10 @@ function! lh#dev#tags#fetch(feature) abort
     throw a:feature.": no tags for `".id."'"
   endif
   " Filter for function definitions and #defines, ...
-  let accepted_kinds = lh#dev#option#get('tag_kinds_for_inclusion', &ft, '[dfmptcs]')
+  let accepted_kinds = lh#ft#option#get('tag_kinds_for_inclusion', &ft, '[dfmptcs]')
   call filter(info, "v:val.kind =~ ".string(accepted_kinds))
   " Filter for include files only
-  let accepted_files = lh#dev#option#get('file_regex_for_inclusion', &ft, '\.h')
+  let accepted_files = lh#ft#option#get('file_regex_for_inclusion', &ft, '\.h')
   call filter(info, "v:val.filename =~? ".string(accepted_files))
   " Is there any symbol left ?
   if len(info) == 0
@@ -115,6 +117,8 @@ function! s:TagsSelectPolicy()
   let select_policy = lh#option#get('tags_select', "expand('<cword>')", 'bg')
   return select_policy
 endfunction
+
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
