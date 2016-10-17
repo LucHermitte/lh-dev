@@ -17,9 +17,49 @@ let s:k_version = 200
 
 UTSuite [lh-dev-lib] Testing lh#dev#option functions
 
-runtime autoload/lh/dev/option.vim
 let s:cpo_save=&cpo
 set cpo&vim
+
+" ## Dependencies {{{1
+runtime autoload/lh/dev/option.vim
+runtime autoload/lh/ft/option.vim
+runtime autoload/lh/project.vim
+runtime autoload/lh/let.vim
+runtime autoload/lh/option.vim
+runtime autoload/lh/os.vim
+
+let cleanup = lh#on#exit()
+      \.restore('g:force_reload_lh_project')
+try
+  runtime plugin/lh-project.vim
+finally
+  call cleanup.finalize()
+endtry
+
+let s:prj_varname = 'b:'.get(g:, 'lh#project#varname', 'crt_project')
+
+"------------------------------------------------------------------------
+" ## Fixture {{{1
+function! s:Setup() " {{{2
+  let s:prj_list = lh#project#_save_prj_list()
+  let s:cleanup = lh#on#exit()
+        \.restore('b:'.s:prj_varname)
+        \.restore('s:prj_varname')
+        \.restore('g:lh#project.auto_discover_root')
+        " \.register({-> lh#project#_restore_prj_list(s:prj_list)})
+  let g:lh#project = { 'auto_discover_root': 'no' }
+  if exists('b:'.s:prj_varname)
+    exe 'unlet b:'.s:prj_varname
+  endif
+endfunction
+
+function! s:Teardown() " {{{2
+  call s:cleanup.finalize()
+  call lh#project#_restore_prj_list(s:prj_list)
+endfunction
+
+"------------------------------------------------------------------------
+" ## Tests {{{1
 "------------------------------------------------------------------------
 function! s:Test_global()
   let cleanup = lh#on#exit()
@@ -111,6 +151,8 @@ function! s:Test_inheritedFT()
     call cleanup.finalize()
   endtry
 endfunction
+
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
