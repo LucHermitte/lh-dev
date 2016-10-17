@@ -170,7 +170,7 @@ endfunction
 " Function: lh#dev#option#inherited_filetypes(fts) {{{3
 " - todo, this may required to be specific to each property considered
 function! lh#dev#option#inherited_filetypes(fts)
-  return call('lh#ft#option#inherited_filetypes', [a:fts])
+  return lh#ft#option#inherited_filetypes(a:fts)
 endfunction
 
 " Be sure lh-vim-lib :LetIfUndef command is correctly defined.
