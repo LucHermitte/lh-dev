@@ -28,18 +28,22 @@ function! s:Test_global()
         \.restore('g:FT_foo')
         \.restore('b:FT_foo')
   try
+    Unlet g:foo
+    Unlet b:foo
+    Unlet g:FT_foo
+    Unlet b:FT_foo
     let g:foo = 42
-    Assert lh#dev#option#get('foo', 'FT', 12) == 42
-    Assert lh#dev#option#get('bar', 'FT', 12) == 12
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 42)
+    AssertEquals(lh#dev#option#get('bar', 'FT', 12) , 12)
 
     let b:foo = 43
-    Assert lh#dev#option#get('foo', 'FT', 12) == 43
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 43)
 
     let g:FT_foo = 44
-    Assert lh#dev#option#get('foo', 'FT', 12) == 44
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 44)
 
     let b:FT_foo = 45
-    Assert lh#dev#option#get('foo', 'FT', 12) == 45
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 45)
   finally
     call cleanup.finalize()
   endtry
@@ -52,13 +56,13 @@ function! s:Test_local()
         \.restore('b:FT_foo')
   try
     let b:foo = 43
-    Assert lh#dev#option#get('foo', 'FT', 12) == 43
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 43)
 
     let g:FT_foo = 44
-    Assert lh#dev#option#get('foo', 'FT', 12) == 44
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 44)
 
     let b:FT_foo = 45
-    Assert lh#dev#option#get('foo', 'FT', 12) == 45
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 45)
   finally
     call cleanup.finalize()
   endtry
@@ -71,10 +75,10 @@ function! s:Test_FT_global()
         \.restore('b:FT_foo')
   try
     let g:FT_foo = 44
-    Assert lh#dev#option#get('foo', 'FT', 12) == 44
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 44)
 
     let b:FT_foo = 45
-    Assert lh#dev#option#get('foo', 'FT', 12) == 45
+    AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 45)
   finally
     call cleanup.finalize()
   endtry
@@ -82,9 +86,9 @@ endfunction
 
 " Function: s:Test_inheritedFT() {{{3
 function! s:Test_inheritedFT()
-  Assert lh#dev#option#inherited_filetypes('zz') == ['zz']
-  Assert lh#dev#option#inherited_filetypes('c') == ['c']
-  Assert lh#dev#option#inherited_filetypes('cpp') == ['cpp', 'c']
+  AssertEquals(lh#dev#option#inherited_filetypes('zz') , ['zz'])
+  AssertEquals(lh#dev#option#inherited_filetypes('c') , ['c'])
+  AssertEquals(lh#dev#option#inherited_filetypes('cpp') , ['cpp', 'c'])
 
   let cleanup = lh#on#exit()
         \.restore('g:foo1_inherits')
