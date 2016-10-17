@@ -30,7 +30,9 @@ runtime autoload/lh/os.vim
 
 let cleanup = lh#on#exit()
       \.restore('g:force_reload_lh_project')
+      " \.restore('g:lh#project.permissions.whitelist')
 try
+  let g:lh#project.permissions.whitelist = []
   runtime plugin/lh-project.vim
 finally
   call cleanup.finalize()
@@ -42,6 +44,8 @@ let s:prj_varname = 'b:'.get(g:, 'lh#project#varname', 'crt_project')
 " ## Fixture {{{1
 function! s:Setup() " {{{2
   let s:prj_list = lh#project#_save_prj_list()
+  call lh#project#_restore_prj_list([])
+  " Assert empty(s:prj_list)
   let s:cleanup = lh#on#exit()
         \.restore('b:'.s:prj_varname)
         \.restore('s:prj_varname')
