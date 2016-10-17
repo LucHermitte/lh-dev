@@ -44,7 +44,8 @@ let s:prj_varname = 'b:'.get(g:, 'lh#project#varname', 'crt_project')
 " ## Fixture {{{1
 function! s:Setup() " {{{2
   let s:prj_list = lh#project#_save_prj_list()
-  call lh#project#_restore_prj_list([])
+  let s:prj_list.projects = {}
+  " call lh#project#_restore_prj_list([])
   " Assert empty(s:prj_list)
   let s:cleanup = lh#on#exit()
         \.restore('b:'.s:prj_varname)
@@ -77,7 +78,9 @@ function! s:Test_global()
     Unlet g:FT_foo
     Unlet b:FT_foo
     let g:foo = 42
+    AssertEquals(lh#option#get('foo', 12) , 42)
     AssertEquals(lh#ft#option#get('foo', 'FT', 12) , 42)
+    AssertEquals(lh#ft#option#get('bar', 'FT', 12) , 12)
     AssertEquals(lh#dev#option#get('foo', 'FT', 12) , 42)
     AssertEquals(lh#dev#option#get('bar', 'FT', 12) , 12)
 
