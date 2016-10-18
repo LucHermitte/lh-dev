@@ -48,41 +48,6 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
-" Function: lh#dev#option#get(name, filetype[, default [, scope]])  {{{2
-" @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
-" b:{name}, or g:{name}. {default} is returned if none exists.
-" @note filetype inheritance is supported.
-" The order of the scopes for the variables checked can be specified through
-" the optional argument {scope}
-function! lh#dev#option#get(name, ft,...) abort
-  let fts = lh#ft#option#inherited_filetypes(a:ft)
-  call map(fts, 'v:val."_"')
-  let fts += [ '']
-  let scope = (a:0 == 2) ? a:2 : 'bpg'
-
-  for ft in fts
-    let r = lh#option#get(ft.a:name, lh#option#unset(), scope)
-    if lh#option#is_set(r)
-      return r
-    endif
-    unlet r
-  endfor
-  return a:0 > 0 ? a:1 : lh#option#unset()
-  " This function has been deprecated
-  return call('lh#ft#option#get', [a:name, a:ft] + a:000)
-endfunction
-
-" Function: lh#dev#option#get_postfixed(name, filetype, default [, scope])  {{{2
-" @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
-" b:{name}, or g:{name}. {default} is returned if none exists.
-" @note filetype inheritance is supported.
-" The order of the scopes for the variables checked can be specified through
-" the optional argument {scope}
-function! lh#dev#option#get_postfixed(name, ft,...) abort
-  " This function has been deprecated
-  return call('lh#ft#option#get_postfixed', [a:name, a:ft] + a:000)
-endfunction
-
 " Function: lh#dev#option#call(name, filetype, [, parameters])  {{{2
 " @return lh#dev#{ft}#{name}({parameters}) if it exists, or
 " lh#dev#{name}({parameters}) otherwise
