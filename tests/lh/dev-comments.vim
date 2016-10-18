@@ -32,6 +32,7 @@ function! s:Setup()
         \.restore_option('ECcommentOpen')
         \.restore_option('ECcommentClose')
         \.restore('&commentstring')
+        \.restore('&magic')
 endfunction
 
 function! s:Teardown()
@@ -42,10 +43,14 @@ function! s:Test_mono_line_cpp()
   let b:ECcommentOpen  = '//'
   let b:ECcommentClose = ''
   let  &commentstring  = '/*%s*/'
+  set magic
 
   AssertEqual(lh#dev#option#call('_open_comment', 'cpp'), '/*')
   AssertEqual(lh#dev#option#call('_close_comment', 'cpp'), '*/')
   AssertEqual(lh#dev#option#call('_line_comment', 'cpp'), '//')
+  let line_comment  = escape(lh#dev#option#call('_line_comment', 'cpp') , '%<>+=*\[(){')
+  let line = substitute('// toto', '\v'.line_comment.'.*', '', '')
+  AssertEqual(line, '')
   AssertEqual(['', 0], lh#dev#purge_comments('', 0, 'cpp'))
   AssertEqual(['', 1], lh#dev#purge_comments('', 1, 'cpp'))
   AssertEqual(['', 0], lh#dev#purge_comments('// toto', 0, 'cpp'))
