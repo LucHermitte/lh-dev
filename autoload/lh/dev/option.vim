@@ -74,7 +74,7 @@ endfunction
 " @return lh#dev#{ft}#{name}({parameters}) if it exists, or
 " lh#dev#{name}({parameters}) otherwise
 " If {name} is a |List|, then the function name used is: {name}[0]#{ft}#{name}[1]
-function! lh#dev#option#call(name, ft, ...)
+function! lh#dev#option#call(name, ft, ...) abort
   if type(a:name) == type([])
     let prefix = a:name[0]
     let name   = a:name[1]
@@ -171,7 +171,10 @@ endfunction
 " # List of inherited properties between languages {{{2
 " Function: lh#dev#option#inherited_filetypes(fts) {{{3
 " - todo, this may required to be specific to each property considered
-function! lh#dev#option#inherited_filetypes(fts)
+" For a very obscure reason, if this function is not duplicated here, tests are
+" failling on travis! But neither on my Vim 7.4-2xxx nor on my Vim 7.3-429
+" (yes, the same version than the one on travis!)
+function! lh#dev#option#inherited_filetypes(fts) abort
   let res = []
   let lFts = split(a:fts, ',')
   let aux = map(copy(lFts), '[v:val] + lh#dev#option#inherited_filetypes(lh#option#get(v:val."_inherits", ""))')

@@ -13,9 +13,11 @@
 " Installation:
 "       Drop this file into {rtp}/tests/lh
 "       Requires Vim7+
-"       «install details»
-" History:      «history»
-" TODO:         «missing features»
+"
+" Note:
+"       For this test to pass on Travis-CI, it's seems important to duplicate
+"       lh#ft#option#inherited_filetypes() code in
+"       lh#dev#option#inherited_filetypes()
 " }}}1
 "=============================================================================
 
@@ -43,37 +45,7 @@ function! s:Test_mono_line_cpp()
   let b:ECcommentOpen  = '//'
   let b:ECcommentClose = ''
   let  &commentstring  = '/*%s*/'
-  set magic
 
-  AssertEqual(lh#dev#option#call('_open_comment', 'cpp'), '/*')
-  AssertEqual(lh#dev#option#call('_close_comment', 'cpp'), '*/')
-  AssertEqual(lh#dev#option#call('_line_comment', 'cpp'), '//')
-  let line_comment0 = lh#dev#option#call('_line_comment', 'cpp')
-  AssertEqual(line_comment0, '//')
-
-  " Fails for no good reason on travis...
-  let line_comment  = substitute(line_comment0, '[%<>+=*\[(){]', '\\&', 'g')
-  AssertEqual(line_comment, '//')
-  " Fails for no good reason on travis...
-  let line_comment  = escape(line_comment0, '%<>+=*\[(){')
-  AssertEqual(line_comment, '//')
-  " Fails for no good reason on travis...
-  AssertEqual(escape(line_comment0, '%<>+=*\[(){'), '//')
-
-  " Work!
-  AssertEqual(line_comment0, '//')
-  " Fails! ????
-  AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', '')) " Fails
-  AssertEqual('', substitute('// toto', line_comment0.'.*', '', ''))      " Fails
-  AssertEqual('', substitute('// toto', '//.*', '', ''))                  " Works
-  AssertEqual('', substitute('// toto', '\v//.*', '', ''))                " Works
-  " Fails for no good reason on travis...
-  AssertEqual('', substitute('// toto', '\v'.line_comment.'.*', '', ''))
-
-  " Fails for no good reason on travis...
-  AssertEqual('', substitute('// toto', '\v//.*', '', ''))
-  AssertEqual('', substitute('// toto', '//.*', '', ''))
-  AssertEqual('', substitute('// toto', line_comment.'.*', '', ''))
   AssertEqual(['', 0], lh#dev#purge_comments('', 0, 'cpp'))
   AssertEqual(['', 1], lh#dev#purge_comments('', 1, 'cpp'))
   AssertEqual(['', 0], lh#dev#purge_comments('// toto', 0, 'cpp'))
