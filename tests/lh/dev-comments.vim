@@ -50,17 +50,24 @@ function! s:Test_mono_line_cpp()
   AssertEqual(lh#dev#option#call('_line_comment', 'cpp'), '//')
   let line_comment0 = lh#dev#option#call('_line_comment', 'cpp')
   AssertEqual(line_comment0, '//')
+
+  " Fails for no good reason on travis...
   AssertEqual(escape(line_comment0, '%<>+=*\[(){'), '//')
+  " Fails for no good reason on travis...
   let line_comment  = escape(line_comment0, '%<>+=*\[(){')
   AssertEqual(line_comment, '//')
+  " Fails for no good reason on travis...
   let line_comment  = substitute(line_comment0, '[%<>+=*\[(){]', '\\&', 'g')
   AssertEqual(line_comment, '//')
-  let line = substitute('// toto', '\v'.line_comment.'.*', '', '')
-  AssertEqual(line, '')
-  AssertEqual(line, substitute('// toto', '\v//.*', '', ''))
-  AssertEqual(line, substitute('// toto', '//.*', '', ''))
-  AssertEqual(line, substitute('// toto', '\v'.line_comment.'.*', '', ''))
-  AssertEqual(line, substitute('// toto', line_comment.'.*', '', ''))
+
+  AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', ''))
+  " Fails for no good reason on travis...
+  AssertEqual('', substitute('// toto', '\v'.line_comment.'.*', '', ''))
+
+  " Fails for no good reason on travis...
+  AssertEqual('', substitute('// toto', '\v//.*', '', ''))
+  AssertEqual('', substitute('// toto', '//.*', '', ''))
+  AssertEqual('', substitute('// toto', line_comment.'.*', '', ''))
   AssertEqual(['', 0], lh#dev#purge_comments('', 0, 'cpp'))
   AssertEqual(['', 1], lh#dev#purge_comments('', 1, 'cpp'))
   AssertEqual(['', 0], lh#dev#purge_comments('// toto', 0, 'cpp'))
