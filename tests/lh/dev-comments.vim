@@ -61,6 +61,7 @@ function! s:Test_mono_line_cpp()
   AssertEqual(line_comment, '//')
 
   AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', ''))
+  AssertEqual('', substitute('// toto', '//.*', '', ''))
   " Fails for no good reason on travis...
   AssertEqual('', substitute('// toto', '\v'.line_comment.'.*', '', ''))
 
