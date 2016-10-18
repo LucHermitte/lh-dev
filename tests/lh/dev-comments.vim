@@ -27,7 +27,7 @@ runtime autoload/lh/dev/option.vim
 let s:cpo_save=&cpo
 set cpo&vim
 "------------------------------------------------------------------------
-function! s:Setup()
+function! s:S0etup()
   let s:cleanup = lh#on#exit()
         \.restore_option('ECcommentOpen')
         \.restore_option('ECcommentClose')
@@ -35,7 +35,7 @@ function! s:Setup()
         \.restore('&magic')
 endfunction
 
-function! s:Teardown()
+function! s:T0eardown()
   call s:cleanup.finalize()
 endfunction
 
@@ -63,10 +63,10 @@ function! s:Test_mono_line_cpp()
   " Work!
   AssertEqual(line_comment0, '//')
   " Fails! ????
-  AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', ''))
-  AssertEqual('', substitute('// toto', line_comment0.'.*', '', ''))
-  AssertEqual('', substitute('// toto', '//.*', '', ''))
-  AssertEqual('', substitute('// toto', '\v//.*', '', ''))
+  AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', '')) " Fails
+  AssertEqual('', substitute('// toto', line_comment0.'.*', '', ''))      " Fails
+  AssertEqual('', substitute('// toto', '//.*', '', ''))                  " Works
+  AssertEqual('', substitute('// toto', '\v//.*', '', ''))                " Works
   " Fails for no good reason on travis...
   AssertEqual('', substitute('// toto', '\v'.line_comment.'.*', '', ''))
 
