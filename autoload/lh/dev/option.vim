@@ -48,6 +48,41 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
+" Function: lh#dev#option#get(name, filetype[, default [, scope]])  {{{2
+" @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
+" b:{name}, or g:{name}. {default} is returned if none exists.
+" @note filetype inheritance is supported.
+" The order of the scopes for the variables checked can be specified through
+" the optional argument {scope}
+function! lh#dev#option#get(name, ft,...) abort
+  let fts = lh#ft#option#inherited_filetypes(a:ft)
+  call map(fts, 'v:val."_"')
+  let fts += [ '']
+  let scope = (a:0 == 2) ? a:2 : 'bpg'
+
+  for ft in fts
+    let r = lh#option#get(ft.a:name, lh#option#unset(), scope)
+    if lh#option#is_set(r)
+      return r
+    endif
+    unlet r
+  endfor
+  return a:0 > 0 ? a:1 : lh#option#unset()
+  " This function has been deprecated
+  return call('lh#ft#option#get', [a:name, a:ft] + a:000)
+endfunction
+
+" Function: lh#dev#option#get_postfixed(name, filetype, default [, scope])  {{{2
+" @return which ever exists first among: b:{ft}_{name}, or g:{ft}_{name}, or
+" b:{name}, or g:{name}. {default} is returned if none exists.
+" @note filetype inheritance is supported.
+" The order of the scopes for the variables checked can be specified through
+" the optional argument {scope}
+function! lh#dev#option#get_postfixed(name, ft,...) abort
+  " This function has been deprecated
+  return call('lh#ft#option#get_postfixed', [a:name, a:ft] + a:000)
+endfunction
+
 " Function: lh#dev#option#call(name, filetype, [, parameters])  {{{2
 " @return lh#dev#{ft}#{name}({parameters}) if it exists, or
 " lh#dev#{name}({parameters}) otherwise
@@ -101,7 +136,7 @@ function! lh#dev#option#pre_load_overrides(name, ft) abort
     throw "Unexpected type (".type(a:name).") for name parameter"
   endif
 
-  let fts = lh#ft#option#inherited_filetypes(a:ft)
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
   let files = map(copy(fts), 'prefix."/".v:val."/".name.".vim"')
   " let files += [prefix.'/'.name.'.vim'] " Don't load the default again!
   for file in files
@@ -150,8 +185,19 @@ endfunction
 " Function: lh#dev#option#inherited_filetypes(fts) {{{3
 " - todo, this may required to be specific to each property considered
 function! lh#dev#option#inherited_filetypes(fts)
+  let res = []
+  let lFts = split(a:fts, ',')
+  for ft in lFts
+    let parents = lh#option#get(ft.'_inherits', '')
+    let res += [ft] + lh#dev#option#inherited_filetypes(parents)
+  endfor
+  return res
+
   return lh#ft#option#inherited_filetypes(a:fts)
 endfunction
+
+runtime plugin/let.vim
+LetIfUndef g:cpp_inherits = 'c'
 
 " }}}1
 let &cpo=s:cpo_save
