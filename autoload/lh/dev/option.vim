@@ -172,7 +172,14 @@ endfunction
 " Function: lh#dev#option#inherited_filetypes(fts) {{{3
 " - todo, this may required to be specific to each property considered
 function! lh#dev#option#inherited_filetypes(fts)
-  return lh#ft#option#inherited_filetypes(a:fts)
+  let res = []
+  let lFts = split(a:fts, ',')
+  let aux = map(copy(lFts), '[v:val] + lh#dev#option#inherited_filetypes(lh#option#get(v:val."_inherits", ""))')
+  for a in aux
+    let res += a
+  endfor
+  return res
+  " return lh#ft#option#inherited_filetypes(a:fts)
 endfunction
 
 " }}}1
