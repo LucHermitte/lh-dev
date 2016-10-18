@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      05th Oct 2009
-" Last Update:  16th Oct 2016
+" Last Update:  18th Oct 2016
 "------------------------------------------------------------------------
 " Description:  «description»
 " }}}1
@@ -111,7 +111,8 @@ function! lh#dev#option#call(name, ft, ...)
     if exists('*'.fname) | break | endif
   endfor
 
-  call s:Verbose('Calling: '.fname.'('.join(map(copy(a:000), 'string(v:val)'), ', ').')')
+  " call s:Verbose('Calling: '.fname.'('.join(map(copy(a:000), 'string(v:val)'), ', ').')')
+  call s:Verbose('Calling: %1(%2)', fname, a:000)
   if s:verbose >= 2
     debug return call (function(fname), a:000)
   else

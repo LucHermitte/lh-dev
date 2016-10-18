@@ -2,9 +2,9 @@
 " File:         tests/lh/dev-comments.vim                         {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://github.com/LucHermitte/lh-dev/>
-" Version:      1.3.9
+" Version:      2.0.0
 " Created:      05th Nov 2010
-" Last Update:  06th Dec 2015
+" Last Update:  18th Oct 2016
 "------------------------------------------------------------------------
 " Description:
 "       UT tests regardint comment manipulations
@@ -22,6 +22,7 @@
 UTSuite [lh-dev] Testing lh#dev#purge_comments function
 
 runtime autoload/lh/dev.vim
+runtime autoload/lh/dev/option.vim
 
 let s:cpo_save=&cpo
 set cpo&vim
