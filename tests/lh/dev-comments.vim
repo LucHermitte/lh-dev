@@ -60,9 +60,13 @@ function! s:Test_mono_line_cpp()
   " Fails for no good reason on travis...
   AssertEqual(escape(line_comment0, '%<>+=*\[(){'), '//')
 
+  " Work!
   AssertEqual(line_comment0, '//')
+  " Fails! ????
   AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', ''))
+  AssertEqual('', substitute('// toto', line_comment0.'.*', '', ''))
   AssertEqual('', substitute('// toto', '//.*', '', ''))
+  AssertEqual('', substitute('// toto', '\v//.*', '', ''))
   " Fails for no good reason on travis...
   AssertEqual('', substitute('// toto', '\v'.line_comment.'.*', '', ''))
 
