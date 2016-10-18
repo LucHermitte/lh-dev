@@ -52,14 +52,15 @@ function! s:Test_mono_line_cpp()
   AssertEqual(line_comment0, '//')
 
   " Fails for no good reason on travis...
-  AssertEqual(escape(line_comment0, '%<>+=*\[(){'), '//')
+  let line_comment  = substitute(line_comment0, '[%<>+=*\[(){]', '\\&', 'g')
+  AssertEqual(line_comment, '//')
   " Fails for no good reason on travis...
   let line_comment  = escape(line_comment0, '%<>+=*\[(){')
   AssertEqual(line_comment, '//')
   " Fails for no good reason on travis...
-  let line_comment  = substitute(line_comment0, '[%<>+=*\[(){]', '\\&', 'g')
-  AssertEqual(line_comment, '//')
+  AssertEqual(escape(line_comment0, '%<>+=*\[(){'), '//')
 
+  AssertEqual(line_comment0, '//')
   AssertEqual('', substitute('// toto', '\v'.line_comment0.'.*', '', ''))
   AssertEqual('', substitute('// toto', '//.*', '', ''))
   " Fails for no good reason on travis...
