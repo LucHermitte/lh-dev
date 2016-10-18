@@ -43,6 +43,9 @@ function! s:Test_mono_line_cpp()
   let b:ECcommentClose = ''
   let  &commentstring  = '/*%s*/'
 
+  AssertEqual(lh#dev#option#call('_open_comment', 'cpp'), '/*')
+  AssertEqual(lh#dev#option#call('_close_comment', 'cpp'), '*/')
+  AssertEqual(lh#dev#option#call('_line_comment', 'cpp'), '//')
   AssertEqual(['', 0], lh#dev#purge_comments('', 0, 'cpp'))
   AssertEqual(['', 1], lh#dev#purge_comments('', 1, 'cpp'))
   AssertEqual(['', 0], lh#dev#purge_comments('// toto', 0, 'cpp'))

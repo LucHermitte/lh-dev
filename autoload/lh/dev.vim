@@ -216,7 +216,7 @@ function! lh#dev#purge_comments(line, is_continuing_comment, ...) abort
   " purge remaining comment from a previous line
   if a:is_continuing_comment
     " assert(!empty(close_comment))
-    if empty(close_comment) || -1 == match(line, close_comment)
+    if empty(close_comment) || (-1 == match(line, close_comment))
       return ["", 1]
     else
       " todo: use p
@@ -225,15 +225,15 @@ function! lh#dev#purge_comments(line, is_continuing_comment, ...) abort
   endif
   " purge line comment (// in C++, # in perl, ...)
   if !empty(line_comment)
-    let line = substitute(line, line_comment.'\v.*', '', '')
+    let line = substitute(line, '\v'.line_comment.'.*', '', '')
   endif
   " purge "zone" comment (/**/ in C, ...)
   let is_continuing_comment = 0
   if !empty(open_comment)
-    let line = substitute(line, open_comment.'\v.{-}'.close_comment, '', 'g')
-    let p = match(line, open_comment)
+    let line = substitute(line, '\v'.open_comment.'.{-}'.close_comment, '', 'g')
+    let p = match(line, '\v'.open_comment)
     if -1 != p
-      let line = line[0:p-1]
+      let line = line[0 : p-1]
       let is_continuing_comment = 1
     endif
   endif
@@ -459,12 +459,11 @@ function! lh#dev#_line_comment() abort
   " - EnhancedCommentify
   if exists('b:ECcommentOpen') && !empty(b:ECcommentOpen) && (!exists('b:ECcommentClose') || empty(b:ECcommentClose))
     return b:ECcommentOpen
-  endif
   " - tComment
   " - NERDCommenter
   " - &commentstring
-  if !empty(&commentstring) && &commentstring =~ '.\+%s$'
-    return matchstr(&commentstring, '.*\ze%s.*')
+  elseif !empty(&commentstring) && &commentstring =~ '\v.+\%s$'
+    return matchstr(&commentstring, '\v.*\ze\%s.*')
   endif
   return ""
 endfunction
