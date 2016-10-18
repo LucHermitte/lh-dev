@@ -98,7 +98,7 @@ function! lh#dev#option#call(name, ft, ...)
     throw "Unexpected type (".type(a:name).") for name parameter"
   endif
 
-  let fts = lh#ft#option#inherited_filetypes(a:ft)
+  let fts = lh#dev#option#inherited_filetypes(a:ft)
   call map(fts, 'v:val."#"')
   let fts += ['']
   for ft in fts

@@ -27,7 +27,7 @@ runtime autoload/lh/dev/option.vim
 let s:cpo_save=&cpo
 set cpo&vim
 "------------------------------------------------------------------------
-function! s:S0etup()
+function! s:Setup()
   let s:cleanup = lh#on#exit()
         \.restore_option('ECcommentOpen')
         \.restore_option('ECcommentClose')
@@ -35,7 +35,7 @@ function! s:S0etup()
         \.restore('&magic')
 endfunction
 
-function! s:T0eardown()
+function! s:Teardown()
   call s:cleanup.finalize()
 endfunction
 
