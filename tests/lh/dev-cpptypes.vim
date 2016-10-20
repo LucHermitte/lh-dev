@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      03rd Dec 2015
-" Last Update:  19th Oct 2016
+" Last Update:  20th Oct 2016
 "------------------------------------------------------------------------
 " Description:
 "       Tests to autoload/lh/dev/cpp/types.vim functions
@@ -155,7 +155,7 @@ function! s:Test_const_correct_type() abort
   try
     let b:cpp_base_type_pattern = ''
     let b:cpp_place_const_after_type = 1
-    AssertEqual(lh#dev#cpp#types#const_correct_type(type), type.' cnst&')
+    AssertEqual(lh#dev#cpp#types#const_correct_type(type), type.' const&')
     let b:cpp_base_type_pattern = '<SizeType>'
     AssertEqual(lh#dev#cpp#types#const_correct_type(type), type)
   finally

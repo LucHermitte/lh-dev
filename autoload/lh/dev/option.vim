@@ -170,10 +170,6 @@ endfunction
 
 " # List of inherited properties between languages {{{2
 " Function: lh#dev#option#inherited_filetypes(fts) {{{3
-" - todo, this may required to be specific to each property considered
-" For a very obscure reason, if this function is not duplicated here, tests are
-" failling on travis! But neither on my Vim 7.4-2xxx nor on my Vim 7.3-429
-" (yes, the same version than the one on travis!)
 function! lh#dev#option#inherited_filetypes(fts) abort
   return lh#ft#option#inherited_filetypes(a:fts)
 endfunction
