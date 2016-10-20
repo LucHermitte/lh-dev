@@ -155,7 +155,7 @@ function! s:Test_const_correct_type() abort
   try
     let b:cpp_base_type_pattern = ''
     let b:cpp_place_const_after_type = 1
-    AssertEqual(lh#dev#cpp#types#const_correct_type(type), type.' const&')
+    AssertEqual(lh#dev#cpp#types#const_correct_type(type), type.' cnst&')
     let b:cpp_base_type_pattern = '<SizeType>'
     AssertEqual(lh#dev#cpp#types#const_correct_type(type), type)
   finally

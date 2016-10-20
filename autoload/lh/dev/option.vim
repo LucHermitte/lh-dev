@@ -175,14 +175,7 @@ endfunction
 " failling on travis! But neither on my Vim 7.4-2xxx nor on my Vim 7.3-429
 " (yes, the same version than the one on travis!)
 function! lh#dev#option#inherited_filetypes(fts) abort
-  let res = []
-  let lFts = split(a:fts, ',')
-  let aux = map(copy(lFts), '[v:val] + lh#dev#option#inherited_filetypes(lh#option#get(v:val."_inherits", ""))')
-  for a in aux
-    let res += a
-  endfor
-  return res
-  " return lh#ft#option#inherited_filetypes(a:fts)
+  return lh#ft#option#inherited_filetypes(a:fts)
 endfunction
 
 " }}}1
