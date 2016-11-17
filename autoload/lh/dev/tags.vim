@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = 200
 " Created:      09th Sep 2013
-" Last Update:  17th Oct 2016
+" Last Update:  17th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "       API functions to obtain symbol declarations
@@ -89,7 +89,7 @@ function! lh#dev#tags#fetch(feature) abort
     throw a:feature.": no tags for `".id."'"
   endif
   " Filter for function definitions and #defines, ...
-  let accepted_kinds = lh#ft#option#get('tag_kinds_for_inclusion', &ft, '[dfmptcs]')
+  let accepted_kinds = lh#ft#option#get('tag_kinds_for_inclusion', &ft, '[dfmptcsg]')
   call filter(info, "v:val.kind =~ ".string(accepted_kinds))
   " Filter for include files only
   let accepted_files = lh#ft#option#get('file_regex_for_inclusion', &ft, '\.h')
