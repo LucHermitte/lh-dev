@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = 200
 " Created:      09th Sep 2013
-" Last Update:  17th Nov 2016
+" Last Update:  05th Dec 2016
 "------------------------------------------------------------------------
 " Description:
 "       API functions to obtain symbol declarations
@@ -56,9 +56,12 @@ function! lh#dev#tags#keep_full_names(tags_list)
   let result_as_dict = {}
   for tag in a:tags_list
     let full_name = []
-    if has_key(tag, 'class') && stridx(tag.name, tag.class) < 0
-      let full_name += [ tag.class ]
-    endif
+    for qualif in ['namespace', 'class', 'enum']
+      if has_key(tag, qualif) && stridx(tag.name, tag[qualif]) < 0
+        let full_name += [ tag[qualif] ]
+      endif
+    endfor
+    " TODO: if tag.name contains redundant part of the namespace => fix it
     let full_name += [ tag.name ]
     " TODO: use the right scope resolution operator
     let name = join(full_name, '::')
