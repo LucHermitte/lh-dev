@@ -145,10 +145,14 @@ function! lh#dev#style#apply(text, ...) abort
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
   let keys = lh#dev#style#_sort_styles(styles)
-  let sKeys = join(keys, '\|')
-  " Using a sorted list of keys permits to avoid triggering "}" style on
-  " "class {};" when there is a "};" style.
-  let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(styles, submatch(0), keys, a:text)', 'g')
+  if empty(keys)
+    return a:text
+  else
+    let sKeys = join(keys, '\|')
+    " Using a sorted list of keys permits to avoid triggering "}" style on
+    " "class {};" when there is a "};" style.
+    let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(styles, submatch(0), keys, a:text)', 'g')
+  endif
   return res
 endfunction
 
