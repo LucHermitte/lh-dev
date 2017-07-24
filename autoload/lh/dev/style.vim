@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  20th Oct 2016
+" Last Update:  24th Jul 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -212,7 +212,7 @@ function! lh#dev#style#_add(...) abort
     throw "Replacement text unspecified in ".string(a:000)
   endif
   " Interpret some escape sequences
-  let repl = lh#dev#reinterpret_escaped_char(repl)
+  let repl = lh#mapping#reinterpret_escaped_char(repl)
 
   " Add the new style {{{4
   let previous = get(s:style, pattern, [])
