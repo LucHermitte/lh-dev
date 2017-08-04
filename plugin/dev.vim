@@ -7,7 +7,7 @@
 " Version:      1.3.0
 let s:k_version = 130
 " Created:      31st May 2010
-" Last Update:  20th Jul 2015
+" Last Update:  04th Aug 2017
 "------------------------------------------------------------------------
 " Description:
 "       Global commands and definitions of lh-dev
@@ -25,7 +25,7 @@ let s:cpo_save=&cpo
 set cpo&vim
 " Avoid global reinclusion }}}1
 "------------------------------------------------------------------------
-" Commands and Mappings {{{1
+" ## Commands and Mappings {{{1
 command! -nargs=1 -complete=custom,s:Convertions
       \ NameConvert call s:NameConvert(<f-args>)
 command! -nargs=1 -range -complete=custom,s:CompleteConvertNames
@@ -33,9 +33,14 @@ command! -nargs=1 -range -complete=custom,s:CompleteConvertNames
 
 command! -nargs=+
       \ AddStyle call lh#dev#style#_add(<f-args>)
-" Commands and Mappings }}}1
 "------------------------------------------------------------------------
-" Functions {{{1
+" ## Register to editorconfig if found {{{1
+if !empty(globpath(&rtp, 'autoload/editorconfig.vim'))
+  call editorconfig#AddNewHook(function('lh#dev#editorconfig#hook'))
+endif
+
+"------------------------------------------------------------------------
+" ## Functions {{{1
 " Note: most functions are best placed into
 " autoload/«your-initials»/«dev».vim
 " Keep here only the functions are are required when the plugin is loaded,
@@ -65,7 +70,7 @@ let s:k_entity_pattern.in = '\w'
 let s:k_entity_pattern.out = '\W'
 let s:k_entity_pattern.prev_end = '\zs\w\W\+$'
 
-" Functions {{{2
+" # Functions {{{2
 " Function: s:ConvertNames(repl_arg) {{{3
 " Syntax: ConvertNames/{regex}/{convertion_type}
 function! s:ConvertNames(repl_arg) range abort
@@ -134,7 +139,7 @@ function! s:Convertions(ArgLead, CmdLine, CursorPs)
   return join(lh#list#transform(s:k_convertions, [], 'v:1_[0]'), "\n")
 endfunction
 
-" Functions }}}1
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

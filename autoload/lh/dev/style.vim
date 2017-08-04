@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  24th Jul 2017
+" Last Update:  04th Aug 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -20,7 +20,7 @@ let s:k_version = 2000
 "         filetype
 "
 " Requires:
-"       - lh-vim-lib v3.3.7
+"       - lh-vim-lib v4.0.0
 " Tests:
 "       See tests/lh/dev-style.vim
 " }}}1
@@ -165,6 +165,75 @@ function! lh#dev#style#surround(
   return call(function('lh#map#surround'), [begin, end, a:isLine, a:isIndented, a:goback, a:mustInterpret]+a:000)
 endfunction
 
+" # Use semantically named styles {{{2
+" Function: lh#dev#style#_prepare_options_for_add_style(input_options) {{{3
+function! lh#dev#style#_prepare_options_for_add_style(input_options) abort
+  let options       = []
+  let local = get(a:input_options, 'buffer', 0)
+  if local
+    let options += ['-b']
+  endif
+  let prio  = get(a:input_options, 'priority', 1)
+  if prio != 1
+    let options += ['-pr='.prio]
+  endif
+
+  let ft    = get(a:input_options, 'ft', '*')
+  let options += [join(['-ft', ft], '=')]
+
+  return [ options, local, prio, ft ]
+endfunction
+
+" Function: lh#dev#style#use(styles [, options]) {{{3
+" TODO: handle:
+" * editor config possible future settings (see
+" https://github.com/jedmao/codepainter/tree/master/test/cases)
+"   - spaces_around_operators (true/hybrid/false)
+"   - spaces_around_brackets (inside/outside/both/none)
+" * clang-format settings (https://clangformat.com/)
+"   - BreakBeforeBinaryOperators
+"   - BreakBeforeBraces
+"   - BreakBeforeTernaryOperators
+"   - BreakConstructorInitializersBeforeComma (though one!!)
+"   - IndentCaseLabels
+"   - IndentFunctionDeclarationAfterType
+"   - NamespaceIndentation
+"   - SpaceBeforeAssignmentOperators
+"   - SpaceBeforeParens
+"   - SpaceInEmptyParentheses
+"   - SpacesBeforeTrailingComments
+"   - SpacesInAngles
+"   - SpacesInCStyleCastParentheses
+"   - SpacesInParentheses
+let s:k_nb_leading_chars  = len('autoload/')
+let s:k_nb_trailing_chars = len('.vim') + 1
+function! lh#dev#style#use(styles, ...) abort
+  " let input_options = get(a:, 1, {})
+  " let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
+
+  for [style_name, style_state] in items(a:styles)
+    let style_state = substitute(style_state, '.*', '\L&\E', '')
+    let style_state = substitute(style_state, '\W', '_', 'g')
+    let path = 'autoload/**/style/'.style_name.'/'.style_state.'.vim'
+    let plugins = lh#path#glob_as_list(&rtp, path)
+    if empty(plugins)
+      let path = 'autoload/**/style/'.style_name.'.vim'
+      let plugins = lh#path#glob_as_list(&rtp, path)
+    endif
+
+    if !empty(plugins)
+      let args = [a:styles, style_state ] + a:000
+      let plugins_relative_to_rtp = lh#path#strip_start(plugins, &rtp)
+      let funcnames = map(copy(plugins_relative_to_rtp), 'v:val[s:k_nb_leading_chars : - s:k_nb_trailing_chars]')
+      call map(funcnames, 'substitute(v:val, "[/\\\\]", "#", "g")."#use"')
+      call s:Verbose('Loading styles for %1: %2: -> %3', style_name, style_state, funcnames)
+      call map(copy(funcnames), 'call (function(v:val), args)')
+    else
+      call s:Verbose('No style-plugin found for %1: %2', style_name, style_state)
+    endif
+  endfor
+endfunction
+
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 if !exists('s:style')
@@ -221,13 +290,13 @@ function! lh#dev#style#_add(...) abort
   " Add the new style {{{4
   let previous = get(s:style, pattern, [])
   " but first check whether there is already something before adding anything
-  for style in previous
-    if style.local == local && style.ft == ft
+  let styles = filter(copy(previous), 'v:val.local == local && v:val.ft == ft')
+  if !empty(styles)
+    let style = styles[0]
       let style.replacement = repl
       let style.prio = prio
       return
-    endif
-  endfor
+  endif
   " This is new => add ;; note the "return" in the search loop
   let s:style[pattern] = previous +
         \ [ {'local': local, 'ft': ft, 'replacement': repl, 'prio': prio }]
@@ -267,6 +336,7 @@ AddStyle while(  -ft=c   while\ (
 AddStyle for(    -ft=c   for\ (
 AddStyle switch( -ft=c   switch\ (
 AddStyle catch(  -ft=cpp catch\ (
+" ))))))))))
 
 " # Ignore style in C comments {{{2
 " # Ignore style in comments after curly brackets {{{2
@@ -287,14 +357,10 @@ AddStyle \\f{ -ft=c \\\\f{
 AddStyle \\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup/K&R {{{2
-AddStyle {  -ft=c -prio=10 \ {\n
-AddStyle }; -ft=c -prio=10 \n};\n
-AddStyle }  -ft=c -prio=10 \n}
+call lh#dev#style#use({'indent_brace_style': 'Stroustrup'}, {'ft': 'c', 'prio': 10})
 
 " # Inhibated style in C & al: Allman, Whitesmiths, Pico {{{2
-" AddStyle {  -ft=c -prio=10 \n{\n
-" AddStyle }; -ft=c -prio=10 \n};\n
-" AddStyle }  -ft=c -prio=10 \n}\n
+" call lh#dev#style#use('Allman', {'ft': 'c', 'prio': 10})
 
 " # Ignore curly-brackets on single lines {{{2
 AddStyle ^\ *{\ *$ -ft=c &
