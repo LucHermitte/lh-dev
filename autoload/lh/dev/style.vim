@@ -241,9 +241,8 @@ if !exists('s:style')
 endif
 
 " # :AddStyle API {{{2
-" Function: lh#dev#style#_add(pattern, ...) {{{3
-function! lh#dev#style#_add(...) abort
-  " Analyse params {{{4
+" Function: lh#dev#style#_decode_add_params(pattern, ...) {{{3
+function! lh#dev#style#_decode_add_params(...) abort
   let local = -1
   let ft    = '*'
   let prio  = 1
@@ -266,6 +265,14 @@ function! lh#dev#style#_add(...) abort
       let repl = o
     endif
   endfor
+
+  return [local, ft, prio, list]
+endfunction
+
+" Function: lh#dev#style#_add(pattern, ...) {{{3
+function! lh#dev#style#_add(...) abort
+  " Analyse params {{{4
+  let [local, ft, prio, list] = call('lh#dev#style#_decode_add_params', a:000)
 
   " list styles
   if list == 1
