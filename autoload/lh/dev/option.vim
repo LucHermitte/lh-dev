@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      05th Oct 2009
-" Last Update:  04th Jan 2017
+" Last Update:  03rd Aug 2017
 "------------------------------------------------------------------------
 " Description:  «description»
 " }}}1
@@ -57,8 +57,9 @@ endfunction
 " @note filetype inheritance is supported.
 " The order of the scopes for the variables checked can be specified through
 " the optional argument {scope}
+" @deprecated, used lh#ft#option#get
 function! lh#dev#option#get(name, ft,...) abort
-  " This function has been deprecated
+  call lh#notify#deprecated('lh#dev#option#get', 'lh#ft#option#get')
   return call('lh#ft#option#get', [a:name, a:ft] + a:000)
 endfunction
 
@@ -68,8 +69,9 @@ endfunction
 " @note filetype inheritance is supported.
 " The order of the scopes for the variables checked can be specified through
 " the optional argument {scope}
+" @deprecated, used lh#ft#option#get_postfixed
 function! lh#dev#option#get_postfixed(name, ft,...) abort
-  " This function has been deprecated
+  call lh#notify#deprecated('lh#dev#option#get_postfixed', 'lh#ft#option#get_postfixed')
   return call('lh#ft#option#get_postfixed', [a:name, a:ft] + a:000)
 endfunction
 
