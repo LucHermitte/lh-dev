@@ -69,15 +69,15 @@ endfunction
 " Function: lh#dev#style#get(ft) {{{3
 " priority:
 " 1- same ft && buffer local
-" 2- same ft && global
-" 3- inferior ft (C++ inherits C stuff) && buffer local
-" 4- inferior ft (C++ inherits C stuff) && global
+" 2- inferior ft (C++ inherits C stuff) && buffer local
 " ...
-" n-1- for all ft && buffer local
-" n- for all ft && global
+" k-1- for all ft && buffer local
+" k- same ft && global
+" k+1- inferior ft (C++ inherits C stuff) && global
+" ...
+" 2*k- for all ft && global
 "
-" TODO: priority n-1 seems much better than priority 2: I may have to change
-" that
+" TODO: test the new priorities
 function! lh#dev#style#get(ft) abort
   let res = {}
 
@@ -85,18 +85,40 @@ function! lh#dev#style#get(ft) abort
   let bufnr = bufnr('%')
 
   for [pattern, hows] in items(s:style)
-    let new_repl = {}
-    let new_repl[pattern] = {}
+    let new_repl = { 'pattern': {} }
 
-    for how in hows
-      if how.local != -1 && how.local != bufnr
-        continue
-      endif
+    " Keep only those related to the current buffer, or global
+    let hows = filter(copy(hows), 'v:val.local == -1 || v:val.local == bufnr')
 
-      let ft = index(fts, how.ft)
-      if ft < 0 | continue | endif
+    " Compute ft adequation of the repl-ft to the current ft stack
+    call map(hows, 'v:val.ft_index = index(fts, v:val.ft')
+
+    " Keep also only those with a related ft
+    call filter(hows, 'v:val.ft_index >= 0')
+
+
+    " New algo: buffer locality > ft
+    " We start by filtering either the local hows, or the remaining global ones
+    let local_hows = filter(copy(hows), 'v:val.local == bufnr')
+    if !empty(local_hows)
+      " Note: having a mismatching ft for the current buffer makes no sense.
+      " => len(local_hows) should be 1 at most
+      let hows = local_hows
+      " else: the initial (copied!!) value contains everything
+    endif
+
+    " Now we can sort by ft_index
+    call lh#list#sort(hows, { lhs, rhs -> lhs.ft_index - rhs.ft_index })
+    " TODO: assert -> We expect no duplicates given a ft_index
+    let new_repl = { 'pattern': {'replacement': hows[0].replacement, 'prio': hows[0].prio} }
+
+
+    " Old algo: ft > buffer locality
+    for how in [] " used to be: hows
+      let ft=how.ft_index
 
       if empty(new_repl[pattern])
+        " New? => We record the compatible replacement
         let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
         let new_repl.ft = ft
       else
@@ -112,7 +134,7 @@ function! lh#dev#style#get(ft) abort
       endif " compare to previous definition
     endfor
     if !empty(new_repl[pattern])
-      unlet new_repl.ft
+      " unlet new_repl.ft " used by old algo
       call extend(res, new_repl)
     endif
   endfor
@@ -300,11 +322,11 @@ function! lh#dev#style#_add(...) abort
   let styles = filter(copy(previous), 'v:val.local == local && v:val.ft == ft')
   if !empty(styles)
     let style = styles[0]
-      let style.replacement = repl
-      let style.prio = prio
-      return
+    let style.replacement = repl
+    let style.prio = prio
+    return
   endif
-  " This is new => add ;; note the "return" in the search loop
+  " This is new => add ;; note the "return" after the search loop
   let s:style[pattern] = previous +
         \ [ {'local': local, 'ft': ft, 'replacement': repl, 'prio': prio }]
   call s:Verbose('Register %1 style for %2 filetype%3, of priority %4 on %5 -> %6',

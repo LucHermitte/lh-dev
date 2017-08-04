@@ -60,7 +60,7 @@ function! lh#dev#editorconfig#hook(config) abort
   " filetypes, nor if it's a global setting
   " => We need to make it as local as possible with "-buffer" option. This also
   " means, the heuristic used to choose a style shall be changed!
-  call lh#dev#style#use(a:config, { 'ft': &ft})
+  call lh#dev#style#use(a:config, {'buffer': 1})
 endfunction
 
 "------------------------------------------------------------------------
