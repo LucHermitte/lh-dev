@@ -4,7 +4,7 @@
 "		<URL:http://github.com/LucHermitte/lh-dev>
 " Version:      1.3.9
 " Created:      14th Feb 2014
-" Last Update:  06th Dec 2015
+" Last Update:  07th Aug 2017
 "------------------------------------------------------------------------
 " Description:
 "       Unit tests for lh#dev#style
@@ -41,18 +41,20 @@ endfunction
 function! s:Test_global_all()
   " Todo: play with scratch buffer
   " Yes there is a trailing whitespace
-  AddStyle ; ;\ 
-  AssertEqual(s:GetStyle(&ft), {';': '; '})
-  AssertEqual(s:GetStyle('fake'), {';': '; '})
+  AddStyle [[:space:]]*;[[:space:]]* ;\ 
+  AssertEqual(s:GetStyle(&ft), {'[[:space:]]*;[[:space:]]*': '; '})
+  AssertEqual(s:GetStyle('fake'), {'[[:space:]]*;[[:space:]]*': '; '})
 
   AssertEqual(lh#dev#style#apply('toto;titi'), 'toto; titi')
-  " Shall the function be idempotent?
-  " AssertEqual(lh#dev#style#apply('toto; titi'), 'toto; titi')
-  " AssertEqual(lh#dev#style#apply('toto  ;   titi'), 'toto; titi')
+  " The [[:space:]] permits to have an idempotent pattern.
+  " At this point, '\' is transformed into the character '\\', which makes
+  " impossible to use '\s*;\s*' => TODO: may need a way to specify regex!
+  AssertEqual(lh#dev#style#apply('toto; titi'), 'toto; titi')
+  AssertEqual(lh#dev#style#apply('toto  ;   titi'), 'toto; titi')
 
   AddStyle | |\n
-  AssertEqual(s:GetStyle(&ft), {';': '; ', '|': '|\n'})
-  AssertEqual(s:GetStyle('fake'), {';': '; ', '|': '|\n'})
+  AssertEqual(s:GetStyle(&ft), {'[[:space:]]*;[[:space:]]*': '; ', '|': '|\n'})
+  AssertEqual(s:GetStyle('fake'), {'[[:space:]]*;[[:space:]]*': '; ', '|': '|\n'})
 
   AssertEqual(lh#dev#style#apply('toto|titi'), "toto|\ntiti")
   " Shall the function be idempotent?
@@ -207,6 +209,63 @@ function! s:Test_this_ft_over_all()
   AssertEqual(s:GetStyle(&ft)   , {';': '; '})
 endfunction
 
+" Function: s:Test_check_prio() {{{3
+function! s:Test_check_prio()
+  AddStyle T glob
+  AssertEqual(s:GetStyle('fake'), {'T': 'glob'})
+  AssertEqual(s:GetStyle(&ft)   , {'T': 'glob'})
+
+  AddStyle T ft -ft
+  AssertEqual(s:GetStyle('fake'), {'T': 'glob'})
+  AssertEqual(s:GetStyle(&ft)   , {'T': 'ft'})
+
+  " Buffer has priority over ft
+  AddStyle T buffer -b
+  AssertEqual(s:GetStyle('fake'), {'T': 'buffer'})
+  AssertEqual(s:GetStyle(&ft)   , {'T': 'buffer'})
+
+  " Check this is correctly filled
+  let bufnr = bufnr('%')
+  let style = lh#dev#style#debug('s:style')
+  AssertEqual! (len(style)  , 1)
+  AssertEqual! (len(style.T), 3)
+  " First added -> global
+  AssertEqual(style.T[0].ft         , '*')
+  AssertEqual(style.T[0].local      , -1)
+  AssertEqual(style.T[0].replacement, 'glob')
+
+  " Second added -> ft
+  AssertEqual(style.T[1].ft         , &ft)
+  AssertEqual(style.T[1].local      , -1)
+  AssertEqual(style.T[1].replacement, 'ft')
+
+  " Third added -> buffer
+  AssertEqual(style.T[2].ft         , '*')
+  AssertEqual(style.T[2].local      , bufnr)
+  AssertEqual(style.T[2].replacement, 'buffer')
+
+  " Check this is correctly restituted
+  " Current buffer, whatever the buffer => locall style
+  AssertEqual(s:GetStyle('fake'), {'T': 'buffer'})
+  AssertEqual(s:GetStyle(&ft)   , {'T': 'buffer'})
+  AssertEqual(&ft, 'vim')
+  try " other buffer, no ft => global
+    new " other ft
+    AssertEqual(s:GetStyle('fake'), {'T': 'glob'})
+    AssertEqual(s:GetStyle('vim')   , {'T': 'ft'})
+  finally
+    bw
+  endtry
+  try " other buffer, vim ft => vimstyle
+    new " same ft
+    set ft=vim
+    AssertEqual(s:GetStyle('fake'), {'T': 'glob'})
+    AssertEqual(s:GetStyle('vim')   , {'T': 'ft'})
+  finally
+    bw
+  endtry
+endfunction
+
 " Function: s:Test_mix_everything() {{{3
 function! s:Test_mix_everything()
   AddStyle T 1 -ft -b
@@ -293,3 +352,4 @@ endfunction
 let &cpo=s:cpo_save
 "=============================================================================
 " vim600: set fdm=marker:
+" Vim: let b:vim_maintain.remove_trailing=0
