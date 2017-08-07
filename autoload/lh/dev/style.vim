@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  04th Aug 2017
+" Last Update:  06th Aug 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -85,16 +85,20 @@ function! lh#dev#style#get(ft) abort
   let bufnr = bufnr('%')
 
   for [pattern, hows] in items(s:style)
-    let new_repl = { 'pattern': {} }
+    let new_repl = {}
+    let new_repl[pattern] = {}
 
     " Keep only those related to the current buffer, or global
     let hows = filter(copy(hows), 'v:val.local == -1 || v:val.local == bufnr')
 
     " Compute ft adequation of the repl-ft to the current ft stack
-    call map(hows, 'v:val.ft_index = index(fts, v:val.ft')
+    call map(hows, 'extend(v:val, {"ft_index": index(fts, v:val.ft)})')
 
     " Keep also only those with a related ft
     call filter(hows, 'v:val.ft_index >= 0')
+    if empty(hows)
+      continue
+    endif
 
 
     " New algo: buffer locality > ft
@@ -106,11 +110,12 @@ function! lh#dev#style#get(ft) abort
       let hows = local_hows
       " else: the initial (copied!!) value contains everything
     endif
+    call lh#assert#value(hows).not().empty()
 
     " Now we can sort by ft_index
     call lh#list#sort(hows, { lhs, rhs -> lhs.ft_index - rhs.ft_index })
     " TODO: assert -> We expect no duplicates given a ft_index
-    let new_repl = { 'pattern': {'replacement': hows[0].replacement, 'prio': hows[0].prio} }
+    let new_repl[pattern] = {'replacement': hows[0].replacement, 'prio': hows[0].prio}
 
 
     " Old algo: ft > buffer locality
@@ -269,6 +274,7 @@ function! lh#dev#style#_decode_add_params(...) abort
   let ft    = '*'
   let prio  = 1
   let list  = 0
+  let strs  = {}
   for o in a:000
     if     o =~ '-b\%[uffer]'
       let local = bufnr('%')
@@ -281,40 +287,41 @@ function! lh#dev#style#_decode_add_params(...) abort
       endif
     elseif o =~ '-l\%[ist]'
       let list = 1
-    elseif !exists('pattern')
-      let pattern = o
+    elseif !has_key(strs, 'pattern')
+      let strs.pattern = o
     else
-      let repl = o
+      let strs.repl = o
     endif
   endfor
 
-  return [local, ft, prio, list]
+  return [local, ft, prio, list, strs]
 endfunction
 
 " Function: lh#dev#style#_add(pattern, ...) {{{3
 function! lh#dev#style#_add(...) abort
   " Analyse params {{{4
-  let [local, ft, prio, list] = call('lh#dev#style#_decode_add_params', a:000)
+  let [local, ft, prio, list, strs] = call('lh#dev#style#_decode_add_params', a:000)
 
   " list styles
   if list == 1
     let styles = lh#dev#style#get(ft)
-    if exists('pattern')
-      let styles = filter(copy(styles), 'v:key =~ pattern')
+    if has_key(strs, 'pattern')
+      let styles = filter(copy(styles), 'v:key =~ strs.pattern')
     endif
     echo join(map(items(styles), 'string(v:val)'), "\n")
     return
   endif
 
 
-  if !exists('pattern')
+  if !has_key(strs, 'pattern')
     throw "Pattern unspecified in ".string(a:000)
   endif
-  if !exists('repl')
+  if !has_key(strs, 'repl')
     throw "Replacement text unspecified in ".string(a:000)
   endif
+  let pattern = strs.pattern
   " Interpret some escape sequences
-  let repl = lh#mapping#reinterpret_escaped_char(repl)
+  let repl = lh#mapping#reinterpret_escaped_char(strs.repl)
 
   " Add the new style {{{4
   let previous = get(s:style, pattern, [])
