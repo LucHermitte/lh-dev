@@ -57,6 +57,15 @@ function! lh#dev#style#debug(expr) abort
   return eval(a:expr)
 endfunction
 
+" # Misc    {{{2
+" s:getSNR([func_name]) {{{3
+function! s:getSNR(...)
+  if !exists("s:SNR")
+    let s:SNR=matchstr(expand('<sfile>'), '<SNR>\d\+_\zegetSNR$')
+  endif
+  return s:SNR . (a:0>0 ? (a:1) : '')
+endfunction
+
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
@@ -78,6 +87,10 @@ endfunction
 " 2*k- for all ft && global
 "
 " TODO: test the new priorities
+function! s:cmp_index(lhs, rhs) abort
+  return a:lhs.ft_index - a:rhs.ft_index
+endfunction
+
 function! lh#dev#style#get(ft) abort
   let res = {}
 
@@ -113,7 +126,7 @@ function! lh#dev#style#get(ft) abort
     call lh#assert#value(hows).not().empty()
 
     " Now we can sort by ft_index
-    call lh#list#sort(hows, { lhs, rhs -> lhs.ft_index - rhs.ft_index })
+    call lh#list#sort(hows, s:getSNR('cmp_index'))
     " TODO: assert -> We expect no duplicates given a ft_index
     let new_repl[pattern] = {'replacement': hows[0].replacement, 'prio': hows[0].prio}
 
