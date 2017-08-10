@@ -83,7 +83,7 @@ function! lh#dev#style#indent_brace_style#use(styles, indent, ...) abort
     " complicates &sw management...
     call call('lh#dev#style#_add', options + ['{' , '\n{'.repeat( ' ', &sw-1) ])
     call call('lh#dev#style#_add', options + ['};', '};\n'])
-    call call('lh#dev#style#_add', options + ['}' , '}\n' ])
+    call call('lh#dev#style#_add', options + ['}' , ' }\n' ])
   elseif a:indent =~? 'Lisp'
     call call('lh#dev#style#_add', options + ['{' , ' {\n'  ])
     call call('lh#dev#style#_add', options + ['};', '};\n'])
@@ -91,7 +91,10 @@ function! lh#dev#style#indent_brace_style#use(styles, indent, ...) abort
   elseif a:indent =~? 'Java'
     call call('lh#dev#style#_add', options + ['{', ' {\n'])
     call call('lh#dev#style#_add', options + ['}', '\n}' ])
+  else
+    return 0
   endif
+  return 1
 endfunction
 
 "------------------------------------------------------------------------

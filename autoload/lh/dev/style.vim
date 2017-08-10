@@ -23,6 +23,8 @@ let s:k_version = 2000
 "       - lh-vim-lib v4.0.0
 " Tests:
 "       See tests/lh/dev-style.vim
+" TODO:
+"       Remove unloaded buffers
 " }}}1
 "=============================================================================
 
@@ -267,9 +269,10 @@ function! lh#dev#style#use(styles, ...) abort
       let funcnames = map(copy(plugins_relative_to_rtp), 'v:val[s:k_nb_leading_chars : - s:k_nb_trailing_chars]')
       call map(funcnames, 'substitute(v:val, "[/\\\\]", "#", "g")."#use"')
       call s:Verbose('Loading styles for %1: %2: -> %3', style_name, style_state, funcnames)
-      call map(copy(funcnames), 'call (function(v:val), args)')
+      return min(map(copy(funcnames), 'call (function(v:val), args)'))
     else
       call s:Verbose('No style-plugin found for %1: %2', style_name, style_state)
+      return 0
     endif
   endfor
 endfunction
