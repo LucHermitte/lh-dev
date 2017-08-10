@@ -2,7 +2,7 @@
 " File:         tests/lh/dev-style.vim                            {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://github.com/LucHermitte/lh-dev>
-" Version:      1.3.9
+" Version:      2.0.0
 " Created:      14th Feb 2014
 " Last Update:  07th Aug 2017
 "------------------------------------------------------------------------
