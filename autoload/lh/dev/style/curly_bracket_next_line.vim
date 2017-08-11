@@ -56,7 +56,7 @@ function! lh#dev#style#curly_bracket_next_line#use(styles, value, ...) abort
   let input_options = get(a:, 1, {})
   let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
 
-  if a:value
+  if a:value =~? '\v(true|yes|1)'
     call call('lh#dev#style#_add', options + ['{' , '\n{' ])
   else
     call call('lh#dev#style#_add', options + ['{' , '{' ])

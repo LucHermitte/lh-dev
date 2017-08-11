@@ -2,7 +2,8 @@
 require 'spec_helper'
 require 'pp'
 
-RSpec.describe "When testing semantic styles", :style do
+# =====[ Semantic Styles {{{1
+RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
   let (:filename) { "test.cpp" }
   let (:editorconfig) { ".editorconfig" }
 
