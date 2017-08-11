@@ -36,6 +36,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       vim.command('silent! unlet g:cpp_std_flavour')
       expect(vim.command('runtime! spec/support/c-snippets.vim')).to eq "" # if snippet
       expect(vim.command('verbose iab if')).to match(/LH_cpp_snippets_def_abbr/)
+      vim.command('call lh#dev#style#clear()')
       clear_buffer
       set_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
@@ -54,7 +55,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }<++>
       EOF
@@ -68,7 +69,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }<++>
       EOF
@@ -82,7 +83,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }
       <++>
@@ -97,7 +98,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo)
+      if(foo)
       { <++>
       }
       <++>
@@ -112,7 +113,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo)
+      if(foo)
       { <++> }
       <++>
       EOF
@@ -126,7 +127,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>}
         <++>
       EOF
@@ -142,7 +143,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }<++>
       EOF
@@ -156,7 +157,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo)
+      if(foo)
       {
         <++>
       }
@@ -188,6 +189,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       vim.command('silent! unlet g:cpp_std_flavour')
       expect(vim.command('runtime! spec/support/c-snippets.vim')).to eq "" # if snippet
       expect(vim.command('verbose iab if')).to match(/LH_cpp_snippets_def_abbr/)
+      vim.command('call lh#dev#style#clear()')
       clear_buffer
       set_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
@@ -215,7 +217,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }<++>
       EOF
@@ -232,7 +234,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }<++>
       EOF
@@ -249,7 +251,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }
       <++>
@@ -267,7 +269,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo)
+      if(foo)
       { <++>
       }
       <++>
@@ -285,7 +287,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo)
+      if(foo)
       { <++> }
       <++>
       EOF
@@ -302,7 +304,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>}
         <++>
       EOF
@@ -321,7 +323,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo) {
+      if(foo) {
         <++>
       }<++>
       EOF
@@ -338,7 +340,7 @@ RSpec.describe "When testing semantic styles", :style, :indent_brace_style do
       assert_buffer_contents <<-EOF
       /** File Header line to trick auto-inclusion */
 
-      if (foo)
+      if(foo)
       {
         <++>
       }
