@@ -62,21 +62,91 @@ RSpec.describe "When testing EditorConfig Domain-Specific styles", :style, :doma
     end
 
     # ====[ curly_bracket_next_line {{{3
-    specify "`if` is correctly expanded w/ curly_bracket_next_line", :curly_bracket_next_line do
-      # Inject editorconfig file, then, reload the settings
-      File.open(editorconfig, "w") { |f| f.write("[*]\ncurly_bracket_next_line = true") }
-      vim.command("EditorConfigReload")
-      # And then test
-      vim.feedkeys('aif foo\<esc>')
-      vim.feedkeys('i\<esc>') # pause
-      assert_buffer_contents <<-EOF
-      /** File Header line to trick auto-inclusion */
+    context "while expanding `if`", :curly_bracket_next_line do
+      specify "`if` is correctly expanded w/ curly_bracket_next_line = true" do # {{{4
+        # Inject editorconfig file, then, reload the settings
+        File.open(editorconfig, "w") { |f| f.write("[*]\ncurly_bracket_next_line = true") }
+        vim.command("EditorConfigReload")
+        # And then test
+        vim.feedkeys('aif foo\<esc>')
+        vim.feedkeys('i\<esc>') # pause
+        assert_buffer_contents <<-EOF
+        /** File Header line to trick auto-inclusion */
 
-      if(foo)
-      {<++>}<++>
-      EOF
+        if(foo)
+        {<++>}<++>
+        EOF
+      end
+      specify "`if` is correctly expanded w/ curly_bracket_next_line = no" do # {{{4
+        # Inject editorconfig file, then, reload the settings
+        File.open(editorconfig, "w") { |f| f.write("[*]\ncurly_bracket_next_line = no") }
+        vim.command("EditorConfigReload")
+        # And then test
+        vim.feedkeys('aif foo\<esc>')
+        vim.feedkeys('i\<esc>') # pause
+        assert_buffer_contents <<-EOF
+        /** File Header line to trick auto-inclusion */
+
+        if(foo){<++>}<++>
+        EOF
+      end
     end
 
+    # ====[ spaces_around_brackets {{{3
+    context "while expanding `if`", :spaces_around_brackets do
+      specify "`if` is correctly expanded w/ spaces_around_brackets = inside" do # {{{4
+        # Inject editorconfig file, then, reload the settings
+        File.open(editorconfig, "w") { |f| f.write("[*]\nspaces_around_brackets = inside") }
+        vim.command("EditorConfigReload")
+        # And then test
+        vim.feedkeys('aif foo\<esc>')
+        vim.feedkeys('i\<esc>') # pause
+        assert_buffer_contents <<-EOF
+        /** File Header line to trick auto-inclusion */
+
+        if( foo ){<++>}<++>
+        EOF
+      end
+      specify "`if` is correctly expanded w/ spaces_around_brackets = outside" do # {{{4
+        # Inject editorconfig file, then, reload the settings
+        File.open(editorconfig, "w") { |f| f.write("[*]\nspaces_around_brackets = outside") }
+        vim.command("EditorConfigReload")
+        # And then test
+        vim.feedkeys('aif foo\<esc>')
+        vim.feedkeys('i\<esc>') # pause
+        assert_buffer_contents <<-EOF
+        /** File Header line to trick auto-inclusion */
+
+        if (foo) {<++>}<++>
+        EOF
+      end
+      specify "`if` is correctly expanded w/ spaces_around_brackets = both" do # {{{4
+        # Inject editorconfig file, then, reload the settings
+        File.open(editorconfig, "w") { |f| f.write("[*]\nspaces_around_brackets  = both") }
+        vim.command("EditorConfigReload")
+        # And then test
+        vim.feedkeys('aif foo\<esc>')
+        vim.feedkeys('i\<esc>') # pause
+        assert_buffer_contents <<-EOF
+        /** File Header line to trick auto-inclusion */
+
+        if ( foo ) {<++>}<++>
+        EOF
+      end
+      specify "`if` is correctly expanded w/ spaces_around_brackets = none" do # {{{4
+        # Inject editorconfig file, then, reload the settings
+        File.open(editorconfig, "w") { |f| f.write("[*]\nspaces_around_brackets = none") }
+        vim.command("EditorConfigReload")
+        # And then test
+        vim.feedkeys('aif foo\<esc>')
+        vim.feedkeys('i\<esc>') # pause
+        assert_buffer_contents <<-EOF
+        /** File Header line to trick auto-inclusion */
+
+        if(foo){<++>}<++>
+        EOF
+      end
+    end
   end # }}}2
 
 end # }}}1

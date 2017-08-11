@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  06th Aug 2017
+" Last Update:  11th Aug 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -228,10 +228,9 @@ endfunction
 
 " Function: lh#dev#style#use(styles [, options]) {{{3
 " TODO: handle:
-" * editor config possible future settings (see
-" https://github.com/jedmao/codepainter/tree/master/test/cases)
-"   - spaces_around_operators (true/hybrid/false)
-"   - spaces_around_brackets (inside/outside/both/none)
+" * editor config possible future settings
+"   - spaces_around_operators (true/hybrid/false) (see
+"   https://github.com/jedmao/codepainter/tree/master/test/cases)
 " * clang-format settings (https://clangformat.com/)
 "   - BreakBeforeBinaryOperators
 "   - BreakBeforeBraces
