@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  11th Aug 2017
+" Last Update:  23rd Aug 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -74,7 +74,8 @@ endfunction
 " # Main Style functions {{{2
 " Function: lh#dev#style#clear() {{{3
 function! lh#dev#style#clear()
-  let s:style = {}
+  let s:style        = {}
+  let s:style_groups = {}
 endfunction
 
 " Function: lh#dev#style#get(ft) {{{3
@@ -88,9 +89,43 @@ endfunction
 " ...
 " 2*k- for all ft && global
 "
+" Let's say the priority is: group over single definitions
 " TODO: test the new priorities
 function! s:cmp_index(lhs, rhs) abort
   return a:lhs.ft_index - a:rhs.ft_index
+endfunction
+
+function! s:filter_hows(hows, fts, bufnr) abort
+  " Keep only those related to the current buffer, or global
+  let hows = filter(copy(a:hows), 'v:val.local == -1 || v:val.local == a:bufnr')
+
+  " Compute ft adequation of the repl-ft to the current ft stack
+  call map(hows, 'extend(v:val, {"ft_index": index(a:fts, v:val.ft)})')
+
+  " Keep also only those with a related ft
+  call filter(hows, 'v:val.ft_index >= 0')
+
+  " algo: buffer locality > ft
+  " We start by filtering either the local hows, or the remaining global ones
+  let local_hows = filter(copy(hows), 'v:val.local == a:bufnr')
+  if !empty(local_hows)
+    " Note: having a mismatching ft for the current buffer makes no sense.
+    " => len(local_hows) should be 1 at most
+    let hows = local_hows
+    " else: the initial (copied!!) value contains everything
+  endif
+  " call lh#assert#value(hows).not().empty()
+
+  " Now we can sort by ft_index
+  call lh#list#sort(hows, s:getSNR('cmp_index'))
+  " TODO: assert -> We expect no duplicates given a ft_index
+  return hows
+endfunction
+
+function! s:filter_related(styles, fts, bufnr) abort
+  let styles = map(items(a:styles), '[v:val[0], s:filter_hows(v:val[1], a:fts, a:bufnr)]')
+  call filter(styles, '!empty(v:val[1])')
+  return styles
 endfunction
 
 function! lh#dev#style#get(ft) abort
@@ -99,66 +134,33 @@ function! lh#dev#style#get(ft) abort
   let fts = lh#ft#option#inherited_filetypes(a:ft) + ['*']
   let bufnr = bufnr('%')
 
-  for [pattern, hows] in items(s:style)
-    let new_repl = {}
-    let new_repl[pattern] = {}
-
-    " Keep only those related to the current buffer, or global
-    let hows = filter(copy(hows), 'v:val.local == -1 || v:val.local == bufnr')
-
-    " Compute ft adequation of the repl-ft to the current ft stack
-    call map(hows, 'extend(v:val, {"ft_index": index(fts, v:val.ft)})')
-
-    " Keep also only those with a related ft
-    call filter(hows, 'v:val.ft_index >= 0')
-    if empty(hows)
-      continue
-    endif
-
-
-    " New algo: buffer locality > ft
-    " We start by filtering either the local hows, or the remaining global ones
-    let local_hows = filter(copy(hows), 'v:val.local == bufnr')
-    if !empty(local_hows)
-      " Note: having a mismatching ft for the current buffer makes no sense.
-      " => len(local_hows) should be 1 at most
-      let hows = local_hows
-      " else: the initial (copied!!) value contains everything
-    endif
+  " Extract single definitions
+  let styles = s:filter_related(s:style, fts, bufnr)
+  for [pattern, hows] in styles
     call lh#assert#value(hows).not().empty()
-
-    " Now we can sort by ft_index
-    call lh#list#sort(hows, s:getSNR('cmp_index'))
-    " TODO: assert -> We expect no duplicates given a ft_index
+    " call lh#assert#value(len(hows)).eq(1)
+    let new_repl = {}
     let new_repl[pattern] = {'replacement': hows[0].replacement, 'prio': hows[0].prio}
 
-
-    " Old algo: ft > buffer locality
-    for how in [] " used to be: hows
-      let ft=how.ft_index
-
-      if empty(new_repl[pattern])
-        " New? => We record the compatible replacement
-        let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
-        let new_repl.ft = ft
-      else
-        let old_ft = get(new_repl, 'ft', -1)
-        if ft < old_ft
-          let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
-          let new_repl.ft = ft
-        elseif ft == old_ft
-          if how.local == bufnr " then we override global setting
-            let new_repl[pattern] = { 'replacement': how.replacement, 'prio': how.prio }
-          endif
-        endif " compare fts
-      endif " compare to previous definition
-    endfor
-    if !empty(new_repl[pattern])
-      " unlet new_repl.ft " used by old algo
-      call extend(res, new_repl)
-    endif
+    call extend(res, new_repl)
   endfor
 
+  " Extract groups
+  let style_groups = s:filter_related(s:style_groups, fts, bufnr)
+  for [gname, hows] in style_groups
+    call lh#assert#value(hows).not().empty()
+    " call lh#assert#value(len(hows)).eq(1)
+    call lh#assert#value(hows[0]).has_key('styles')
+    call lh#assert#value(hows[0].styles).has_key('_definitions')
+    for [pattern, really_how] in items(hows[0].styles._definitions)
+      call s:Verbose("grp:%1: /%2/, hows: %2", gname, pattern, really_how)
+      let new_repl = {}
+      let new_repl[pattern] = {'replacement': really_how.replacement, 'prio': really_how.priority}
+      call extend(res, new_repl)
+    endfor
+  endfor
+
+  " Return the result...
   return res
 endfunction
 
@@ -173,7 +175,8 @@ function! lh#dev#style#_sort_styles(styles) abort
   endfor
   let keys = []
   for prio in lh#list#sort(copy(keys(prio_lists)), 'N')
-    let keys += reverse(lh#list#sort(map(prio_lists[prio], 'escape(v:val, "\\")')))
+    " let keys += reverse(lh#list#sort(map(prio_lists[prio], 'escape(v:val, "\\")')))
+    let keys += reverse(lh#list#sort(prio_lists[prio]))
   endfor
   return keys
   " let keys = reverse(lh#list#sort(map(keys(a:styles), 'escape(v:val, "\\")')))
@@ -246,6 +249,7 @@ endfunction
 "   - SpacesInAngles
 "   - SpacesInCStyleCastParentheses
 "   - SpacesInParentheses
+" * Need to be able to clear a previous similar style
 let s:k_nb_leading_chars  = len('autoload/')
 let s:k_nb_trailing_chars = len('.vim') + 1
 function! lh#dev#style#use(styles, ...) abort
@@ -253,6 +257,8 @@ function! lh#dev#style#use(styles, ...) abort
   " let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
 
   for [style_name, style_state] in items(a:styles)
+    let style_name  = tolower(style_name)
+    let style_state = tolower(style_state)
     let style_state = substitute(style_state, '.*', '\L&\E', '')
     let style_state = substitute(style_state, '\W', '_', 'g')
     let path = 'autoload/**/style/'.style_name.'/'.style_state.'.vim'
@@ -275,6 +281,12 @@ function! lh#dev#style#use(styles, ...) abort
     endif
   endfor
 endfunction
+
+
+function! s:getSID() abort
+  return eval(matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_getSID$'))
+endfunction
+let s:k_script_name      = s:getSID()
 
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
@@ -344,15 +356,43 @@ function! lh#dev#style#_add(...) abort
   let styles = filter(copy(previous), 'v:val.local == local && v:val.ft == ft')
   if !empty(styles)
     let style = styles[0]
+    let style.override = get(style, 'override', []) + [{'replacement': style.replacement, 'prio': style.prio}]
     let style.replacement = repl
     let style.prio = prio
-    return
+    return {pattern: copy(style)}
   endif
   " This is new => add ;; note the "return" after the search loop
-  let s:style[pattern] = previous +
-        \ [ {'local': local, 'ft': ft, 'replacement': repl, 'prio': prio }]
+  let style = {'local': local, 'ft': ft, 'replacement': repl, 'prio': prio }
+  let s:style[pattern] = previous + [style]
   call s:Verbose('Register %1 style for %2 filetype%3, of priority %4 on %5 -> %6',
         \ local < 0 ? 'global' : 'bufnr('.local.')' , ft=='*' ? 'all' : ft, ft=='*' ? 's' : '', prio, pattern, repl)
+  return {pattern: copy(style)}
+endfunction
+
+" Function: lh#dev#style#define_group(name, is_for_all_buffers, ft) {{{3
+function! lh#dev#style#define_group(name, is_for_all_buffers, ft) abort
+  let previous = get(s:style_groups, a:name, [])
+  let local = a:is_for_all_buffers ? '-1' : bufnr('%')
+  " first check whether there is already something before adding anything
+  let groups = filter(copy(previous), 'v:val.local == local && v:val.ft == a:ft')
+  if !empty(groups)
+    " We will override all the styles
+    let group = groups[0]
+  else
+    " We will define a bunch of new styles
+    let group = {'local': local, 'ft': a:ft}
+    let s:style_groups[a:name] = previous + [group]
+  endif
+  let group.styles = lh#object#make_top_type({'_definitions': {}})
+  call lh#object#inject_methods(group.styles, s:k_script_name, ['add'])
+  return group.styles
+endfunction
+
+function! s:add(pattern, repl, ...) dict abort
+  call s:Verbose("Add style: /%1/ -> %2", a:pattern, a:repl)
+  let prio = get(a:, 1, 1)
+  let self._definitions[a:pattern] = {'replacement': a:repl, 'priority': prio}
+  return self
 endfunction
 
 " # Internals {{{2
@@ -404,8 +444,10 @@ AddStyle @{  -ft=c @{
 AddStyle @}  -ft=c @}
 
 " Doxygen Formulas
-AddStyle \\f{ -ft=c \\\\f{
-AddStyle \\f} -ft=c \\\\f}
+" First \ -> cmdline => \\ == One '\' character passed to vim function
+" => \\\\ => 2 '\' characters, interpreted as a single '\' character in regex
+AddStyle \\\\f{ -ft=c \\\\f{
+AddStyle \\\\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup/K&R {{{2
 call lh#dev#style#use({'indent_brace_style': 'Stroustrup'}, {'ft': 'c', 'prio': 10})
