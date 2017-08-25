@@ -326,6 +326,124 @@ function! s:Test_mix_everything()
   endtry
 endfunction
 
+"------------------------------------------------------------------------
+" # Tests with used styles {{{2
+" Function: s:Test_use_attach() {{{3
+function! s:Test_use_attach() abort
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"BreakBeforeBraces": "attach"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo() {\ntoto\n}##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_stroustrup() " #{{{3
+  " if (x < 0) {
+  "     puts("Negative");
+  "     negative(x);
+  " }
+  " else {
+  "     puts("Non-negative");
+  "     nonnegative(x);
+  " }
+  " class Vector {
+  " public:
+  "     Vector(int s) :elem(new double[s]), sz(s) { }   // construct a Vector
+  "     double& operator[](int i) { return elem[i]; }   // element access: subscripting
+  "     int size() { return sz; }
+  " private:
+  "     double * elem;    // pointer to the elements
+  "     int sz;           // number of elements
+  " };
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"BreakBeforeBraces": "stroustrup"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_linux() " #{{{3
+  " if (x < 0) {
+  "     puts("Negative");
+  "     negative(x);
+  " }
+  " else {
+  "     puts("Non-negative");
+  "     nonnegative(x);
+  " }
+  " class Vector
+  " {
+  " public:
+  "     Vector(int s) :elem(new double[s]), sz(s) { }   // construct a Vector
+  "     double& operator[](int i) { return elem[i]; }   // element access: subscripting
+  "     int size() { return sz; }
+  " private:
+  "     double * elem;    // pointer to the elements
+  "     int sz;           // number of elements
+  " };
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"BreakBeforeBraces": "linux"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_allman() " #{{{3
+  " while (x == y)
+  " {
+  "     something();
+  "     somethingelse();
+  " }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"BreakBeforeBraces": "allman"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_gnu() " #{{{3
+  " static char *
+  " concat (char *s1, char *s2)
+  " {
+  "   while (x == y)
+  "     {
+  "       something ();
+  "       somethingelse ();
+  "     }
+  "   finalthing ();
+  " }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"BreakBeforeBraces": "gnu"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
 " }}}2
 "------------------------------------------------------------------------
 " # Override last definition {{{2

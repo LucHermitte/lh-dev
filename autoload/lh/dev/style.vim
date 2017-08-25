@@ -150,9 +150,8 @@ function! lh#dev#style#get(ft) abort
   for [gname, hows] in style_groups
     call lh#assert#value(hows).not().empty()
     " call lh#assert#value(len(hows)).eq(1)
-    call lh#assert#value(hows[0]).has_key('styles')
-    call lh#assert#value(hows[0].styles).has_key('_definitions')
-    for [pattern, really_how] in items(hows[0].styles._definitions)
+    call lh#assert#value(hows[0]).has_key('_definitions')
+    for [pattern, really_how] in items(hows[0]._definitions)
       call s:Verbose("grp:%1: /%2/, hows: %2", gname, pattern, really_how)
       let new_repl = {}
       let new_repl[pattern] = {'replacement': really_how.replacement, 'prio': really_how.priority}
@@ -189,6 +188,22 @@ function! lh#dev#style#apply(text, ...) abort
   let g:applyied_on += [a:text]
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
+
+  " Alas:
+  " - substitute+_get_replacement cannot work because it cannot tell exactly
+  "   which key matched
+  " - manual iteration with match(..., start) is not compatible with \zs
+  " => patterns must explicitly specify their context
+  " => new algo, new definitions
+  let res = a:text
+  for [pattern, style] in items(styles)
+    " TODO: see whether a chained map() would be faster
+    let res = substitute(res, pattern, style.replacement, 'g')
+  endfor
+  return res
+
+
+  " The old algo...
   let keys = lh#dev#style#_sort_styles(styles)
   if empty(keys)
     return a:text
@@ -369,23 +384,27 @@ function! lh#dev#style#_add(...) abort
   return {pattern: copy(style)}
 endfunction
 
-" Function: lh#dev#style#define_group(name, is_for_all_buffers, ft) {{{3
-function! lh#dev#style#define_group(name, is_for_all_buffers, ft) abort
-  let previous = get(s:style_groups, a:name, [])
+" Function: lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) {{{3
+function! lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) abort
+  let previous = get(s:style_groups, a:kind, [])
   let local = a:is_for_all_buffers ? '-1' : bufnr('%')
   " first check whether there is already something before adding anything
   let groups = filter(copy(previous), 'v:val.local == local && v:val.ft == a:ft')
   if !empty(groups)
     " We will override all the styles
+    call lh#assert#value(len(groups)).eq(1)
     let group = groups[0]
   else
     " We will define a bunch of new styles
-    let group = {'local': local, 'ft': a:ft}
-    let s:style_groups[a:name] = previous + [group]
+    let group = lh#object#make_top_type({'local': local, 'ft': a:ft})
+    let s:style_groups[a:kind] = previous + [group]
   endif
-  let group.styles = lh#object#make_top_type({'_definitions': {}})
-  call lh#object#inject_methods(group.styles, s:k_script_name, ['add'])
-  return group.styles
+  call lh#assert#value(group).has_key('ft').verifies({ self -> self.ft == a:ft})
+  call lh#assert#value(group).has_key('local').verifies({ self -> self.local == local})
+  let group.name         = a:name
+  let group._definitions = {}
+  call lh#object#inject_methods(group, s:k_script_name, ['add'])
+  return group
 endfunction
 
 function! s:add(pattern, repl, ...) dict abort
@@ -398,10 +417,7 @@ endfunction
 " # Internals {{{2
 " Function: lh#dev#style#_get_replacement(styles, match, keys, all_text) {{{3
 function! lh#dev#style#_get_replacement(styles, match, keys, all_text) abort
-  " if has_key(a:styles, a:match)
-  "   return a:styles[a:match].replacement
-  " else
-  "   We have been called => there is a match!
+  " We have been called => there is a match!
   let idx = lh#list#match_re(a:keys, a:match)
   if a:keys[idx] =~ '^^\|$$'
     " echomsg "match begin/end"
@@ -412,8 +428,7 @@ function! lh#dev#style#_get_replacement(styles, match, keys, all_text) abort
     endif
   endif
   " echomsg "match: ". a:keys[idx] . " -> " . (a:styles[a:keys[idx]].replacement)
-  return substitute(a:match, a:match, a:styles[a:keys[idx]].replacement, '')
-  " endif
+  return substitute(a:match, a:keys[idx], a:styles[a:keys[idx]].replacement, '')
 endfunction
 
 "------------------------------------------------------------------------
@@ -422,11 +437,11 @@ endfunction
 " # Space before open bracket in C & al {{{2
 " A little space before all C constructs in C and child languages
 " NB: the spaces isn't put before all open brackets
-AddStyle if(     -ft=c   if\ (
-AddStyle while(  -ft=c   while\ (
-AddStyle for(    -ft=c   for\ (
-AddStyle switch( -ft=c   switch\ (
-AddStyle catch(  -ft=cpp catch\ (
+" AddStyle -ft=c -prio=11 \\<\\(if\\|while\\|for\\|switch\\|catch\\)\\zs\\s*( \ (
+" AddStyle while(  -ft=c   while\ (
+" AddStyle for(    -ft=c   for\ (
+" AddStyle switch( -ft=c   switch\ (
+" AddStyle catch(  -ft=cpp catch\ (
 " ))))))))))
 
 " # Ignore style in C comments {{{2

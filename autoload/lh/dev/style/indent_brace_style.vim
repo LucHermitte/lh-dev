@@ -13,7 +13,8 @@ let s:k_version = '2.0.0'
 "
 "------------------------------------------------------------------------
 " History:      «history»
-" TODO:         «missing features»
+" TODO:
+" - Merge everything w/ clang-format's BreakBeforeBrace style
 " }}}1
 "=============================================================================
 
@@ -49,6 +50,49 @@ endfunction
 
 
 "------------------------------------------------------------------------
+" ## Styles             {{{1
+" # Style definitions {{{2
+" Function: lh#dev#style#indent_brace_style#_horstmann(local, ft, prio) {{{3
+" TODO: adapt the indent when sw is changed, or read it in a:styles
+" This also means that if Horstmann/Pico is global and &sw is not, it'll
+" complicates &sw management...
+function! lh#dev#style#indent_brace_style#_horstmann(local, ft, prio, ...) abort
+  let style = lh#dev#style#breakbeforebraces#_new('horstmann', a:local, a:ft)
+  call style.add('{' , '\n{'.repeat( ' ', &sw-1), a:prio)
+  call style.add('};', '\n};\n'                 , a:prio)
+  call style.add('}' , '\n}\n'                  , a:prio)
+  return style
+endfunction
+
+" Function: lh#dev#style#indent_brace_style#_pico(local, ft, prio) {{{3
+" TODO: adapt the indent when sw is changed, or read it in a:styles
+" This also means that if Horstmann/Pico is global and &sw is not, it'll
+" complicates &sw management...
+function! lh#dev#style#indent_brace_style#_pico(local, ft, prio, ...) abort
+  let style = lh#dev#style#breakbeforebraces#_new('pico', a:local, a:ft)
+  call style.add('{' , '\n{'.repeat( ' ', &sw-1), a:prio)
+  call style.add('};', '};\n'                   , a:prio)
+  call style.add('}' , ' }\n'                   , a:prio)
+  return style
+endfunction
+
+" Function: lh#dev#style#indent_brace_style#_lisp(local, ft, prio) {{{3
+function! lh#dev#style#indent_brace_style#_lisp(local, ft, prio, ...) abort
+  let style = lh#dev#style#breakbeforebraces#_new('lisp', a:local, a:ft)
+  call style.add('{' , ' {\n', a:prio)
+  call style.add('};', '};\n', a:prio)
+  call style.add('}' , '}\n' , a:prio)
+  return style
+endfunction
+
+" Function: lh#dev#style#indent_brace_style#_java(local, ft, prio) {{{3
+function! lh#dev#style#indent_brace_style#_java(local, ft, prio, ...) abort
+  let style = lh#dev#style#breakbeforebraces#_new('java', a:local, a:ft)
+  call style.add('{', ' {\n', a:prio)
+  call style.add('}', '\n}' , a:prio)
+  return style
+endfunction
+
 " ## API      functions {{{1
 
 " Function: lh#dev#style#indent_brace_style#use(styles, indent, ...) {{{3
@@ -56,44 +100,33 @@ function! lh#dev#style#indent_brace_style#use(styles, indent, ...) abort
   let input_options = get(a:, 1, {})
   let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
   if prio == 1
-    let options += ['-pr=10']
+    let prio9 = 9
+    let prio = 10
   endif
   if     a:indent =~? 'k_r\|1TBS\|OTBS\|linux_kernel\|bsd_knf\|Ratliff'
-    call call('lh#dev#style#_add', options + ['{' , ' {\n'  ])
-    call call('lh#dev#style#_add', options + ['};', '\n};\n'])
-    call call('lh#dev#style#_add', options + ['}' , '\n}'   ])
+    " TODO: check what are the other differences
+    let style = lh#dev#style#breakbeforebraces#_linux(local, ft, prio, prio9)
   elseif a:indent =~? 'Stroustrup'
-    call call('lh#dev#style#_add', options + ['{' , ' {\n'  ])
-    call call('lh#dev#style#_add', options + ['};', '\n};\n'])
-    call call('lh#dev#style#_add', options + ['}' , '\n}\n' ])
-  elseif a:indent =~? 'Allman\|Whitesmiths\|GNU'
-    call call('lh#dev#style#_add', options + ['{' , '\n{\n' ])
-    call call('lh#dev#style#_add', options + ['};', '\n};\n'])
-    call call('lh#dev#style#_add', options + ['}' , '\n}\n' ])
+    let style = lh#dev#style#breakbeforebraces#_stroustrup(local, ft, prio, prio9)
+  elseif a:indent =~? 'Allman\|Whitesmiths'
+    " TODO: check what are the other differences
+    let style = lh#dev#style#breakbeforebraces#_allman(local, ft, prio, prio9)
+  elseif a:indent =~? 'GNU'
+    let style = lh#dev#style#breakbeforebraces#_gnu(local, ft, prio, prio9)
   elseif a:indent =~? 'Horstmann'
-    " TODO: adapt the indent when sw is changed, or read it in a:styles
-    " This also means that if Horstmann/Pico is global and &sw is not, it'll
-    " complicates &sw management...
-    call call('lh#dev#style#_add', options + ['{' , '\n{'.repeat( ' ', &sw-1) ])
-    call call('lh#dev#style#_add', options + ['};', '\n};\n'])
-    call call('lh#dev#style#_add', options + ['}' , '\n}\n' ])
+    let style = lh#dev#style#indent_brace_style#_horstmann(local, ft, prio, prio9)
   elseif a:indent =~? 'Pico'
-    " TODO: adapt the indent when sw is changed, or read it in a:styles
-    " This also means that if Horstmann/Pico is global and &sw is not, it'll
-    " complicates &sw management...
-    call call('lh#dev#style#_add', options + ['{' , '\n{'.repeat( ' ', &sw-1) ])
-    call call('lh#dev#style#_add', options + ['};', '};\n'])
-    call call('lh#dev#style#_add', options + ['}' , ' }\n' ])
+    let style = lh#dev#style#indent_brace_style#_pico(local, ft, prio, prio9)
   elseif a:indent =~? 'Lisp'
-    call call('lh#dev#style#_add', options + ['{' , ' {\n'  ])
-    call call('lh#dev#style#_add', options + ['};', '};\n'])
-    call call('lh#dev#style#_add', options + ['}' , '}\n' ])
+    let style = lh#dev#style#indent_brace_style#_lisp(local, ft, prio, prio9)
   elseif a:indent =~? 'Java'
-    call call('lh#dev#style#_add', options + ['{', ' {\n'])
-    call call('lh#dev#style#_add', options + ['}', '\n}' ])
+    let style = lh#dev#style#indent_brace_style#_java(local, ft, prio, prio9)
   else
+    call s:Verbose("WARNING: Impossible to set `indent_brace_style` style to `%1`", a:indent)
+    call lh#common#warning_msg("WARNING: Impossible to set `indent_brace_style` style to `".a:indent.'`')
     return 0
   endif
+  call s:Verbose("`indent_brace_style` style set to `%1`", a:indent)
   return 1
 endfunction
 
