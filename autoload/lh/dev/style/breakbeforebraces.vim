@@ -88,7 +88,9 @@ endfunction
 " Function: lh#dev#style#breakbeforebraces#_linux(local, ft, prio) {{{3
 " Like Attach, but break before braces on function, namespace and class
 " definitions.
-" TODO: handle multiline statements
+" TODO:
+" - Handle multiline statements
+" - Update the definition when marker characters change
 let s:k_linux_context_no_break
       \ = '\%('
       \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
@@ -102,7 +104,10 @@ function! lh#dev#style#breakbeforebraces#_linux(local, ft, prio, prio9) abort
   " break if not behind one of the previous contexts, or at the beginning of
   " the line
   call style.add('\('.s:k_linux_context_no_break.'\s*\|^\)\@<!{', '\n{\n', a:prio + 1)
-  call style.add('};\@!'                                        , '\n}\n', a:prio)
+  call style.add('}\%(\s*\%(;\|else\|while\|$\|'.lh#marker#txt('.\{-}').'\)\)\@!' , '\n}\n', a:prio)
+  call style.add('}\ze\%(\s*\%(else\|while\)\)'                 , '\n} ', a:prio)
+  call style.add('}\ze$'                                        , '\n}', a:prio)
+  call style.add('}\ze'.lh#marker#txt('.\{-}')                  , '\n}', a:prio)
   call style.add('};'                                           , '\n};\n', a:prio)
   return style
 endfunction

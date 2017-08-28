@@ -18,6 +18,15 @@ UTSuite [lh-dev] Testing lh#dev#style
 
 runtime! autoload/lh/dev/style.vim autoload/lh/dev/style/*.vim
 
+runtime autoload/lh/marker.vim
+function! s:marker(...)
+  if !exists('*lh#marker#txt')
+    return '<+'.get(a:, 1, '').'+>'
+  else
+    return call('lh#marker#txt', a:000)
+  endif
+endfunction
+
 " Enforce at least a filetype when run from rspec
 set ft=vim
 
@@ -457,13 +466,13 @@ function! s:Test_use_ibs_kr() " #{{{3
   "     while (x == y) {
   "         something();
   "         somethingelse();
-  " 
+  "
   "         if (some_error)
   "             do_correct();
   "         else
   "             continue_as_usual();
   "     }
-  " 
+  "
   "     finalthing();
   "     ...
   " }
@@ -472,9 +481,10 @@ function! s:Test_use_ibs_kr() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})
     " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}'.'##'), "int main()\n{\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n} else {\ntiti;\n}##")
   finally
     bw
   endtry
@@ -483,17 +493,22 @@ endfunction
 function! s:Test_use_ibs_0tbs() " #{{{3
   " int main(int argc, char *argv[])
   " {
+  "     if (x < 0) {
+  "         puts("Negative");
+  "     } else {
+  "         nonnegative(x);
+  "     }
   "     ...
   "     while (x == y) {
   "         something();
   "         somethingelse();
-  " 
+  "
   "         if (some_error)
   "             do_correct();
   "         else
   "             continue_as_usual();
   "     }
-  " 
+  "
   "     finalthing();
   "     ...
   " }
@@ -502,9 +517,10 @@ function! s:Test_use_ibs_0tbs() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"indent_brace_style": "0TBS"}, {"buffer": 1})
     " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}'.s:marker('##')), "if(cond) {\ntoto\n}".s:marker("##"))
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n} else {\ntiti;\n}##")
   finally
     bw
   endtry
@@ -516,9 +532,10 @@ function! s:Test_use_ibs_linux_kernel() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"indent_brace_style": "linux_kernel"}, {"buffer": 1})
     " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}##'), "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n} else {\ntiti;\n}##")
     AssertEqual(&expandtab, 1)
     AssertEqual(&tabstop, 8)
   finally
@@ -709,9 +726,10 @@ function! s:Test_use_java() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"indent_brace_style": "java"}, {"buffer": 1})
     " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main() {\ntoto;\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main() {\ntoto;\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}##').'##', "if(cond) {\ntoto\n}\n####")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n} else {\ntiti;\n}##")
   finally
     bw
   endtry

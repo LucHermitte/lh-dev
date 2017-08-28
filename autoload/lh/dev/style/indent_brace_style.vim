@@ -51,12 +51,51 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Styles             {{{1
+" # Common definitions {{{2
+" Function: lh#dev#style#indent_brace_style#__k_r_end_bracket(style, a:prio) {{{3
+" Many styles handle `}` in the same way: K&R, Java, 1TBS, 0TBS...
+" NB:
+" - finally belongs to java, C#...
+" - catch belongs to C++, Java...
+" TODO: Provide a way to inject other keywords.
+function! lh#dev#style#indent_brace_style#__k_r_end_bracket(style, prio) abort
+  call a:style.add('}\%(\s*\%(;\|else\|while\|catch\|finally\|$\|'.lh#marker#txt('.\{-}').'\|!mark!\)\)\@!' , '\n}\n' , a:prio)
+  call a:style.add('}\ze\%(\s*\%(else\|while\|catch\|finally\)\)'                                           , '\n} '  , a:prio)
+  call a:style.add('}\ze$'                                                                  , '\n}'   , a:prio)
+  call a:style.add('}\ze\('.lh#marker#txt('.\{-}').'\|!mark!\)'                             , '\n}'   , a:prio)
+  call a:style.add('};'                                                                     , '\n};\n', a:prio)
+endfunction
+
 " # Style definitions {{{2
+" Function: lh#dev#style#indent_brace_style#_k_r(local, ft, prio, ...) {{{3
+" clang-format BreakBeforeBrace=Linux is just about braces. This indent style
+" also implies expandtab and ts8
+" TODO:
+" - Handle multiline statements
+" - Update the definition when marker characters change
+let s:k_k_r_context_no_break
+      \ = '\%('
+      \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
+      \ . '\|' . '\<do\|else\>'
+      \ . '\)'
+function! lh#dev#style#indent_brace_style#_k_r(local, ft, prio, ...) abort
+  let style = lh#dev#style#breakbeforebraces#_new('K&R', a:local, a:ft)
+  " Let's assume there is no function definition in a control statement, we'll
+  " see about lambdas later
+  call style.add(s:k_k_r_context_no_break.'\zs{'              , ' {\n', a:prio)
+  " break if not behind one of the previous contexts, or at the beginning of
+  " the line
+  call style.add('\('.s:k_k_r_context_no_break.'\s*\|^\)\@<!{'                            , '\n{\n' , a:prio + 1)
+
+  call lh#dev#style#indent_brace_style#__k_r_end_bracket(style, a:prio)
+  return style
+endfunction
+
 " Function: lh#dev#style#indent_brace_style#_linux_kernel(local, ft, prio, ...) {{{3
 " clang-format BreakBeforeBrace=Linux is just about braces. This indent style
 " also implies expandtab and ts8
 function! lh#dev#style#indent_brace_style#_linux_kernel(local, ft, prio, ...) abort
-  let style = call('lh#dev#style#breakbeforebraces#_linux', [a:local, a:ft, a:prio] + a:000)
+  let style = call('lh#dev#style#indent_brace_style#_k_r', [a:local, a:ft, a:prio] + a:000)
   " TODO: when used with global and ft!='*', register expandtab/ts to be set to
   " be set locally
   if a:local
@@ -115,6 +154,25 @@ function! lh#dev#style#indent_brace_style#_bsd_knf(local, ft, prio, ...) abort
   return style
 endfunction
 
+" Function: lh#dev#style#indent_brace_style#_ratliff(local, ft, prio, ...) {{{3
+let s:k_ratliff_context_no_break
+      \ = '\%('
+      \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
+      \ . '\|' . '\<do\|else\>'
+      \ . '\)'
+function! lh#dev#style#indent_brace_style#_ratliff(local, ft, prio, ...) abort
+  let style = lh#dev#style#breakbeforebraces#_new('ratliff', a:local, a:ft)
+  " Let's assume there is no function definition in a control statement, we'll
+  " see about lambdas later
+  call style.add(s:k_ratliff_context_no_break.'\zs{'              , ' {\n', a:prio)
+  " break if not behind one of the previous contexts, or at the beginning of
+  " the line
+  call style.add('\('.s:k_ratliff_context_no_break.'\s*\|^\)\@<!{', '\n{\n', a:prio + 1)
+  call style.add('};\@!'                                        , '\n}\n', a:prio)
+  call style.add('};'                                           , '\n};\n', a:prio)
+  return style
+endfunction
+
 " Function: lh#dev#style#indent_brace_style#_horstmann(local, ft, prio) {{{3
 " Horstmann 97 style, as the 2003 one is identical to Allman's.
 " TODO: adapt the indent when sw is changed, or read it in a:styles
@@ -157,19 +215,18 @@ function! lh#dev#style#indent_brace_style#_java(local, ft, prio, ...) abort
   let style = lh#dev#style#breakbeforebraces#_new('java', a:local, a:ft)
   call style.add('^{'    , ' {\n'    , a:prio) " Not meant to exist
   call style.add('^\@<!{', ' {\n'    , a:prio)
-  call style.add('};\@!' , '\n}\n'   , a:prio)
-  call style.add('};'    , '\n};\n'  , a:prio) " So it can be used in C&C++ as well
+  call lh#dev#style#indent_brace_style#__k_r_end_bracket(style, a:prio)
   return style
 endfunction
 
 " ## API      functions {{{1
 let s:k_function = {
-      \ 'k_r'         : 'lh#dev#style#breakbeforebraces#_linux'
-      \,'0tbs'        : 'lh#dev#style#breakbeforebraces#_linux'
-      \,'1tbs'        : 'lh#dev#style#breakbeforebraces#_linux'
+      \ 'k_r'         : 'lh#dev#style#indent_brace_style#_k_r'
+      \,'0tbs'        : 'lh#dev#style#indent_brace_style#_k_r'
+      \,'1tbs'        : 'lh#dev#style#indent_brace_style#_k_r'
       \,'linux_kernel': 'lh#dev#style#indent_brace_style#_linux_kernel'
       \,'bsd_knf'     : 'lh#dev#style#indent_brace_style#_bsd_knf'
-      \,'ratliff'     : 'lh#dev#style#breakbeforebraces#_linux'
+      \,'ratliff'     : 'lh#dev#style#indent_brace_style#_ratliff'
       \,'stroustrup'  : 'lh#dev#style#breakbeforebraces#_stroustrup'
       \,'allman'      : 'lh#dev#style#breakbeforebraces#_allman'
       \,'whitesmiths' : 'lh#dev#style#breakbeforebraces#_allman'
