@@ -16,7 +16,7 @@ set cpo&vim
 
 UTSuite [lh-dev] Testing lh#dev#style
 
-runtime autoload/lh/dev/style.vim
+runtime! autoload/lh/dev/style.vim autoload/lh/dev/style/*.vim
 
 " Enforce at least a filetype when run from rspec
 set ft=vim
@@ -329,19 +329,20 @@ endfunction
 "------------------------------------------------------------------------
 " # Tests with used styles {{{2
 " Function: s:Test_use_attach() {{{3
-function! s:Test_use_attach() abort
+function! s:Test_use_bbb_attach() abort
   try
     new " same ft
     set ft=cpp
     call lh#dev#style#use({"BreakBeforeBraces": "attach"}, {"buffer": 1})
     AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto\n};\n##")
     AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo() {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond) {\ntoto;\n} else if(c2) {\ntutu;\n} else {\ntiti;\n}##")
   finally
     bw
   endtry
 endfunction
 
-function! s:Test_use_stroustrup() " #{{{3
+function! s:Test_use_bbb_stroustrup() " #{{{3
   " if (x < 0) {
   "     puts("Negative");
   "     negative(x);
@@ -364,14 +365,15 @@ function! s:Test_use_stroustrup() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"BreakBeforeBraces": "stroustrup"}, {"buffer": 1})
     AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse if(c2) {\ntutu;\n}\nelse {\ntiti;\n}\n##")
   finally
     bw
   endtry
 endfunction
 
-function! s:Test_use_linux() " #{{{3
+function! s:Test_use_bbb_linux() " #{{{3
   " if (x < 0) {
   "     puts("Negative");
   "     negative(x);
@@ -395,15 +397,15 @@ function! s:Test_use_linux() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"BreakBeforeBraces": "linux"}, {"buffer": 1})
     AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
     AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
   finally
     bw
   endtry
 endfunction
 
-function! s:Test_use_allman() " #{{{3
+function! s:Test_use_bbb_allman() " #{{{3
   " while (x == y)
   " {
   "     something();
@@ -416,12 +418,14 @@ function! s:Test_use_allman() " #{{{3
     AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
     AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
     AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse\n{\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse if(c2)\n{\ntutu;\n}\nelse\n{\ntiti;\n}\n##")
   finally
     bw
   endtry
 endfunction
 
-function! s:Test_use_gnu() " #{{{3
+function! s:Test_use_bbb_gnu() " #{{{3
   " static char *
   " concat (char *s1, char *s2)
   " {
@@ -439,6 +443,275 @@ function! s:Test_use_gnu() " #{{{3
     AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
     AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
     AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse\n{\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse if(c2)\n{\ntutu;\n}\nelse\n{\ntiti;\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_kr() " #{{{3
+  " int main(int argc, char *argv[])
+  " {
+  "     ...
+  "     while (x == y) {
+  "         something();
+  "         somethingelse();
+  " 
+  "         if (some_error)
+  "             do_correct();
+  "         else
+  "             continue_as_usual();
+  "     }
+  " 
+  "     finalthing();
+  "     ...
+  " }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_0tbs() " #{{{3
+  " int main(int argc, char *argv[])
+  " {
+  "     ...
+  "     while (x == y) {
+  "         something();
+  "         somethingelse();
+  " 
+  "         if (some_error)
+  "             do_correct();
+  "         else
+  "             continue_as_usual();
+  "     }
+  " 
+  "     finalthing();
+  "     ...
+  " }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "0TBS"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_linux_kernel() " #{{{3
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "linux_kernel"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(&expandtab, 1)
+    AssertEqual(&tabstop, 8)
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_bsd_knf() " #{{{3
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "bsd_knf"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if (cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if (cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(&expandtab, 1)
+    AssertEqual(&tabstop, 8)
+    AssertEqual(&sw, 4)
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_ratliff() " #{{{3
+  " Identical to 1TBS/K&R, but with a special indent value (identical to
+  " Whitesmiths') but not handled by this feature
+  " https://en.wikipedia.org/wiki/Indent_style#Ratliff_style
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "ratliff"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    " TODO: AssertMatch(&&cindent, ????)
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_allman() " #{{{3
+  " while (x == y)
+  " {
+  "     something();
+  "     somethingelse();
+  " }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "allman"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse\n{\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse if(c2)\n{\ntutu;\n}\nelse\n{\ntiti;\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_whitesmthis() " #{{{3
+  " Identical to Allman, but with a special indent value but not handled by
+  " this feature.
+  " while (x == y)
+  "     {
+  "     something();
+  "     somethingelse();
+  "     }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "whitesmiths"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse\n{\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse if(c2)\n{\ntutu;\n}\nelse\n{\ntiti;\n}\n##")
+    " TODO: AssertMatch(&&cindent, ????)
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_gnu() " #{{{3
+  " Identical to Allman, but with a special indent value but not handled by
+  " this feature.
+  " while (x == y)
+  "   {
+  "     something();
+  "     somethingelse();
+  "   }
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "GNU"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse\n{\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{\ntoto;\n}\nelse if(c2)\n{\ntutu;\n}\nelse\n{\ntiti;\n}\n##")
+    " TODO: AssertMatch(&&cindent, ????)
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_hortsmann() " #{{{3
+  " https://en.wikipedia.org/wiki/Indent_style#Horstmann_style
+  " while (x == y)
+  " {   something();
+  "     somethingelse();
+  "     //...
+  "     if (x < 0)
+  "     {   printf("Negative");
+  "         negative(x);
+  "     }
+  "     else
+  "     {   printf("Non-negative");
+  "         nonnegative(x);
+  "     }
+  " }
+  " finalthing();
+  try
+    new " same ft
+    set ft=cpp
+    setlocal sw=4
+    AssertEqual!(&sw, 4)
+    call lh#dev#style#use({"indent_brace_style": "Horstmann"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{   toto\n};\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{   toto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{   toto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{   toto;\n}\nelse\n{   titi;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{   toto;\n}\nelse if(c2)\n{   tutu;\n}\nelse\n{   titi;\n}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_pico() " #{{{3
+  " https://en.wikipedia.org/wiki/Indent_style#Pico_style
+  " stuff(n):
+  " { x: 3 * n;
+  "   y: doStuff(x);
+  "   y + x }
+  try
+    new " same ft
+    set ft=cpp
+    setlocal sw=4
+    AssertEqual!(&sw, 4)
+    call lh#dev#style#use({"indent_brace_style": "Pico"}, {"buffer": 1})
+    AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{   toto };\n##")
+    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{   toto }\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond)\n{   toto }\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond)\n{   toto; }\nelse\n{   titi; }\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else if(c2){tutu;}else{titi;}').'##', "if(cond)\n{   toto; }\nelse if(c2)\n{   tutu; }\nelse\n{   titi; }\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_ibs_lisp() " #{{{3
+  " for (i = 0; i < 10; i++) {
+  "     if (i % 2 == 0)
+  "         doSomething(i);
+  "     else {
+  "         doSomethingElse(i);
+  "         doThirdThing(i);}}
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "Lisp"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main() {\ntoto;}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;}\nelse {\ntiti;}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){if(cond2){toto;}else{titi;}}else{tutu;}').'##', "if(cond) {\nif(cond2) {\ntoto;}\nelse {\ntiti;}}\nelse {\ntutu;}\n##")
+  finally
+    bw
+  endtry
+endfunction
+
+function! s:Test_use_java() " #{{{3
+  try
+    new " same ft
+    set ft=cpp
+    call lh#dev#style#use({"indent_brace_style": "java"}, {"buffer": 1})
+    " AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto {\ntoto\n};\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main() {\ntoto;\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
   finally
     bw
   endtry
