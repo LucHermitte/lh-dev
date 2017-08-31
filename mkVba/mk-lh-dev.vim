@@ -47,6 +47,7 @@ autoload/lh/dev/naming.vim
 autoload/lh/dev/option.vim
 autoload/lh/dev/snippet.vim
 autoload/lh/dev/style.vim
+autoload/lh/dev/style/__braces.vim
 autoload/lh/dev/style/curly_bracket_next_line.vim
 autoload/lh/dev/style/indent_brace_style.vim
 autoload/lh/dev/tags.vim

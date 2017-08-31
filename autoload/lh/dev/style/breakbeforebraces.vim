@@ -53,123 +53,20 @@ function! lh#dev#style#breakbeforebraces#debug(expr) abort
 endfunction
 
 "------------------------------------------------------------------------
-" ## Styles             {{{1
-" # Root "class" {{{2
-
-" Function: lh#dev#style#breakbeforebraces#_new(name, local, ft) {{{3
-function! lh#dev#style#breakbeforebraces#_new(name, local, ft) abort
-  let style = lh#dev#style#define_group('breakbeforebraces', a:name, !a:local, a:ft)
-  let s:crt_style = style
-  return style
-endfunction
-
-" # Style definitions {{{2
-" Function: lh#dev#style#breakbeforebraces#_attach(local, ft, prio) {{{3
-" Always attach braces to surrounding context
-function! lh#dev#style#breakbeforebraces#_attach(local, ft, prio, ...) abort
-  let style = lh#dev#style#breakbeforebraces#_new('attach', a:local, a:ft)
-  " except at the start of the line
-  call style.add('^\@<!{', ' {\n'  , a:prio)
-  call style.add('}' , '\n}'   , a:prio)
-  call style.add('}else' , '} else'   , a:prio)
-  " extra \n after the semi-colon
-  call style.add('};', '};\n', a:prio)
-  return style
-endfunction
-
-" Function: lh#dev#style#breakbeforebraces#non() {{{3
-" Permits to clear everything on this topic and to define things manually
-" instead.
-function! lh#dev#style#breakbeforebraces#non() abort
-  let style = lh#dev#style#breakbeforebraces#_new('none', a:local, a:ft)
-  return style
-endfunction
-
-" Function: lh#dev#style#breakbeforebraces#_linux(local, ft, prio) {{{3
-" Like Attach, but break before braces on function, namespace and class
-" definitions.
-" TODO:
-" - Handle multiline statements
-" - Update the definition when marker characters change
-let s:k_linux_context_no_break
-      \ = '\%('
-      \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
-      \ . '\|' . '\<do\|else\>'
-      \ . '\)'
-function! lh#dev#style#breakbeforebraces#_linux(local, ft, prio, prio9) abort
-  let style = lh#dev#style#breakbeforebraces#_new('linux', a:local, a:ft)
-  " Let's assume there is no function definition in a control statement, we'll
-  " see about lambdas later
-  call style.add(s:k_linux_context_no_break.'\zs{'              , ' {\n', a:prio)
-  " break if not behind one of the previous contexts, or at the beginning of
-  " the line
-  call style.add('\('.s:k_linux_context_no_break.'\s*\|^\)\@<!{', '\n{\n', a:prio + 1)
-  call style.add('}\%(\s*\%(;\|else\|while\|$\|'.lh#marker#txt('.\{-}').'\)\)\@!' , '\n}\n', a:prio)
-  call style.add('}\ze\%(\s*\%(else\|while\)\)'                 , '\n} ', a:prio)
-  call style.add('}\ze$'                                        , '\n}', a:prio)
-  call style.add('}\ze'.lh#marker#txt('.\{-}')                  , '\n}', a:prio)
-  call style.add('};'                                           , '\n};\n', a:prio)
-  return style
-endfunction
-
-" Function: lh#dev#style#breakbeforebraces#_stroustrup(local, ft, prio) {{{3
-" Like Attach, but break before function definitions.
-" TODO: handle multiline statements
-let s:k_stroutrup_context_no_break
-      \ = '\%('
-      \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.\{-})'
-      \ . '\|' . '\<do\|else\>'
-      \ . '\|' . '\<\%(namespace\|class\|struct\|union\|enum\).\{-}\S\>'
-      \ . '\)'
-function! lh#dev#style#breakbeforebraces#_stroustrup(local, ft, prio, prio9) abort
-  let style = lh#dev#style#breakbeforebraces#_new('stroustrup', a:local, a:ft)
-
-  " Let's assume there is no function definition in a control statement, we'll
-  " see about lambdas later
-  call style.add(s:k_stroutrup_context_no_break.'\zs{'              , ' {' , a:prio)
-  call style.add('{', '{\n', a:prio)
-  " break if not behind one of the previous contexts, or at the beginning of
-  " the line
-  call style.add('\('.s:k_stroutrup_context_no_break.'\s*\|^\)\@<!{', '\n{', a:prio + 1)
-  call style.add('}'                                                , '\n}'  , a:prio)
-  " extra \n if followed by a semi-colon
-  call style.add('};'                                               , '};\n' , a:prio)
-  call style.add('};\@!'                                        , '}\n', a:prio)
-  " call style.add('}else' , '} else'   , a:prio)
-  return style
-endfunction
-
-" Function: lh#dev#style#breakbeforebraces#_allman(local, ft, prio) {{{3
-" Always break before braces.
-function! lh#dev#style#breakbeforebraces#_allman(local, ft, prio, ...) abort
-  let style = lh#dev#style#breakbeforebraces#_new('allman', a:local, a:ft)
-
-  call style.add('^\@<!{' , '\n{\n' , a:prio)
-  call style.add('};\@!'  , '\n}\n' , a:prio)
-  call style.add('};'     , '\n};\n', a:prio)
-  return style
-endfunction
-
-" Function: lh#dev#style#breakbeforebraces#_gnu(local, ft, prio) {{{3
-" Always break before braces and add an extra level of indentation to braces of
-" control statements, not to those of class, function or other definitions.
-" TODO: adjust cindent
-function! lh#dev#style#breakbeforebraces#_gnu(local, ft, prio, ...) abort
-  let style = lh#dev#style#breakbeforebraces#_new('gnu', a:local, a:ft)
-
-  call style.add('^\@<!{' , '\n{\n' , a:prio)
-  call style.add('};\@!'  , '\n}\n' , a:prio)
-  call style.add('};'     , '\n};\n', a:prio)
-  return style
-endfunction
-
-
-"------------------------------------------------------------------------
 " ## API      functions {{{1
 
 " Function: lh#dev#style#breakbeforebraces#use(styles, indent, ...) {{{3
 " "factory" function
 let s:style = lh#on#exit()
+let s:k_function = {
+      \ 'none'      : 'lh#dev#style#__braces#none'
+      \,'attach'    : 'lh#dev#style#__braces#attach'
+      \,'linux'     : 'lh#dev#style#__braces#linux'
+      \,'stroustrup': 'lh#dev#style#__braces#stroustrup'
+      \,'allman'    : 'lh#dev#style#__braces#allman'
+      \,'gnu'       : 'lh#dev#style#__braces#gnu'
+      \ }
+
 function! lh#dev#style#breakbeforebraces#use(styles, indent, ...) abort
   let input_options = get(a:, 1, {})
   let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
@@ -178,9 +75,8 @@ function! lh#dev#style#breakbeforebraces#use(styles, indent, ...) abort
     let prio = 10
   endif
   let indent = tolower(a:indent)
-  if exists('*lh#dev#style#breakbeforebraces#_'.indent)
-    " Covers: attach, linux, stroustrup, allman, gnu, none
-    let style = call('lh#dev#style#breakbeforebraces#_'.indent, [local, ft, prio, prio9])
+  if has_key(s:k_function, indent)
+    let style = call(s:k_function[indent], [local, ft, prio, prio9])
     call s:Verbose("`breakbeforebraces` style set to `%1`", a:indent)
     return 1
   else

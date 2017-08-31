@@ -406,9 +406,10 @@ function! s:Test_use_bbb_linux() " #{{{3
     set ft=cpp
     call lh#dev#style#use({"BreakBeforeBraces": "linux"}, {"buffer": 1})
     AssertEqual(lh#dev#style#apply('class toto{toto};').'##', "class toto\n{\ntoto\n};\n##")
-    AssertEqual(lh#dev#style#apply('foo(){toto}').'##', "foo()\n{\ntoto\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}\n##")
-    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n}\nelse {\ntiti;\n}\n##")
+    AssertEqual(lh#dev#style#apply('int main(){toto;}').'##', "int main()\n{\ntoto;\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}##'), "if(cond) {\ntoto\n}\n##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto}').'##', "if(cond) {\ntoto\n}##")
+    AssertEqual(lh#dev#style#apply('if(cond){toto;}else{titi;}').'##', "if(cond) {\ntoto;\n} else {\ntiti;\n}##")
   finally
     bw
   endtry
@@ -720,7 +721,7 @@ function! s:Test_use_ibs_lisp() " #{{{3
   endtry
 endfunction
 
-function! s:Test_use_java() " #{{{3
+function! s:Test_use_ibs_java() " #{{{3
   try
     new " same ft
     set ft=cpp
