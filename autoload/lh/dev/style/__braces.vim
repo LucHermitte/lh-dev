@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      29th Aug 2017
-" Last Update:  29th Aug 2017
+" Last Update:  04th Sep 2017
 "------------------------------------------------------------------------
 " Description:
 "       Factorize all styles related to curly-braces.
@@ -80,7 +80,7 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
-" Function: lh#dev#style#__braces#none(...) {{{3
+" Function: lh#dev#style#__braces#none(...) {{{2
 " Permits to clear everything on this topic and to define things manually
 " instead.
 function! lh#dev#style#__braces#none(...) abort
@@ -88,7 +88,7 @@ function! lh#dev#style#__braces#none(...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#attach(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#attach(local, ft, prio, ...) {{{2
 " "attach" comes from clang-format BreakBeforeBrace
 function! lh#dev#style#__braces#attach(local, ft, prio, ...) abort
   let style = lh#dev#style#__braces#__new('attach', a:local, a:ft)
@@ -99,7 +99,7 @@ function! lh#dev#style#__braces#attach(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#linux(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#linux(local, ft, prio, ...) {{{2
 " "linux" comes from clang-format BreakBeforeBrace, and it's shared with
 " editor-config indent_brace_style, except the latter will change indenting
 " options as well.
@@ -127,7 +127,7 @@ function! lh#dev#style#__braces#linux(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#stroustrup(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#stroustrup(local, ft, prio, ...) {{{2
 " "stroustrup" comes from clang-format BreakBeforeBrace
 " Like "attach", but break before function definitions.
 " TODO: handle multiline statements
@@ -155,7 +155,7 @@ function! lh#dev#style#__braces#stroustrup(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#allman(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#allman(local, ft, prio, ...) {{{2
 " Always break before braces.
 " "allman" comes from clang-format BreakBeforeBrace, and it's shared with
 " editor-config indent_brace_style
@@ -168,7 +168,7 @@ function! lh#dev#style#__braces#allman(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#gnu(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#gnu(local, ft, prio, ...) {{{2
 " Always break before braces and add an extra level of indentation to braces of
 " control statements, not to those of class, function or other definitions.
 " "gnu" comes from clang-format BreakBeforeBrace
@@ -182,7 +182,7 @@ function! lh#dev#style#__braces#gnu(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#bsd_knf(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#bsd_knf(local, ft, prio, ...) {{{2
 " https://en.wikipedia.org/wiki/Indent_style#Variant:_BSD_KNF
 " TODO: handle multiline statements
 let s:k_bsd_knf_context_no_break
@@ -207,7 +207,7 @@ function! lh#dev#style#__braces#bsd_knf(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#ratliff(local, ft, prio, ...) {{{3
+" Function: lh#dev#style#__braces#ratliff(local, ft, prio, ...) {{{2
 let s:k_ratliff_context_no_break
       \ = '\%('
       \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
@@ -226,7 +226,7 @@ function! lh#dev#style#__braces#ratliff(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#horstmann(local, ft, prio) {{{3
+" Function: lh#dev#style#__braces#horstmann(local, ft, prio) {{{2
 " Horstmann 97 style, as the 2003 one is identical to Allman's.
 " TODO: adapt the indent when sw is changed, or read it in a:styles
 " This also means that if Horstmann/Pico is global and &sw is not, it'll
@@ -240,7 +240,7 @@ function! lh#dev#style#__braces#horstmann(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#pico(local, ft, prio) {{{3
+" Function: lh#dev#style#__braces#pico(local, ft, prio) {{{2
 " TODO: adapt the indent when sw is changed, or read it in a:styles
 " This also means that if Horstmann/Pico is global and &sw is not, it'll
 " complicates &sw management...
@@ -254,7 +254,7 @@ function! lh#dev#style#__braces#pico(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#lisp(local, ft, prio) {{{3
+" Function: lh#dev#style#__braces#lisp(local, ft, prio) {{{2
 function! lh#dev#style#__braces#lisp(local, ft, prio, ...) abort
   let style = lh#dev#style#__braces#__new('lisp', a:local, a:ft)
   call style.add('^\@<!{' , ' {\n', a:prio)
@@ -263,7 +263,7 @@ function! lh#dev#style#__braces#lisp(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#java(local, ft, prio) {{{3
+" Function: lh#dev#style#__braces#java(local, ft, prio) {{{2
 function! lh#dev#style#__braces#java(local, ft, prio, ...) abort
   let style = lh#dev#style#__braces#__new('java', a:local, a:ft)
   call style.add('^{'    , ' {\n'    , a:prio) " Not meant to exist
