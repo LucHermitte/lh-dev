@@ -66,7 +66,6 @@ function! lh#dev#style#curly_bracket_next_line#none(...) abort
   return style
 endfunction
 
-
 " Function: lh#dev#style#curly_bracket_next_line#use(styles, value, ...) {{{3
 function! lh#dev#style#curly_bracket_next_line#use(styles, value, ...) abort
   let input_options = get(a:, 1, {})
