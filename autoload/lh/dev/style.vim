@@ -399,8 +399,8 @@ function! lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) abort
     let group = lh#object#make_top_type({'local': local, 'ft': a:ft})
     let s:style_groups[a:kind] = previous + [group]
   endif
-  call lh#assert#value(group).has_key('ft').verifies({ self -> self.ft == a:ft})
-  call lh#assert#value(group).has_key('local').verifies({ self -> self.local == local})
+  call lh#assert#value(group).get('ft').eq(a:ft)
+  call lh#assert#value(group).get('local').eq(local)
   let group.name         = a:name
   let group._definitions = {}
   call lh#object#inject_methods(group, s:k_script_name, ['add'])
