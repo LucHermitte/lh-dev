@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  23rd Aug 2017
+" Last Update:  05th Sep 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -381,7 +381,9 @@ function! lh#dev#style#_add(...) abort
   let s:style[pattern] = previous + [style]
   call s:Verbose('Register %1 style for %2 filetype%3, of priority %4 on %5 -> %6',
         \ local < 0 ? 'global' : 'bufnr('.local.')' , ft=='*' ? 'all' : ft, ft=='*' ? 's' : '', prio, pattern, repl)
-  return {pattern: copy(style)}
+  let res = {}
+  let res[pattern] = copy(style)
+  return pattern
 endfunction
 
 " Function: lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) {{{3
