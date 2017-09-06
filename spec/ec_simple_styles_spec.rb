@@ -43,7 +43,7 @@ RSpec.describe "When testing EditorConfig Domain-Specific styles", :style, :doma
       vim.command('silent! unlet g:cpp_std_flavour')
       expect(vim.command('runtime! spec/support/c-snippets.vim')).to eq "" # if snippet
       expect(vim.command('verbose iab if')).to match(/LH_cpp_snippets_def_abbr/)
-      vim.command('call lh#dev#style#clear()')
+      expect(vim.echo('lh#dev#style#clear()')).to eq "0"
       expect(vim.echo('lh#dev#style#get("c")')).to eq "{}"
       clear_buffer
       set_buffer_contents <<-EOF
@@ -68,6 +68,7 @@ RSpec.describe "When testing EditorConfig Domain-Specific styles", :style, :doma
         File.open(editorconfig, "w") { |f| f.write("[*]\ncurly_bracket_next_line = true") }
         vim.command("EditorConfigReload")
         # And then test
+        vim.feedkeys('i\<esc>') # pause
         vim.feedkeys('aif foo\<esc>')
         vim.feedkeys('i\<esc>') # pause
         assert_buffer_contents <<-EOF
