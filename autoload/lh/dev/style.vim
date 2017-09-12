@@ -468,6 +468,7 @@ AddStyle \\\\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup/K&R {{{2
 call lh#dev#style#use({'indent_brace_style': 'Stroustrup'}, {'ft': 'c', 'prio': 10})
+call lh#dev#style#use({'spaces_around_brackets': 'outside'}, {'ft': 'c', 'prio': 10})
 
 " # Inhibated style in C & al: Allman, Whitesmiths, Pico {{{2
 " call lh#dev#style#use('Allman', {'ft': 'c', 'prio': 10})
@@ -493,8 +494,9 @@ AddStyle {} -ft=c -prio=5 \n{}
 
 " # Java style {{{2
 " Force Java style in Java
-AddStyle { -ft=java -prio=10 \ {\n
-AddStyle } -ft=java -prio=10 \n}
+" AddStyle { -ft=java -prio=10 \ {\n
+" AddStyle } -ft=java -prio=10 \n}
+call lh#dev#style#use({'indent_brace_style': 'java'}, {'ft': 'java', 'prio': 10})
 
 " }}}1
 "------------------------------------------------------------------------
