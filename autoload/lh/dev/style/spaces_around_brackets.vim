@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      11th Aug 2017
-" Last Update:  05th Sep 2017
+" Last Update:  12th Sep 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for EditorConfig non-official
@@ -73,21 +73,21 @@ function! lh#dev#style#spaces_around_brackets#none(...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#spaces_around_brackets#use(styles, value, ...) {{{3
+" Function: lh#dev#style#spaces_around_brackets#use(styles, value, ...) {{{2
 function! lh#dev#style#spaces_around_brackets#use(styles, value, ...) abort
   let input_options = get(a:, 1, {})
   let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
 
   let style = lh#dev#style#spaces_around_brackets#__new(a:value, local, ft)
   if     a:value =~? 'inside'
-    call style.add('(' , '( ' , prio)
-    call style.add(')' , ' )' , prio)
+    call style.add('(\s*' , '( ' , prio)
+    call style.add('\s*)' , ' )' , prio)
   elseif a:value =~? 'outside'
-    call style.add('(' , ' (' , prio)
-    call style.add(')' , ') ' , prio)
+    call style.add('\s*(' , ' (' , prio)
+    call style.add(')\s*' , ') ' , prio)
   elseif a:value =~? 'both'
-    call style.add('(' , ' ( ' , prio)
-    call style.add(')' , ' ) ' , prio)
+    call style.add('\s*(\s*' , ' ( ' , prio)
+    call style.add('\s*)\s*' , ' ) ' , prio)
   else " "none"
     call style.add('(' , '(' , prio)
     call style.add(')' , ')' , prio)
@@ -95,8 +95,6 @@ function! lh#dev#style#spaces_around_brackets#use(styles, value, ...) abort
 endfunction
 
 "------------------------------------------------------------------------
-" ## Internal functions {{{1
-
 "------------------------------------------------------------------------
 " }}}1
 "------------------------------------------------------------------------
