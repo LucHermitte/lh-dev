@@ -183,12 +183,17 @@ function! lh#dev#style#_sort_styles(styles) abort
 endfunction
 
 " Function: lh#dev#style#apply(text [, ft]) {{{3
-let g:applyied_on=[]
 function! lh#dev#style#apply(text, ...) abort
-  let g:applyied_on += [a:text]
   let ft = a:0 == 0 ? &ft : a:1
   let styles = lh#dev#style#get(ft)
+  return lh#dev#style#apply_these(styles, a:text)
+endfunction
 
+" Function: lh#dev#style#apply(styles, text) {{{3
+" Function meant to be used in a loop after caching the styles
+let g:applyied_on=[]
+function! lh#dev#style#apply_these(styles, text, ...) abort
+  " let g:applyied_on += [a:text]
   " Alas:
   " - substitute+_get_replacement cannot work because it cannot tell exactly
   "   which key matched
