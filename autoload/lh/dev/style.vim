@@ -201,7 +201,7 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
   " => patterns must explicitly specify their context
   " => new algo, new definitions
   let res = a:text
-  for [pattern, style] in items(styles)
+  for [pattern, style] in items(a:styles)
     " TODO: see whether a chained map() would be faster
     let res = substitute(res, pattern, style.replacement, 'g')
   endfor
@@ -209,14 +209,14 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
 
 
   " The old algo...
-  let keys = lh#dev#style#_sort_styles(styles)
+  let keys = lh#dev#style#_sort_styles(a:styles)
   if empty(keys)
     return a:text
   else
     let sKeys = join(keys, '\|')
     " Using a sorted list of keys permits to avoid triggering "}" style on
     " "class {};" when there is a "};" style.
-    let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(styles, submatch(0), keys, a:text)', 'g')
+    let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(a:styles, submatch(0), keys, a:text)', 'g')
   endif
   return res
 endfunction
