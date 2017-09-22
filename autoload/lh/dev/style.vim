@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  05th Sep 2017
+" Last Update:  21st Sep 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -192,8 +192,13 @@ endfunction
 " Function: lh#dev#style#apply(styles, text) {{{3
 " Function meant to be used in a loop after caching the styles
 let g:applyied_on=[]
+" function! s:cmp_e1_prio(lhs, rhs)
+function! lh#dev#style#cmp_e1_prio(lhs, rhs)
+  return get(a:lhs[1], 'prio', 0) - get(a:rhs[1], 'prio', 0)
+endfunction
+
 function! lh#dev#style#apply_these(styles, text, ...) abort
-  " let g:applyied_on += [a:text]
+  let g:applyied_on += [a:text]
   " Alas:
   " - substitute+_get_replacement cannot work because it cannot tell exactly
   "   which key matched
@@ -201,7 +206,9 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
   " => patterns must explicitly specify their context
   " => new algo, new definitions
   let res = a:text
-  for [pattern, style] in items(a:styles)
+  let styles = items(a:styles)
+  call lh#list#sort(styles, s:getSNR('cmp_e1_prio'))
+  for [pattern, style] in styles
     " TODO: see whether a chained map() would be faster
     let res = substitute(res, pattern, style.replacement, 'g')
   endfor
@@ -453,17 +460,18 @@ endfunction
 
 " # Ignore style in C comments {{{2
 " # Ignore style in comments after curly brackets {{{2
+" TODO
 AddStyle {\ *// -ft=c \ &
 AddStyle }\ *// -ft=c &
 
 " # Multiple C++ namespaces on same line {{{2
-AddStyle {\ *namespace -ft=cpp \ &
-AddStyle }\ *} -ft=cpp &
+AddStyle {\\_s*namespace -ft=cpp {\ namespace -prio=20
+AddStyle }\\_s*}         -ft=cpp }\ }         -prio=20
 
 " # Doxygen {{{2
 " Doxygen Groups
-AddStyle @{  -ft=c @{
-AddStyle @}  -ft=c @}
+AddStyle @\\_s*{  -ft=c @{ -prio=100
+AddStyle @\\_s*}  -ft=c @} -prio=100
 
 " Doxygen Formulas
 " First \ -> cmdline => \\ == One '\' character passed to vim function
@@ -479,23 +487,24 @@ call lh#dev#style#use({'spaces_around_brackets': 'outside'}, {'ft': 'c', 'prio':
 " call lh#dev#style#use('Allman', {'ft': 'c', 'prio': 10})
 
 " # Ignore curly-brackets on single lines {{{2
+" TODO
 AddStyle ^\ *{\ *$ -ft=c &
 AddStyle ^\ *}\ *$ -ft=c &
 
 " # Handle specifically empty pairs of curly-brackets {{{2
 " On its own line
 " -> Leave it be
-AddStyle ^\ *{}\ *$ -ft=c &
+" AddStyle ^\\s*\\zs{\\_s*}\ *$ -ft=c {} -prio=20
 " -> Split it
-" AddStyle ^\ *{}\ *$ -ft=c {\n}
+AddStyle {\\_s*} -ft=c {\n} -prio=20
 
 " Mixed
 " -> Split it
 " AddStyle {} -ft=c -prio=5 \ {\n}
 " -> On the next line (unsplit)
-AddStyle {} -ft=c -prio=5 \n{}
+" AddStyle \\_s*{\\_s*} -ft=c -prio=20 \n{}
 " -> On the next line (split)
-" AddStyle {} -ft=c -prio=5 \n{\n}
+" AddStyle \\_s*{\\_s*} -ft=c -prio=20 \n{\n}
 
 " # Java style {{{2
 " Force Java style in Java
