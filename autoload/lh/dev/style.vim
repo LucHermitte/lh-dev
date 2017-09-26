@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  21st Sep 2017
+" Last Update:  26th Sep 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -193,7 +193,7 @@ endfunction
 " Function meant to be used in a loop after caching the styles
 let g:applyied_on=[]
 " function! s:cmp_e1_prio(lhs, rhs)
-function! lh#dev#style#cmp_e1_prio(lhs, rhs)
+function! s:cmp_e1_prio(lhs, rhs)
   return get(a:lhs[1], 'prio', 0) - get(a:rhs[1], 'prio', 0)
 endfunction
 
