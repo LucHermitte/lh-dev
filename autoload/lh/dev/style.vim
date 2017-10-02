@@ -198,6 +198,7 @@ function! s:cmp_e1_prio(lhs, rhs)
 endfunction
 
 function! lh#dev#style#apply_these(styles, text, ...) abort
+  let s:cache_of_ignored_matches = []
   let g:applyied_on += [a:text]
   " Alas:
   " - substitute+_get_replacement cannot work because it cannot tell exactly
@@ -212,6 +213,9 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
     " TODO: see whether a chained map() would be faster
     let res = substitute(res, pattern, style.replacement, 'g')
   endfor
+  if !empty(s:cache_of_ignored_matches)
+    let res = substitute(res, '\v¤(\d+)¤', '\=s:cache_of_ignored_matches[submatch(1)]', 'g')
+  endif
   return res
 
 
@@ -226,6 +230,15 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
     let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(a:styles, submatch(0), keys, a:text)', 'g')
   endif
   return res
+endfunction
+
+" Function: lh#dev#style#ignore(pattern, local, ft) {{{3
+function! lh#dev#style#ignore(pattern, local, ft) abort
+  let ignore_group = lh#dev#style#define_group('ignored', 'ignored', !a:local, 'c')
+  call ignore_group.add(
+        \ a:pattern,
+        \ '\="¤".(len(add(s:cache_of_ignored_matches, submatch(0)))-1)."¤"',
+        \ 0)
 endfunction
 
 " # lh-brackets Adapters for snippets {{{2
@@ -455,12 +468,9 @@ endfunction
 " # Space before open bracket in C & al {{{2
 " A little space before all C constructs in C and child languages
 " NB: the spaces isn't put before all open brackets
-" AddStyle -ft=c -prio=11 \\<\\(if\\|while\\|for\\|switch\\|catch\\)\\zs\\s*( \ (
-" AddStyle while(  -ft=c   while\ (
-" AddStyle for(    -ft=c   for\ (
-" AddStyle switch( -ft=c   switch\ (
-" AddStyle catch(  -ft=cpp catch\ (
-" ))))))))))
+call lh#dev#style#use({'spacesbeforeparens': 'ControlStatements'}, {'ft': 'c', 'prio': 10})
+call lh#dev#style#use({'spacesinptyparentheses': 'no'}           , {'ft': 'c', 'prio': 20})
+" call lh#dev#style#use({'spacesinemptyparentheses': 'no'}         , {'ft': 'c', 'prio': 20})
 
 " # Ignore style in C comments {{{2
 " # Ignore style in comments after curly brackets {{{2
@@ -485,9 +495,6 @@ AddStyle \\\\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup/K&R {{{2
 call lh#dev#style#use({'indent_brace_style': 'Stroustrup'}       , {'ft': 'c', 'prio': 10})
-call lh#dev#style#use({'spacesbeforeparens': 'ControlStatements'}, {'ft': 'c', 'prio': 10})
-call lh#dev#style#use({'spacesinptyparentheses': 'no'}           , {'ft': 'c', 'prio': 20})
-" call lh#dev#style#use({'spacesinemptyparentheses': 'no'}         , {'ft': 'c', 'prio': 20})
 
 " # Inhibated style in C & al: Allman, Whitesmiths, Pico {{{2
 " call lh#dev#style#use('Allman', {'ft': 'c', 'prio': 10})
@@ -511,6 +518,9 @@ AddStyle {\\_s*} -ft=c {\n} -prio=20
 " AddStyle \\_s*{\\_s*} -ft=c -prio=20 \n{}
 " -> On the next line (split)
 " AddStyle \\_s*{\\_s*} -ft=c -prio=20 \n{\n}
+
+" # Test with ignored patterns
+call lh#dev#style#ignore('{\w\+}', 0, 'c')
 
 " # Java style {{{2
 " Force Java style in Java
