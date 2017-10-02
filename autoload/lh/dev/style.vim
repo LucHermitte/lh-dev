@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  26th Sep 2017
+" Last Update:  02nd Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -404,6 +404,10 @@ function! lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) abort
   let local = a:is_for_all_buffers ? '-1' : bufnr('%')
   " first check whether there is already something before adding anything
   let groups = filter(copy(previous), 'v:val.local == local && v:val.ft == a:ft')
+
+  "TODO: if the kind contains dots, then we can support families. e.g.
+  "space.brace.ec / space.brace.cf.{before,in_empty,...}
+  "different family => override
   if !empty(groups)
     " We will override all the styles
     call lh#assert#value(len(groups)).eq(1)
@@ -480,8 +484,10 @@ AddStyle \\\\f{ -ft=c \\\\f{
 AddStyle \\\\f} -ft=c \\\\f}
 
 " # Default style in C & al: Stroustrup/K&R {{{2
-call lh#dev#style#use({'indent_brace_style': 'Stroustrup'}, {'ft': 'c', 'prio': 10})
-call lh#dev#style#use({'spaces_around_brackets': 'outside'}, {'ft': 'c', 'prio': 10})
+call lh#dev#style#use({'indent_brace_style': 'Stroustrup'}       , {'ft': 'c', 'prio': 10})
+call lh#dev#style#use({'spacesbeforeparens': 'ControlStatements'}, {'ft': 'c', 'prio': 10})
+call lh#dev#style#use({'spacesinptyparentheses': 'no'}           , {'ft': 'c', 'prio': 20})
+" call lh#dev#style#use({'spacesinemptyparentheses': 'no'}         , {'ft': 'c', 'prio': 20})
 
 " # Inhibated style in C & al: Allman, Whitesmiths, Pico {{{2
 " call lh#dev#style#use('Allman', {'ft': 'c', 'prio': 10})
@@ -511,6 +517,7 @@ AddStyle {\\_s*} -ft=c {\n} -prio=20
 " AddStyle { -ft=java -prio=10 \ {\n
 " AddStyle } -ft=java -prio=10 \n}
 call lh#dev#style#use({'indent_brace_style': 'java'}, {'ft': 'java', 'prio': 10})
+call lh#dev#style#use({'spacesbeforeparens': 'ControlStatements'}, {'ft': 'java', 'prio': 10})
 
 " }}}1
 "------------------------------------------------------------------------
