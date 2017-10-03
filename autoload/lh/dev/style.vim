@@ -222,7 +222,7 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
     let res = substitute(res, pattern, style.replacement, 'g')
   endfor
   if !empty(s:cache_of_ignored_matches)
-    let res = substitute(res, '\v¤(\d+)¤', '\=s:cache_of_ignored_matches[submatch(1)]', 'g')
+    let res = substitute(res, '\v¤(\d+)¤(\n)=', '\=s:reinject_cached_ignored_matches(submatch(1), submatch(2))', 'g')
   endif
   return res
 
