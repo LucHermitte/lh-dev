@@ -225,19 +225,6 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
     let res = substitute(res, '\v¤(\d+)¤(\n)=', '\=s:reinject_cached_ignored_matches(submatch(1), submatch(2))', 'g')
   endif
   return res
-
-
-  " The old algo...
-  let keys = lh#dev#style#_sort_styles(a:styles)
-  if empty(keys)
-    return a:text
-  else
-    let sKeys = join(keys, '\|')
-    " Using a sorted list of keys permits to avoid triggering "}" style on
-    " "class {};" when there is a "};" style.
-    let res = substitute(a:text, sKeys, '\=lh#dev#style#_get_replacement(a:styles, submatch(0), keys, a:text)', 'g')
-  endif
-  return res
 endfunction
 
 " Function: lh#dev#style#ignore(pattern, local_global, ft) {{{3
@@ -262,8 +249,9 @@ endfunction
 " Function: lh#dev#style#surround() {{{3
 function! lh#dev#style#surround(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
-  let begin = lh#dev#style#apply(a:begin)
-  let end   = lh#dev#style#apply(a:end)
+  let styles = lh#dev#style#get()
+  let begin = lh#dev#style#apply_these(styles, a:begin)
+  let end   = lh#dev#style#apply_these(styles, a:end)
   return call(function('lh#map#surround'), [begin, end, a:isLine, a:isIndented, a:goback, a:mustInterpret]+a:000)
 endfunction
 
@@ -288,24 +276,21 @@ endfunction
 
 " Function: lh#dev#style#use(styles [, options]) {{{3
 " TODO: handle:
+" * incompatible families
 " * editor config possible future settings
 "   - spaces_around_operators (true/hybrid/false) (see
 "   https://github.com/jedmao/codepainter/tree/master/test/cases)
 " * clang-format settings (https://clangformat.com/)
 "   - BreakBeforeBinaryOperators
-"   - BreakBeforeBraces
 "   - BreakBeforeTernaryOperators
 "   - BreakConstructorInitializersBeforeComma (though one!!)
 "   - IndentCaseLabels
 "   - IndentFunctionDeclarationAfterType
 "   - NamespaceIndentation
 "   - SpaceBeforeAssignmentOperators
-"   - SpaceBeforeParens
-"   - SpaceInEmptyParentheses
 "   - SpacesBeforeTrailingComments
 "   - SpacesInAngles
 "   - SpacesInCStyleCastParentheses
-"   - SpacesInParentheses
 " * Need to be able to clear a previous similar style
 let s:k_nb_leading_chars  = len('autoload/')
 let s:k_nb_trailing_chars = len('.vim') + 1
