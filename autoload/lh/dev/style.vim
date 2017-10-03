@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  02nd Oct 2017
+" Last Update:  03rd Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -197,8 +197,16 @@ function! s:cmp_e1_prio(lhs, rhs)
   return get(a:lhs[1], 'prio', 0) - get(a:rhs[1], 'prio', 0)
 endfunction
 
+function! s:reinject_cached_ignored_matches(match, nl) abort
+  let res = s:cache_of_ignored_matches[a:match]
+  if (!empty(a:nl) && res[-1:]!="\n")
+    let res .= a:nl
+  endif
+  return res
+endfunction
+
 function! lh#dev#style#apply_these(styles, text, ...) abort
-  let s:cache_of_ignored_matches = []
+  let s:cache_of_ignored_matches = get(a:, 1, [])
   let g:applyied_on += [a:text]
   " Alas:
   " - substitute+_get_replacement cannot work because it cannot tell exactly
@@ -237,8 +245,16 @@ function! lh#dev#style#ignore(pattern, local, ft) abort
   let ignore_group = lh#dev#style#define_group('ignored', 'ignored', !a:local, 'c')
   call ignore_group.add(
         \ a:pattern,
-        \ '\="¤".(len(add(s:cache_of_ignored_matches, submatch(0)))-1)."¤"',
+        \ '\=lh#dev#style#just_ignore_this(submatch(0))',
         \ 0)
+endfunction
+
+" Function: lh#dev#style#just_ignore_this(text [, cache_of_ignored_matches]) {{{3
+" Permits other tools to inject texts to reinject latter after style has
+" been applied. See mu-template for an example of use.
+function! lh#dev#style#just_ignore_this(text, ...) abort
+  let cache_of_ignored_matches = get(a:, 1, s:cache_of_ignored_matches)
+  return "¤".(len(add(cache_of_ignored_matches, a:text))-1)."¤"
 endfunction
 
 " # lh-brackets Adapters for snippets {{{2
@@ -519,7 +535,9 @@ AddStyle {\\_s*} -ft=c {\n} -prio=20
 " -> On the next line (split)
 " AddStyle \\_s*{\\_s*} -ft=c -prio=20 \n{\n}
 
-" # Test with ignored patterns
+" # Some generic patterns to ignore {{{2
+" In my templates, I write my email address as "luc {dot} ... {at}..."
+" These artefacts shall be left alone.
 call lh#dev#style#ignore('{\w\+}', 0, 'c')
 
 " # Java style {{{2
