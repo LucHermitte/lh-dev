@@ -240,9 +240,10 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
   return res
 endfunction
 
-" Function: lh#dev#style#ignore(pattern, local, ft) {{{3
-function! lh#dev#style#ignore(pattern, local, ft) abort
-  let ignore_group = lh#dev#style#define_group('ignored', 'ignored', !a:local, 'c')
+" Function: lh#dev#style#ignore(pattern, local_global, ft) {{{3
+function! lh#dev#style#ignore(pattern, local_global, ft) abort
+  call lh#assert#value(a:local_global).match('\v^%(l%[ocal]|g%[lobal])$', "lh#dev#style#ignore() expects either 'local' or 'global' as 2nd parameter")
+  let ignore_group = lh#dev#style#define_group('ignored', 'ignored', a:local_global, 'c')
   call ignore_group.add(
         \ a:pattern,
         \ '\=lh#dev#style#just_ignore_this(submatch(0))',
@@ -282,7 +283,7 @@ function! lh#dev#style#_prepare_options_for_add_style(input_options) abort
   let ft    = get(a:input_options, 'ft', '*')
   let options += [join(['-ft', ft], '=')]
 
-  return [ options, local, prio, ft ]
+  return [ options, local ? 'l' : 'g', prio, ft ]
 endfunction
 
 " Function: lh#dev#style#use(styles [, options]) {{{3
@@ -310,7 +311,7 @@ let s:k_nb_leading_chars  = len('autoload/')
 let s:k_nb_trailing_chars = len('.vim') + 1
 function! lh#dev#style#use(styles, ...) abort
   " let input_options = get(a:, 1, {})
-  " let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
+  " let [options, local_global, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
 
   for [style_name, style_state] in items(a:styles)
     let style_name  = tolower(style_name)
@@ -427,10 +428,11 @@ function! lh#dev#style#_add(...) abort
   return pattern
 endfunction
 
-" Function: lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) {{{3
-function! lh#dev#style#define_group(kind, name, is_for_all_buffers, ft) abort
+" Function: lh#dev#style#define_group(kind, name, local_global, ft) {{{3
+function! lh#dev#style#define_group(kind, name, local_global, ft) abort
+  call lh#assert#value(a:local_global).match('\v^%(l%[ocal]|g%[lobal])$', "lh#dev#style#define_group() expects either 'local' or 'global' as 3rd parameter")
   let previous = get(s:style_groups, a:kind, [])
-  let local = a:is_for_all_buffers ? '-1' : bufnr('%')
+  let local = (a:local_global =~ '\v^l%[local]$') ? bufnr('%') : -1
   " first check whether there is already something before adding anything
   let groups = filter(copy(previous), 'v:val.local == local && v:val.ft == a:ft')
 
@@ -500,8 +502,12 @@ AddStyle }\\_s*}         -ft=cpp }\ }         -prio=20
 
 " # Doxygen {{{2
 " Doxygen Groups
-AddStyle @\\_s*{  -ft=c @{ -prio=100
-AddStyle @\\_s*}  -ft=c @} -prio=100
+call lh#dev#style#ignore('@{' , 'global', 'c')
+call lh#dev#style#ignore('@}' , 'global', 'c')
+call lh#dev#style#ignore('\\{', 'global', 'c')
+call lh#dev#style#ignore('\\}', 'global', 'c')
+" AddStyle @\\_s*{  -ft=c @{ -prio=100
+" AddStyle @\\_s*}  -ft=c @} -prio=100
 
 " Doxygen Formulas
 " First \ -> cmdline => \\ == One '\' character passed to vim function
@@ -538,7 +544,7 @@ AddStyle {\\_s*} -ft=c {\n} -prio=20
 " # Some generic patterns to ignore {{{2
 " In my templates, I write my email address as "luc {dot} ... {at}..."
 " These artefacts shall be left alone.
-call lh#dev#style#ignore('{\w\+}', 0, 'c')
+call lh#dev#style#ignore('{\w\+}', 'global', 'c')
 
 " # Java style {{{2
 " Force Java style in Java

@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      29th Aug 2017
-" Last Update:  04th Sep 2017
+" Last Update:  03rd Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Factorize all styles related to curly-braces.
@@ -49,9 +49,9 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
-" Function: lh#dev#style#__braces#__new(name, local, ft) {{{2
-function! lh#dev#style#__braces#__new(name, local, ft) abort
-  let style = lh#dev#style#define_group('curly-braces', a:name, !a:local, a:ft)
+" Function: lh#dev#style#__braces#__new(name, local_global, ft) {{{2
+function! lh#dev#style#__braces#__new(name, local_global, ft) abort
+  let style = lh#dev#style#define_group('curly-braces', a:name, a:local_global, a:ft)
   let s:crt_style = style
   return style
 endfunction
@@ -80,18 +80,18 @@ endfunction
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
-" Function: lh#dev#style#__braces#none(...) {{{2
+" Function: lh#dev#style#__braces#none(local_global, ft) {{{2
 " Permits to clear everything on this topic and to define things manually
 " instead.
-function! lh#dev#style#__braces#none(...) abort
-  let style = lh#dev#style#__braces#__new('none', a:local, a:ft)
+function! lh#dev#style#__braces#none(local_global, ft) abort
+  let style = lh#dev#style#__braces#__new('none', a:local_global, a:ft)
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#attach(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#attach(local_global, ft, prio, ...) {{{2
 " "attach" comes from clang-format BreakBeforeBrace
-function! lh#dev#style#__braces#attach(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('attach', a:local, a:ft)
+function! lh#dev#style#__braces#attach(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('attach', a:local? 'l' : 'g', a:ft)
   " except at the start of the line
   call style.add('^\@<!{', ' {\n'  , a:prio)
   call style.add('}'     , '\n}'   , a:prio)
@@ -99,7 +99,7 @@ function! lh#dev#style#__braces#attach(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#linux(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#linux(local_global, ft, prio, ...) {{{2
 " "linux" comes from clang-format BreakBeforeBrace, and it's shared with
 " editor-config indent_brace_style, except the latter will change indenting
 " options as well.
@@ -114,8 +114,8 @@ let s:k_linux_context_no_break
       \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
       \ . '\|' . '\<do\|else\>'
       \ . '\)'
-function! lh#dev#style#__braces#linux(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('linux', a:local, a:ft)
+function! lh#dev#style#__braces#linux(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('linux', a:local_global, a:ft)
   " Let's assume there is no function definition in a control statement, we'll
   " see about lambdas later
   call style.add(s:k_linux_context_no_break.'\zs{'              , ' {\n', a:prio)
@@ -127,7 +127,7 @@ function! lh#dev#style#__braces#linux(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#stroustrup(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#stroustrup(local_global, ft, prio, ...) {{{2
 " "stroustrup" comes from clang-format BreakBeforeBrace
 " Like "attach", but break before function definitions.
 " TODO: handle multiline statements
@@ -137,8 +137,8 @@ let s:k_stroutrup_context_no_break
       \ . '\|' . '\<do\|else\>'
       \ . '\|' . '\<\%(namespace\|class\|struct\|union\|enum\).\{-}\S\>'
       \ . '\)'
-function! lh#dev#style#__braces#stroustrup(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('stroustrup', a:local, a:ft)
+function! lh#dev#style#__braces#stroustrup(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('stroustrup', a:local_global, a:ft)
 
   " Let's assume there is no function definition in a control statement, we'll
   " see about lambdas later
@@ -155,12 +155,12 @@ function! lh#dev#style#__braces#stroustrup(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#allman(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#allman(local_global, ft, prio, ...) {{{2
 " Always break before braces.
 " "allman" comes from clang-format BreakBeforeBrace, and it's shared with
 " editor-config indent_brace_style
-function! lh#dev#style#__braces#allman(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('allman', a:local, a:ft)
+function! lh#dev#style#__braces#allman(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('allman', a:local_global, a:ft)
 
   call style.add('^\@<!{' , '\n{\n' , a:prio)
   call style.add('};\@!'  , '\n}\n' , a:prio)
@@ -168,13 +168,13 @@ function! lh#dev#style#__braces#allman(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#gnu(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#gnu(local_global, ft, prio, ...) {{{2
 " Always break before braces and add an extra level of indentation to braces of
 " control statements, not to those of class, function or other definitions.
 " "gnu" comes from clang-format BreakBeforeBrace
 " TODO: adjust cindent
-function! lh#dev#style#__braces#gnu(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('gnu', a:local, a:ft)
+function! lh#dev#style#__braces#gnu(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('gnu', a:local_global, a:ft)
 
   call style.add('^\@<!{' , '\n{\n' , a:prio)
   call style.add('};\@!'  , '\n}\n' , a:prio)
@@ -182,7 +182,7 @@ function! lh#dev#style#__braces#gnu(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#bsd_knf(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#bsd_knf(local_global, ft, prio, ...) {{{2
 " https://en.wikipedia.org/wiki/Indent_style#Variant:_BSD_KNF
 " TODO: handle multiline statements
 let s:k_bsd_knf_context_no_break
@@ -190,8 +190,8 @@ let s:k_bsd_knf_context_no_break
       \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
       \ . '\|' . '\<do\|else\>'
       \ . '\)'
-function! lh#dev#style#__braces#bsd_knf(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('bsd_knf', a:local, a:ft)
+function! lh#dev#style#__braces#bsd_knf(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('bsd_knf', a:local_global, a:ft)
   " Let's assume there is no function definition in a control statement, we'll
   " see about lambdas later
   call style.add(s:k_bsd_knf_context_no_break.'\zs{'              , ' {\n', a:prio)
@@ -207,14 +207,14 @@ function! lh#dev#style#__braces#bsd_knf(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#ratliff(local, ft, prio, ...) {{{2
+" Function: lh#dev#style#__braces#ratliff(local_global, ft, prio, ...) {{{2
 let s:k_ratliff_context_no_break
       \ = '\%('
       \ .        '\<\%(if\|while\|switch\|for\)\>\s*(.*)'
       \ . '\|' . '\<do\|else\>'
       \ . '\)'
-function! lh#dev#style#__braces#ratliff(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('ratliff', a:local, a:ft)
+function! lh#dev#style#__braces#ratliff(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('ratliff', a:local_global, a:ft)
   " Let's assume there is no function definition in a control statement, we'll
   " see about lambdas later
   call style.add(s:k_ratliff_context_no_break.'\zs{'              , ' {\n', a:prio)
@@ -226,13 +226,13 @@ function! lh#dev#style#__braces#ratliff(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#horstmann(local, ft, prio) {{{2
+" Function: lh#dev#style#__braces#horstmann(local_global, ft, prio) {{{2
 " Horstmann 97 style, as the 2003 one is identical to Allman's.
 " TODO: adapt the indent when sw is changed, or read it in a:styles
 " This also means that if Horstmann/Pico is global and &sw is not, it'll
 " complicates &sw management...
-function! lh#dev#style#__braces#horstmann(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('horstmann', a:local, a:ft)
+function! lh#dev#style#__braces#horstmann(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('horstmann', a:local_global, a:ft)
   call style.add('^\@<!{', '\n{'.repeat( ' ', &sw-1), a:prio)
   call style.add('^{'    , '\n{'.repeat( ' ', &sw-1), a:prio)
   call style.add('};\@!' , '\n}\n'                  , a:prio)
@@ -240,12 +240,12 @@ function! lh#dev#style#__braces#horstmann(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#pico(local, ft, prio) {{{2
+" Function: lh#dev#style#__braces#pico(local_global, ft, prio) {{{2
 " TODO: adapt the indent when sw is changed, or read it in a:styles
 " This also means that if Horstmann/Pico is global and &sw is not, it'll
 " complicates &sw management...
-function! lh#dev#style#__braces#pico(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('pico', a:local, a:ft)
+function! lh#dev#style#__braces#pico(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('pico', a:local_global, a:ft)
   call style.add('^\@<!{', '\n{'.repeat( ' ', &sw-1), a:prio)
   call style.add('^{'    , '{'.repeat( ' ', &sw-1)  , a:prio)
   " TODO: Don't add a space in `{}` case.
@@ -254,18 +254,18 @@ function! lh#dev#style#__braces#pico(local, ft, prio, ...) abort
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#lisp(local, ft, prio) {{{2
-function! lh#dev#style#__braces#lisp(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('lisp', a:local, a:ft)
+" Function: lh#dev#style#__braces#lisp(local_global, ft, prio) {{{2
+function! lh#dev#style#__braces#lisp(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('lisp', a:local_global, a:ft)
   call style.add('^\@<!{' , ' {\n', a:prio)
   call style.add('^{'     , '{\n' , a:prio) " Not meant to exist
   call style.add('}\+;\=\zs'     , '\n', a:prio)
   return style
 endfunction
 
-" Function: lh#dev#style#__braces#java(local, ft, prio) {{{2
-function! lh#dev#style#__braces#java(local, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('java', a:local, a:ft)
+" Function: lh#dev#style#__braces#java(local_global, ft, prio) {{{2
+function! lh#dev#style#__braces#java(local_global, ft, prio, ...) abort
+  let style = lh#dev#style#__braces#__new('java', a:local_global, a:ft)
   call style.add('^{'    , ' {\n'    , a:prio) " Not meant to exist
   call style.add('^\@<!{', ' {\n'    , a:prio)
   call style.add('}'                                            , '\n}'  , a:prio)

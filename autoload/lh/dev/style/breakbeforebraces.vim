@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      12th Aug 2017
-" Last Update:  23rd Aug 2017
+" Last Update:  03rd Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for clang-format "BreakBeforeBraces" stylistic
@@ -69,14 +69,14 @@ let s:k_function = {
 
 function! lh#dev#style#breakbeforebraces#use(styles, indent, ...) abort
   let input_options = get(a:, 1, {})
-  let [options, local, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
+  let [options, local_global, prio, ft] = lh#dev#style#_prepare_options_for_add_style(input_options)
   if prio == 1
     let prio9 = 9
     let prio = 10
   endif
   let indent = tolower(a:indent)
   if has_key(s:k_function, indent)
-    let style = call(s:k_function[indent], [local, ft, prio, prio9])
+    let style = call(s:k_function[indent], [local_global, ft, prio, prio9])
     call s:Verbose("`breakbeforebraces` style set to `%1`", a:indent)
     return 1
   else
