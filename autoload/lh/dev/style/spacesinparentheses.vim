@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      02nd Oct 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for clang-format "SpacesInParentheses"
@@ -56,6 +56,10 @@ function! lh#dev#style#spacesinparentheses#__new(name, local_global, ft) abort
   return style
 endfunction
 
+" Function: lh#dev#style#spacesinparentheses#_known_list() {{{2
+function! lh#dev#style#spacesinparentheses#_known_list() abort
+  return ['none', 'yes', 'no', 'true', 'false', 1, 0]
+endfunction
 "------------------------------------------------------------------------
 " ## API      functions {{{1
 " Function: lh#dev#style#spacesinparentheses#use(styles, value, ...) {{{2
@@ -67,6 +71,7 @@ function! lh#dev#style#spacesinparentheses#use(styles, value, ...) abort
   if     a:value =~? 'yes\|true\|1'
     call style.add('(\s*' , '( ' , prio)
     call style.add('\s*)' , ' )' , prio)
+  elseif a:value =~? 'none'
   else " no
     call style.add('(\s*' , '('  , prio)
     call style.add('\s*)' , ')'  , prio)

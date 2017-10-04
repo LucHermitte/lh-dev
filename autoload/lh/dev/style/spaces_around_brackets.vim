@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      11th Aug 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for EditorConfig non-official
@@ -62,6 +62,10 @@ function! lh#dev#style#spaces_around_brackets#__new(name, local_global, ft) abor
   return style
 endfunction
 
+" Function: lh#dev#style#spaces_around_brackets#_known_list() {{{2
+function! lh#dev#style#spaces_around_brackets#_known_list() abort
+  return ['none', 'inside', 'outside', 'both']
+endfunction
 
 "------------------------------------------------------------------------
 " ## API      functions {{{1

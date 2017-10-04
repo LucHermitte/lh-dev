@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      12th Aug 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for clang-format "BreakBeforeBraces" stylistic
@@ -87,6 +87,11 @@ function! lh#dev#style#breakbeforebraces#use(styles, indent, ...) abort
 endfunction
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
+
+" Function: lh#dev#style#breakbeforebraces#_known_list() {{{2
+function! lh#dev#style#breakbeforebraces#_known_list() abort
+  return keys(s:k_function)
+endfunction
 
 "------------------------------------------------------------------------
 " }}}1

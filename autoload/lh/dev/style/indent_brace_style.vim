@@ -5,7 +5,7 @@
 " Version:      2.0.0
 let s:k_version = '2.0.0'
 " Created:      04th Aug 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for EditorConfig non-official
@@ -139,6 +139,11 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
+
+" Function: lh#dev#style#indent_brace_style#_known_list() {{{2
+function! lh#dev#style#indent_brace_style#_known_list() abort
+  return keys(s:k_function)
+endfunction
 
 "------------------------------------------------------------------------
 " }}}1

@@ -7,7 +7,7 @@
 " Version:      1.3.0
 let s:k_version = 130
 " Created:      31st May 2010
-" Last Update:  04th Aug 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Global commands and definitions of lh-dev
@@ -33,6 +33,10 @@ command! -nargs=1 -range -complete=custom,s:CompleteConvertNames
 
 command! -nargs=+
       \ AddStyle call lh#dev#style#_add(<f-args>)
+
+command! -nargs=+
+      \ -complete=customlist,lh#dev#style#_use_complete
+      \ UseStyle call lh#dev#style#_use_cmd(<f-args>)
 "------------------------------------------------------------------------
 " ## Register to editorconfig if found {{{1
 if !empty(globpath(&rtp, 'autoload/editorconfig.vim'))

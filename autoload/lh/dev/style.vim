@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -126,6 +126,13 @@ function! s:filter_related(styles, fts, bufnr) abort
   let styles = map(items(a:styles), '[v:val[0], s:filter_hows(v:val[1], a:fts, a:bufnr)]')
   call filter(styles, '!empty(v:val[1])')
   return styles
+endfunction
+
+function! lh#dev#style#get_groups(ft) abort
+  let fts = lh#ft#option#inherited_filetypes(a:ft) + ['*']
+  let bufnr = bufnr('%')
+  let style_groups = s:filter_related(s:style_groups, fts, bufnr)
+  return style_groups
 endfunction
 
 function! lh#dev#style#get(ft) abort
@@ -335,6 +342,103 @@ let s:k_script_name      = s:getSID()
 if !exists('s:style')
   call lh#dev#style#clear()
 endif
+
+" # :UseStyle API {{{2
+" Function: lh#dev#style#_decode_use_params(pattern, ...) {{{3
+function! lh#dev#style#_decode_use_params(...) abort
+  let local = -1
+  let ft    = '*'
+  let prio  = 1
+  let list  = 0
+  let name  = ''
+  for o in a:000
+    if     o =~ '-b\%[uffer]'
+      let local = bufnr('%')
+    elseif o =~ '-pr\%[iority]'
+      let prio = matchstr(o, '.*=\zs.*')
+    elseif o =~ '-ft\|-filetype'
+      let ft = matchstr(o, '.*=\zs.*')
+      if empty(ft)
+        let ft = &ft
+      endif
+    elseif o =~ '-l\%[ist]'
+      let list = 1
+    else
+      let name = o
+    endif
+  endfor
+
+  return [local, ft, prio, list, name]
+endfunction
+
+" Function: lh#dev#style#_use_cmd(...) {{{3
+function! lh#dev#style#_use_cmd(...) abort
+  " Analyse params {{{4
+  let [local, ft, prio, list, name] = call('lh#dev#style#_decode_use_params', a:000)
+
+  " list styles
+  if list == 1
+    let groups = copy(lh#dev#style#get_groups(ft))
+    let show = []
+    for [group, specialisations] in groups
+      for spe in specialisations
+        let show += [ {'group': group, 'name': spe.name, 'ft': spe.ft, 'local': spe.local}]
+      endfor
+    endfor
+    let align_idx = lh#list#arg_max(lh#list#get(show, 'group'), function('lh#encoding#strlen'))
+    let align_group = lh#encoding#strlen(show[align_idx].group)
+
+    let align_idx = lh#list#arg_max(lh#list#get(show, 'name'), function('lh#encoding#strlen'))
+    let align_name = lh#encoding#strlen(show[align_idx].name)
+
+    let align_idx = lh#list#arg_max(lh#list#get(show, 'ft'), function('lh#encoding#strlen'))
+    let align_ft = lh#encoding#strlen(show[align_idx].ft)
+
+    " let align_idx = lh#list#arg_max(lh#list#get(show, 'local'), function('lh#encoding#strlen'))
+    " let align_local = lh#encoding#strlen(show[align_idx].local) + 1
+
+    let text = map(copy(show), ' printf("- %-".align_group."S: %-".align_name."S  ft: %-".align_ft."S  local: %d", v:val.group, v:val.name, v:val.ft, v:val.local)')
+    " let show += [ printf("- %".align."s: %10s  ft: %10s  local: %d", group, spe.name, spe.ft, spe.local)]
+    echo join(text, "\n")
+    " if has_key(strs, 'pattern')
+      " let styles = filter(copy(styles), 'v:key =~ strs.pattern')
+    " endif
+    " echo join(map(items(styles), 'string(v:val)'), "\n")
+    return
+  endif
+  if empty('name')
+    throw 'UseStyle: You need to specify the name of the style you want to use'
+  endif
+
+  let [all, style, value; dummy] = matchlist(name, '\v(.{-})\=(.*)')
+  let options = {'ft': ft, 'prio': prio, 'local': local }
+  let arg = {}
+  let arg[style] = value
+  call call('lh#dev#style#use', [arg, options])
+endfunction
+
+" Function: lh#dev#style#_use_complete(ArgLead, CmdLine, CursorPos) {{{3
+let s:k_use_style_options = ['-b', '-ft']
+function! lh#dev#style#_use_complete(ArgLead, CmdLine, CursorPos) abort
+  let [pos, tokens, ArgLead, CmdLine, CursorPos] = lh#command#analyse_args(a:ArgLead, a:CmdLine, a:CursorPos)
+  if ArgLead =~ '^-'
+    let res = copy(s:k_use_style_options)
+  elseif ArgLead =~ "="
+    let style = matchstr(ArgLead, '\v.{-}\ze\=')
+    let res = call('lh#dev#style#'.style.'#_known_list', [])
+    call map(res, 'style."=".v:val')
+  else
+    let path = 'autoload/**/style/**/*.vim'
+    let plugins = lh#path#glob_as_list(&rtp, path)
+    " call s:Verbose("styles: %1", plugins)
+    let res = map(plugins, 'matchstr(v:val, ".*[\\/]\\zs.*\\ze\\.vim")."="')
+    " call s:Verbose("styles: %1", styles)
+  endif
+  let ArgLead = substitute(ArgLead, '\*', '.*', 'g')
+  call filter(res, 'v:val =~ ArgLead')
+  return res
+endfunction
+
 
 " # :AddStyle API {{{2
 " Function: lh#dev#style#_decode_add_params(pattern, ...) {{{3

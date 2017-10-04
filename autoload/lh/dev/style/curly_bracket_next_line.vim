@@ -5,7 +5,7 @@
 " Version:      2.0.0
 let s:k_version = '2.0.0'
 " Created:      04th Aug 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for EditorConfig non-official
@@ -55,6 +55,11 @@ function! lh#dev#style#curly_bracket_next_line#__new(name, local_global, ft) abo
   let style = lh#dev#style#define_group('curly-bracket-next-line', a:name, a:local_global, a:ft)
   let s:crt_style = style
   return style
+endfunction
+
+" Function: lh#dev#style#curly_bracket_next_line#_known_list() {{{2
+function! lh#dev#style#curly_bracket_next_line#_known_list() abort
+  return ['none', 'yes', 'no', 'true', 'false', 1, 0]
 endfunction
 
 " ## API      functions {{{1

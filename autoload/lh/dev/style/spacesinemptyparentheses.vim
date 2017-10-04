@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      02nd Oct 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  04th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       lh-dev style-plugin for clang-format "SpacesInEmptyParentheses"
@@ -54,6 +54,11 @@ function! lh#dev#style#spacesinemptyparentheses#__new(name, local_global, ft) ab
   let style = lh#dev#style#define_group('spaces.brackets.cf.in_empty', a:name, a:local_global, a:ft)
   let s:crt_style = style
   return style
+endfunction
+
+" Function: lh#dev#style#spacesinemptyparentheses#_known_list() {{{2
+function! lh#dev#style#spacesinemptyparentheses#_known_list() abort
+  return ['none', 'yes', 'no', 'true', 'false', 1, 0]
 endfunction
 
 "------------------------------------------------------------------------
