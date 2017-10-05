@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  04th Oct 2017
+" Last Update:  05th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -99,11 +99,13 @@ function! s:filter_hows(hows, fts, bufnr) abort
   " Keep only those related to the current buffer, or global
   let hows = filter(copy(a:hows), 'v:val.local == -1 || v:val.local == a:bufnr')
 
-  " Compute ft adequation of the repl-ft to the current ft stack
-  call map(hows, 'extend(v:val, {"ft_index": index(a:fts, v:val.ft)})')
+  if a:fts[0] != '!'
+    " Compute ft adequation of the repl-ft to the current ft stack
+    call map(hows, 'extend(v:val, {"ft_index": index(a:fts, v:val.ft)})')
 
-  " Keep also only those with a related ft
-  call filter(hows, 'v:val.ft_index >= 0')
+    " Keep also only those with a related ft
+    call filter(hows, 'v:val.ft_index >= 0')
+  endif
 
   " algo: buffer locality > ft
   " We start by filtering either the local hows, or the remaining global ones
@@ -379,6 +381,10 @@ function! lh#dev#style#_use_cmd(...) abort
   " list styles
   if list == 1
     let groups = copy(lh#dev#style#get_groups(ft))
+    if empty(groups)
+      echo "No style used for ft=".ft
+      return
+    endif
     let show = []
     for [group, specialisations] in groups
       for spe in specialisations
@@ -397,7 +403,7 @@ function! lh#dev#style#_use_cmd(...) abort
     " let align_idx = lh#list#arg_max(lh#list#get(show, 'local'), function('lh#encoding#strlen'))
     " let align_local = lh#encoding#strlen(show[align_idx].local) + 1
 
-    let text = map(copy(show), ' printf("- %-".align_group."S: %-".align_name."S  ft: %-".align_ft."S  local: %d", v:val.group, v:val.name, v:val.ft, v:val.local)')
+    let text = map(copy(show), ' printf("- %-".align_group."S: %-".align_name."S ; ft: %-".align_ft."S ; local: %s(%d)", v:val.group, v:val.name, v:val.ft, v:val.local==-1 ? "*" : bufname(v:val.local), v:val.local)')
     " let show += [ printf("- %".align."s: %10s  ft: %10s  local: %d", group, spe.name, spe.ft, spe.local)]
     echo join(text, "\n")
     " if has_key(strs, 'pattern')

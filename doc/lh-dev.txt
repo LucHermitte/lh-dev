@@ -76,8 +76,11 @@ to have been done earlier with |lh#dev#option#pre_load_overrides()|.
 ------------------------------------------------------------------------------
 CODING STYLE                            *lhdev-style* {{{1
 
-The aim of |:AddStyle| and of |lh#dev#style#get()| is to define how things
-should get written in source code.
+The aim of |:UseStyle|, |:AddStyle| and of |lh#dev#style#get()| is to define
+how things should get written in source code. This feature is not about
+reformatting source code (you're better off with applying clang-format when
+working in C or in C++), but about formatting snippets as they are expanded.
+
 For instance, some projects will want to have opening curly-brackets on new
 lines (see Allman indenting style), other will prefer to have the opening
 bracket on the same line as the function/constrol-statement/... (see K&R
@@ -86,10 +89,53 @@ indenting style, Java coding style, ...)
 This pair doesn't do any replacement by itself. It is expected to used by
 snippet plugins. So far, only |mu-template| exploits this feature.
 
-|:AddStyle| is meant to be used by end users while |lh#dev#style#get()| is
-meant to be used by plugin developpers that want to exploit end-user coding
-style.
+|:UseStyle| and |:AddStyle| are meant to be used by end users while
+|lh#dev#style#get()| is meant to be used by plugin developpers that want to
+exploit end-user coding style.
 Note: Naming policies are implemented with |lhdev-naming|.
+
+                                                *:UseStyle*
+:UseStyle {style-option}={value} [-buffer] [-ft[={ft}]] [-prio={prio}]~
+@param `{style-option}` specifies given a style family what choice has been
+       made.
+       Styles can easilly be added in `{&rtp}/autoload/lh/dev/style/`. If you
+       don't remember them all, don't worry, `:UseStyle` supports command-line
+       completion.
+       Setting the style to `none` unsets the whole family for the related
+       |buffer|s / |filetype|s.
+       Giving a new {value}, overrides the style for the related |buffer|s /
+       |filetype|s.
+
+@param `-buffer` defines this association only for the current buffer. This
+       option is meant to be used with plugins like |local_vimrc|.
+@param `-ft[={ft}]` defines this association only for the specified filetype.
+       When {ft} is not specified, it applies only to the current filetype.
+       This option is meant to be used in .vimrc, in the global zone of
+       |filetype-plugin|s or possibily in |local_vimrc|s (when combined with
+       `-buffer`).
+@param `-prio={prio}` Sets a priority that'll be used to determine which key
+       is matching the text to enhance. By default all style have a priority
+       of 1.  The typical application is to have template expander ignore
+       single curly brackets.
+
+At this time the following styles are implemented.
+EditorConfig styles (https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties#ideas-for-domain-specific-properties):
+   - `curly_bracket_next_line`  = [`yes`, `no`] // `true,` `false,` `0,` `1`.
+   - `indent_brace_style`       = [`0tbs`, `1tbs`, `allman`, `bsd_knf`,
+                                 `gnu`, `horstmann`, `java`, `K&R`,
+                                 `linux_kernel`, `lisp`, `none`, `pico`,
+                                 `ratliff`, `stroustrup`, `whitesmiths]`
+   - `spaces_around_brackets`   = [`inside`, `outside`, `both`, `none`]
+
+Clang-Format styles:
+   - `breakbeforebraces`        = [`allman`, `attach`, `gnu`, `linux`,
+                                 `none`, `stroustrup` ]
+   - `spacesbeforeparens`       = [`none`, `never`, `always`, `control-statements`]
+   -` spacesinemptyparentheses` = [`yes`, `no`] // `true,` `false,` `0,` `1`.
+   -` spacesinparentheses`      = [`yes`, `no`] // `true,` `false,` `0,` `1`.
+
+If you want more precise control, without familly management, you can use
+|:AddStyle| instead.
 
                                                 *:AddStyle*
 :AddStyle {key} [-buffer] [-ft[={ft}]] [-prio={prio}] {Replacement}~
@@ -118,6 +164,14 @@ Examples: >
 <
 Local configuration (with `-buffer`) have the priority over filetype
 specialized configuration (with `-ft`).
+
+Note: `:AddStyle`  is the "old" low-level command that defines unrelated
+styles. In order to define related and exclusive styles, use |:UseStyle|.
+
+:AddStyle -list [-buffer] [-ft[={ft}]] [-prio={prio}]~
+Lists the styles active for the option specified.
+`-ft=*` lists global styles.
+`-ft=!` lisst all styles.
 
 
                                                 *lh#dev#style#get()*
