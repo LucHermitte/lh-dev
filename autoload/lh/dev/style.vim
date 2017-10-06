@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  05th Oct 2017
+" Last Update:  06th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -206,17 +206,9 @@ function! s:cmp_e1_prio(lhs, rhs)
   return get(a:lhs[1], 'prio', 0) - get(a:rhs[1], 'prio', 0)
 endfunction
 
-function! s:reinject_cached_ignored_matches(match, nl) abort
-  let res = s:cache_of_ignored_matches[a:match]
-  if (!empty(a:nl) && res[-1:]!="\n")
-    let res .= a:nl
-  endif
-  return res
-endfunction
-
 function! lh#dev#style#apply_these(styles, text, ...) abort
-  let s:cache_of_ignored_matches = get(a:, 1, [])
   let g:applyied_on += [a:text]
+  let s:cache_of_ignored_matches = get(a:, 1, [])
   " Alas:
   " - substitute+_get_replacement cannot work because it cannot tell exactly
   "   which key matched
@@ -230,10 +222,26 @@ function! lh#dev#style#apply_these(styles, text, ...) abort
     " TODO: see whether a chained map() would be faster
     let res = substitute(res, pattern, style.replacement, 'g')
   endfor
-  if !empty(s:cache_of_ignored_matches)
-    let res = substitute(res, '\v¤(\d+)¤(\n)=', '\=s:reinject_cached_ignored_matches(submatch(1), submatch(2))', 'g')
+  let res = call('lh#dev#style#reinject_cached_ignored_matches', [res]+a:000)
+  return res
+endfunction
+
+" Function: lh#dev#style#reinject_cached_ignored_matches(text [, cache]) {{{3
+function! s:reinject_cached_ignored_matches(match, nl) abort
+  let res = s:cache_of_ignored_matches[a:match]
+  if (!empty(a:nl) && res[-1:]!="\n")
+    let res .= a:nl
   endif
   return res
+endfunction
+
+function! lh#dev#style#reinject_cached_ignored_matches(text, ...) abort
+  let s:cache_of_ignored_matches = get(a:, 1, [])
+  if !empty(s:cache_of_ignored_matches)
+    return substitute(a:text, '\v¤(\d+)¤(\n)=', '\=s:reinject_cached_ignored_matches(submatch(1), submatch(2))', 'g')
+  else
+    return a:text
+  endif
 endfunction
 
 " Function: lh#dev#style#ignore(pattern, local_global, ft) {{{3
