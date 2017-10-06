@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      29th Aug 2017
-" Last Update:  03rd Oct 2017
+" Last Update:  06th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Factorize all styles related to curly-braces.
@@ -91,7 +91,7 @@ endfunction
 " Function: lh#dev#style#__braces#attach(local_global, ft, prio, ...) {{{2
 " "attach" comes from clang-format BreakBeforeBrace
 function! lh#dev#style#__braces#attach(local_global, ft, prio, ...) abort
-  let style = lh#dev#style#__braces#__new('attach', a:local? 'l' : 'g', a:ft)
+  let style = lh#dev#style#__braces#__new('attach', a:local_global, a:ft)
   " except at the start of the line
   call style.add('^\@<!{', ' {\n'  , a:prio)
   call style.add('}'     , '\n}'   , a:prio)
