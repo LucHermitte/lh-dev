@@ -5,13 +5,15 @@
 " Version:      1.6.2
 let s:k_version = 1602
 " Created:      31st May 2010
-" Last Update:  30th May 2016
+" Last Update:  06th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
 "
 "------------------------------------------------------------------------
 " History:
+"       2.0.0
+"       (*) Fix call to lh#dev#c#function#get_prototype(..., 1)
 "       1.6.2
 "       (*) Fix :GOTOIMPL to support operators like +=
 "       1.5.1
@@ -79,7 +81,7 @@ let s:re_funcname_or_operator = '\%(\<\I\i*\>\|'.s:re_operators.'\)\_s*('
 "   identifier.
 " * Retrieve the const modifier even when it is not on the same line as the
 "   ')'.
-function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration,...)
+function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration,...) abort
   let endPattern = a:onlyDeclaration ? ';' : '[;:{]'
   let return_position_end_prototype_as_well = a:0 > 0 && a:1!=0
   exe a:lineNo
@@ -100,7 +102,7 @@ function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration,...)
   let end_pos = getpos('.')
   let l1 = line('.')+1
   " Abort if nothing found
-  if ((0==pos) || (l0>a:lineNo)) | return '' | endif
+  if ((0==pos) || (l0>a:lineNo)) | return return_position_end_prototype_as_well ? [0,''] : '' | endif
   " 3- Build the prototype string
   let proto = []
   while l0 < l1
@@ -124,7 +126,6 @@ function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration,...)
   else
     return s_proto
   endif
-  return s_proto
 endfunction
 
 
