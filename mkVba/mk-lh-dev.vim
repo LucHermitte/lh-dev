@@ -48,8 +48,14 @@ autoload/lh/dev/option.vim
 autoload/lh/dev/snippet.vim
 autoload/lh/dev/style.vim
 autoload/lh/dev/style/__braces.vim
+autoload/lh/dev/style/breakbeforebraces.vim
 autoload/lh/dev/style/curly_bracket_next_line.vim
+autoload/lh/dev/style/empty_braces.vim
 autoload/lh/dev/style/indent_brace_style.vim
+autoload/lh/dev/style/spaces_around_brackets.vim
+autoload/lh/dev/style/spacesbeforeparens.vim
+autoload/lh/dev/style/spacesinemptyparentheses.vim
+autoload/lh/dev/style/spacesinparentheses.vim
 autoload/lh/dev/tags.vim
 autoload/lh/dev/vim/function.vim
 doc/lh-dev.txt

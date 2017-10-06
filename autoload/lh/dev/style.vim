@@ -630,11 +630,9 @@ AddStyle ^\ *{\ *$ -ft=c &
 AddStyle ^\ *}\ *$ -ft=c &
 
 " # Handle specifically empty pairs of curly-brackets {{{2
-" On its own line
-" -> Leave it be
-" AddStyle ^\\s*\\zs{\\_s*}\ *$ -ft=c {} -prio=20
-" -> Split it
-AddStyle {\\_s*} -ft=c {\n} -prio=20
+call lh#dev#style#use({'empty_braces': 'nl'}, {'ft': 'c', 'prio': 10})
+" call lh#dev#style#use({'empty_braces': 'empty'}, {'ft': 'c', 'prio': 10})
+" call lh#dev#style#use({'empty_braces': 'space'}, {'ft': 'c', 'prio': 10})
 
 " Mixed
 " -> Split it

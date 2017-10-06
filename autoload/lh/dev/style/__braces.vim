@@ -62,7 +62,7 @@ endfunction
 " - finally belongs to java, C#...
 " - catch belongs to C++, Java...
 " TODO: Provide a way to inject other keywords.
-let s:follow_end_braces_keywords            = ['else', 'whil', 'catch', 'finally']
+let s:follow_end_braces_keywords            = ['else', 'while', 'catch', 'finally']
 let s:re_accepted_keywords_after_end_braces = '\%(' . join(s:follow_end_braces_keywords, '\|') . '\)'
 let s:re_accepted_after_end_braces          = join(s:follow_end_braces_keywords + [';', '$'], '\|')
 function! lh#dev#style#__braces#__k_r_end_bracket(style, prio) abort
