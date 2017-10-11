@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      12th Feb 2014
-" Last Update:  06th Oct 2017
+" Last Update:  12th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       Functions related to help implement coding styles (e.g. Allman or K&R
@@ -266,7 +266,7 @@ endfunction
 " Function: lh#dev#style#surround() {{{3
 function! lh#dev#style#surround(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
-  let styles = lh#dev#style#get()
+  let styles = lh#dev#style#get(&ft)
   let begin = lh#dev#style#apply_these(styles, a:begin)
   let end   = lh#dev#style#apply_these(styles, a:end)
   return call(function('lh#map#surround'), [begin, end, a:isLine, a:isIndented, a:goback, a:mustInterpret]+a:000)
