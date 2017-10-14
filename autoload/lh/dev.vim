@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      28th May 2010
-" Last Update:  12th Oct 2017
+" Last Update:  14th Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -117,7 +117,7 @@ endfunction
 " NB: In C++, ctags does not understand for (int i=0...), and thus it can't
 " extract "i" as a local variable ...
 " @note depend on tags
-if lh#tags#ctags_flavour() == 'utags'
+if lh#tags#ctags_flavour() =~ 'utags'
   let c_ctags_understands_local_variables_in_one_pass = 1
   let cpp_ctags_understands_local_variables_in_one_pass = 1
 else
