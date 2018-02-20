@@ -32,7 +32,7 @@ function! s:Test_func_funcname()
   " Function that have been specialized in C++
   AssertEqual(lh#dev#option#_find_funcname('function#_build_param_call', 'cpp'), 'lh#dev#cpp#function#_build_param_call')
   " Function that have been specialized only in C++
-  AssertEqual(lh#dev#option#_find_funcname('scope#current', 'cpp'), 'lh#dev#cpp#scope#current')
+  AssertEqual(lh#dev#option#_find_funcname('types#is_view', 'cpp'), 'lh#dev#cpp#types#is_view')
 
   " ## Second syntax, for any plugin...
   " There is no such thing as lh#dev#cpp#foo(), nor lh#dev#c#foo()
@@ -42,7 +42,7 @@ function! s:Test_func_funcname()
   " Function that have been specialized in C++
   AssertEqual(lh#dev#option#_find_funcname(['lh#dev', 'function#_build_param_call'], 'cpp'), 'lh#dev#cpp#function#_build_param_call')
   " Function that have been specialized only in C++
-  AssertEqual(lh#dev#option#_find_funcname(['lh#dev', 'scope#current'], 'cpp'), 'lh#dev#cpp#scope#current')
+  AssertEqual(lh#dev#option#_find_funcname(['lh#dev', 'types#is_view'], 'cpp'), 'lh#dev#cpp#types#is_view')
 endfunction
 
 "------------------------------------------------------------------------
