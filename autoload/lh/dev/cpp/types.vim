@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = '2.0.0'
 " Created:	10th Feb 2009
-" Last Update:	17th Aug 2017
+" Last Update:	20th Feb 2018
 "------------------------------------------------------------------------
 " Description:
 " 	Analysis functions for C++ types.
@@ -333,8 +333,8 @@ function! s:GetClassName(dict) abort
   return get(a:dict, "class", get(a:dict, "struct", ""))
 endfunction
 
-"------------------------------------------------------------------------
 " }}}1
+"------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
 " Vim: let b:UTfiles = 'tests/lh/dev-cpptypes.vim'
