@@ -12,20 +12,6 @@ extracted to [lh-style project](http://github.com/LucHermitte/lh-style).
 
 ## Options
 
-### Inherited filetypes
-
-(TODO: move related documentation to lh-vim-lib...)
-
-All the options available though lh-vim-lib and its API (`lh#ft#get#option()`) can be specialized for each filetype. Doing so for every filetype will quickly become cumbersome when these filetypes have a lot in common like C and C++. To simplify options tuning, lh-dev supports filetype inheritance.
-
-By default, C++ option settings inherits C option settings. In future versions, Java option settings may also inherit C or C++ option settings.
-
-If you want to define new inheritance relations between filetypes, send me an email for me to add to it to the default configuration, or do so in your `.vimrc` with
-
-```vim
-:let `g:{ft}_inherits = 'ft1,ft2,...'`
-```
-
 ## API
 
 This part is just a draft for the moment.

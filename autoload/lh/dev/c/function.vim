@@ -2,10 +2,10 @@
 " File:         autoload/lh/dev/c/function.vim                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte/lh-dev>
-" Version:      1.6.2
-let s:k_version = 1602
+" Version:      2.0.0
+let s:k_version = 2000
 " Created:      31st May 2010
-" Last Update:  06th Oct 2017
+" Last Update:  20th Feb 2018
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
@@ -14,6 +14,7 @@ let s:k_version = 1602
 " History:
 "       2.0.0
 "       (*) Fix call to lh#dev#c#function#get_prototype(..., 1)
+"       (*) Fix lh#dev#c#function#_build_param_call/decl
 "       1.6.2
 "       (*) Fix :GOTOIMPL to support operators like +=
 "       1.5.1
@@ -128,8 +129,6 @@ function! lh#dev#c#function#get_prototype(lineNo, onlyDeclaration,...) abort
   endif
 endfunction
 
-
-
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 
@@ -137,7 +136,7 @@ endfunction
 " lh#dev#c#function#_prototype(fn_tag) " {{{3
 " overrides of lh#dev#function#_prototype() to search for the tag in
 " the relevant file
-function! lh#dev#c#function#_prototype(fn_tag)
+function! lh#dev#c#function#_prototype(fn_tag) abort
   " or should we split-open ?
   call lh#tags#jump(a:fn_tag)
   try
@@ -151,8 +150,8 @@ endfunction
 
 
 " # Parameters {{{2
-" Split the list, then reaarange parameters together
-function! lh#dev#c#function#_split_list_of_parameters(sParameters)
+" Split the list, then rearrange parameters together
+function! lh#dev#c#function#_split_list_of_parameters(sParameters) abort "{{{3
   " call the generic function,
   let raw_params = lh#dev#function#_split_list_of_parameters(a:sParameters)
   " then rearrange elements that should be together
@@ -180,6 +179,7 @@ function! lh#dev#c#function#_split_list_of_parameters(sParameters)
   return lParameters
 endfunction
 
+" Function: lh#dev#c#function#_analyse_parameter( param, ...) {{{3
 " This function will treat C & C++ cases => must recognize
 " [X] arrays
 " [ ] array-references
@@ -267,7 +267,7 @@ function! lh#dev#c#function#_analyse_parameter( param, ...) abort
   return res
 endfunction
 
-function! lh#dev#c#function#_type(variable_tag)
+function! lh#dev#c#function#_type(variable_tag) abort "{{{3
   " or should we split-open ?
   call lh#tags#jump(a:variable_tag)
   try
@@ -298,14 +298,15 @@ endfunction
 " [ ] default value
 " [X] new line before (when analysing non ctags-signatures, but real text)
 " [ ] TU
-function! lh#dev#function#_build_param_decl(param)
+function! lh#dev#c#function#_build_param_decl(param) abort "{{{3
   return a:param.type . ' ' . (a:param.dir =='out' ? '*' : '') .a:param.formal
 endfunction
 
-function! lh#dev#function#_build_param_call(param)
+function! lh#dev#c#function#_build_param_call(param) abort "{{{3
   return (a:param.dir =='out' ? '&' : '') .a:param.name
 endfunction
 
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

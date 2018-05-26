@@ -1,5 +1,5 @@
 *lh-dev.txt*            Vim library for development oriented scripts (v2.0.0.)
-                        For Vim version 7+.    Last change: 30th Nov 2017
+                        For Vim version 7+.    Last change: 20th Feb 2018
 
                         By Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -13,10 +13,9 @@ CONTENTS                                *lhdev-contents*      {{{1
 |lhdev-analysis|        Code Analysis
 |add-local-help|        Instructions on installing this file (:helptags %:h)
 
-
 ------------------------------------------------------------------------------
 PRESENTATION                            *lhdev-presentation* {{{1
-|lh-dev| is a library that defines some common VimL functions I use to
+|lh-dev| is a library that defines some common vim script functions I use to
 implements development oriented plugins and ftplugins.
 This library has been conceived as a suite of |autoload| plugins.  As such, it
 requires Vim 7+.
@@ -76,11 +75,48 @@ to have been done earlier with |lh#dev#option#pre_load_overrides()|.
 ------------------------------------------------------------------------------
 IMPORTING MODULES/INCLUDES              *lhdev-import* {{{1
 
-TBD
-*lh#dev#import#add()*
-*lh#dev#import#add_any()*
-*n_CTRL-X_i*  *<Plug>ImportModule*
+                                            *lh#dev#import#add()*
+lh#dev#import#add({filename} [, {options}])~
+@return if anything was added
+@param {filename} : a filename/module name to include/import.
+@param {options} : |Dict|
+      - `"where"` :` "first"`/`"last"`/language-specific
+      - `"delim"` : `"angl`e"/`"quote"` (C, C++)
+      - `"symbol":` `"a-name"` (everything by default) (Python)
 
+These functions add import/include statements in the current file.
+If the statement is already there, the file will be left unchanged.
+At the moment this feature has been specialzed only for C, C++ and Python.
+
+In order to support other languages, define |function|s like
+`lh#dev#{java}#import#_do_clean_filename()` and
+`lh#dev#{java}#impo_do_build_import_string()`. See their implementation for C
+and for Python to get some inspiration.
+
+This function is particulary useful in snippets to make sure we never use
+something without making sure we can use it.
+See for instance |lh-cpp| snippet for `std::vector<>`...
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                            *lh#dev#import#add_any()*
+lh#dev#import#add_any({filenames} [, {options}])~
+@return if anything was added
+@param {filenames} : |List| of filenames/module names to include/import.
+@param {options} : |Dict|
+      - `"where"` :` "first"`/`"last"`/language-specific
+      - `"delim"` : `"angl`e"/`"quote"` (C, C++)
+      - `"symbol":` `"a-name"` (everything by default) (Python)
+
+If none of the module/file names is already imported/included, then
+import/include the first one of the |list.|
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*n_CTRL-X_i*  *<Plug>ImportModule*
+The normal mode |<plug>| |mapping|| `<Plug>ImportModule` is binded by default
+to `CTRL-X_i`.
+It'll check where the symbol under the cursor has been defined in the current
+tags database and make sure the related file/module is already imported.
 
 ------------------------------------------------------------------------------
 CODE ANALYSIS                           *lhdev-analysis* {{{1
@@ -101,6 +137,6 @@ For instance:
 - `dif`  |delete|s the current function
 
 ------------------------------------------------------------------------------
-© Luc Hermitte, 2011-2016, http://github.com/LucHermitte/lh-dev }}}1
+© Luc Hermitte, 2011-2018, http://github.com/LucHermitte/lh-dev }}}1
  VIM: let b:VS_language = 'american'
  vim:ts=8:sw=4:tw=80:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:fdm=marker:
