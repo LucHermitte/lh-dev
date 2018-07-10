@@ -130,11 +130,13 @@ endfunction
 " extract "i" as a local variable ...
 " @note depend on tags
 if lh#tags#ctags_flavour() =~ 'utags'
-  let c_ctags_understands_local_variables_in_one_pass = 1
+  let c_ctags_understands_local_variables_in_one_pass   = 1
   let cpp_ctags_understands_local_variables_in_one_pass = 1
+  let ctags_has_end_of_functions                        = 1
 else
-  let c_ctags_understands_local_variables_in_one_pass = 0
+  let c_ctags_understands_local_variables_in_one_pass   = 0
   let cpp_ctags_understands_local_variables_in_one_pass = 0
+  let ctags_has_end_of_functions                        = 0
 endif
 
 function! lh#dev#get_variables(function_boundaries, ...) abort
@@ -361,7 +363,9 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
 
   " Make sure to inject line numbers
   let cmd_line = s:inject_to_field(cmd_line, '--fields', 'n') " inject line numbers in fields
-  let cmd_line = s:inject_to_field(cmd_line, '--fields', 'e') " inject end-line numbers in fields
+  if ctags_has_end_of_functions
+    let cmd_line = s:inject_to_field(cmd_line, '--fields', 'e') " inject end-line numbers in fields
+  endif
   let cmd_line = substitute(cmd_line, '\v-kinds\=\S+\zsp', '', '') " remove prototypes, todo: ft-specific
 
   let cmd_line .= ' ' . shellescape(source_name)
