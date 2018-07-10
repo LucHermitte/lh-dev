@@ -97,18 +97,28 @@ function! lh#dev#find_function_boundaries(line) abort
     let crt_function = info.idx " function starting just after the current line
     let lFunctions   = info.fn
     if crt_function == 0
-      throw "No known function around (before) line ".a:line." in ctags base"
+      return lh#option#unset("No known function around (before) line ".a:line." in ctags base")
     endif
-    " echomsg "first after=="crt_function."->".string(lFunctions[crt_function])
 
     " decrement by 1 to access the previous function in the list
     let crt_function -= 1
-    let first_line = lFunctions[crt_function].line
+    let the_function = lFunctions[crt_function]
+    let first_line = the_function.line
+    call s:Verbose("Function data found: %1", the_function)
 
     " 2- find where the function ends
-    let last_line = lh#dev#__FindEndFunc(first_line)
-    "
-    let fun = {'lines': [first_line, last_line[1]], 'fn':lFunctions[crt_function]}
+    if has_key(the_function, 'end')
+      " When it can be done with ctags
+      let last_line = the_function.end
+    else
+      " When it shall be done manually (for instance, with matchit)
+      let last_line = lh#dev#__FindEndFunc(first_line)[1]
+    endif
+    if last_line < a:line
+      return lh#option#unset("No known function around line ".a:line." in ctags base")
+    endif
+
+    let fun = {'lines': [first_line, last_line], 'fn':the_function}
     return fun
   finally
     call lh#dev#end_tag_session()
@@ -351,6 +361,7 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
 
   " Make sure to inject line numbers
   let cmd_line = s:inject_to_field(cmd_line, '--fields', 'n') " inject line numbers in fields
+  let cmd_line = s:inject_to_field(cmd_line, '--fields', 'e') " inject end-line numbers in fields
   let cmd_line = substitute(cmd_line, '\v-kinds\=\S+\zsp', '', '') " remove prototypes, todo: ft-specific
 
   let cmd_line .= ' ' . shellescape(source_name)
