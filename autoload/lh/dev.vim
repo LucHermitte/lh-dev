@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      28th May 2010
-" Last Update:  10th Jul 2018
+" Last Update:  10th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -129,16 +129,6 @@ endfunction
 " NB: In C++, ctags does not understand for (int i=0...), and thus it can't
 " extract "i" as a local variable ...
 " @note depend on tags
-if lh#tags#ctags_flavour() =~ 'utags'
-  let c_ctags_understands_local_variables_in_one_pass   = 1
-  let cpp_ctags_understands_local_variables_in_one_pass = 1
-  let ctags_has_end_of_functions                        = 1
-else
-  let c_ctags_understands_local_variables_in_one_pass   = 0
-  let cpp_ctags_understands_local_variables_in_one_pass = 0
-  let ctags_has_end_of_functions                        = 0
-endif
-
 function! lh#dev#get_variables(function_boundaries, ...) abort
   let lVariables = lh#dev#option#call('function#_local_variables', &ft, a:function_boundaries)
 
@@ -337,38 +327,46 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
   endif
   let args = (a:0 > 0 && type(a:1) == type({})) ? a:1 : {}
   " call s:Verbose("Args: %1, %2", args, a:000)
-  let ctags_pathname = s:temp_tags
+  " let ctags_pathname = s:temp_tags
 
-  let cmd_line = lh#tags#cmd_line(ctags_pathname)
-  let lang = lh#tags#option_force_lang(&ft)
-  if lh#option#is_unset(lang)
-    call lh#common#warning_msg("lh-tags may not know how to recognize and parse ".&ft." files")
-  else
-    let cmd_line .= ' --language-force='.lang
-
-    let kind_flags = '--'.tolower(lang).'-kinds'
-    if a:0>0 || lh#ft#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
-      let cmd_line = s:inject_to_field(cmd_line, kind_flags, 'l')
-      let cmd_line = s:inject_to_field(cmd_line, kind_flags, 'v')
-    endif
-    if has_key(args, 'kinds')
-      for kind in split(substitute(args.kinds, '[[\]]', '', 'g'), '\zs')
-        let cmd_line = s:inject_to_field(cmd_line, kind_flags, kind)
-      endfor
-    endif
+  if filereadable(s:temp_tags)
+    call delete(s:temp_tags)
   endif
-  " As we run on a file, we don't need the --languages= option (unless
-  " may be to force the same thing as --language-force?
-  let cmd_line = substitute(cmd_line, '\v --languages\=\S*', '', '')
+  let indexer = lh#tags#indexers#ctags#make()
+  call indexer.set_output_file(s:temp_tags)
+  let options = {'force_language':&ft, 'extract_local_variables': 1, 'end': 1, 'extract_prototypes': 0, 'index_file': source_name}
+  let cmd_line = join(indexer.cmd_line(options), ' ')
 
-  " Make sure to inject line numbers
-  let cmd_line = s:inject_to_field(cmd_line, '--fields', 'n') " inject line numbers in fields
-  if ctags_has_end_of_functions
-    let cmd_line = s:inject_to_field(cmd_line, '--fields', 'e') " inject end-line numbers in fields
-  endif
-  let cmd_line = substitute(cmd_line, '\v-kinds\=\S+\zsp', '', '') " remove prototypes, todo: ft-specific
+  ""let cmd_line = lh#tags#cmd_line(ctags_pathname)
+  ""let lang = lh#tags#option_force_lang(&ft)
+  ""if lh#option#is_unset(lang)
+  ""  call lh#common#warning_msg("lh-tags may not know how to recognize and parse ".&ft." files")
+  ""else
+  ""  let cmd_line .= ' --language-force='.lang
 
-  let cmd_line .= ' ' . shellescape(source_name)
+  ""  let kind_flags = '--'.tolower(lang).'-kinds'
+  ""  if a:0>0 || lh#ft#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
+  ""    let cmd_line = s:inject_to_field(cmd_line, kind_flags, 'l')
+  ""    let cmd_line = s:inject_to_field(cmd_line, kind_flags, 'v')
+  ""  endif
+  ""  if has_key(args, 'kinds')
+  ""    for kind in split(substitute(args.kinds, '[[\]]', '', 'g'), '\zs')
+  ""      let cmd_line = s:inject_to_field(cmd_line, kind_flags, kind)
+  ""    endfor
+  ""  endif
+  ""endif
+  """ As we run on a file, we don't need the --languages= option (unless
+  """ may be to force the same thing as --language-force?
+  ""let cmd_line = substitute(cmd_line, '\v --languages\=\S*', '', '')
+
+  """ Make sure to inject line numbers
+  ""let cmd_line = s:inject_to_field(cmd_line, '--fields', 'n') " inject line numbers in fields
+  ""if ctags_has_end_of_functions
+  ""  let cmd_line = s:inject_to_field(cmd_line, '--fields', 'e') " inject end-line numbers in fields
+  ""endif
+  ""let cmd_line = substitute(cmd_line, '\v-kinds\=\S+\zsp', '', '') " remove prototypes, todo: ft-specific
+  "" let cmd_line .= ' ' . shellescape(source_name)
+
   if filereadable(s:temp_tags)
     call delete(s:temp_tags)
   endif
