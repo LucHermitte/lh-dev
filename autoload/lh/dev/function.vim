@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = '2.0.0'
 " Created:      28th May 2010
-" Last Update:  20th Feb 2018
+" Last Update:  13th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       Various helper functions that return ctags information on functions
@@ -175,23 +175,29 @@ endfunction
 
 " Function: lh#dev#function#_local_variables(function_boundaries) {{{2
 " Extracts local variables, use ctags data by default.
+" TODO: check whether the functions boundaries shall be reduced by 1
+" line with every langage as it's the case with Vim, or if it's already
+" taken care of by the calling code
 function! lh#dev#function#_local_variables(function_boundaries) abort
   try
-    let lTags = lh#dev#start_tag_session()
-    if ! lh#ft#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
-      let lTags = copy(lh#dev#__BuildCrtBufferCtags(a:function_boundaries))
-    endif
+    let session = lh#dev#start_tag_session2()
+    let fl = session.indexer.flavour()
+    let lang = fl.get_lang_for(&ft)
+    let var_kind = get(fl.get_kind_flags('variables'), lang, ['v'])
+    let cond = 'v:val.kind =~ '.string('['.join(var_kind, '').']')
 
-    let var_kind = lh#ft#option#get('variable_kind', &ft, '[vl]')
-
-    let cond = 'v:val.kind =~ '.string(var_kind)
-    if lh#ft#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
+    if ! has_key(fl.get_kind_flags('local_variables'), lang)
+      " ctags does not understand local _variables: => work within the
+      " sub range
+      let lTags = copy(lh#dev#__BuildCrtBufferCtags(a:function_boundaries).tags)
+      call s:AddOffset(lTags, a:function_boundaries[0] - 1)
+    else
       let cond .=
             \   ' && v:val.line>='. a:function_boundaries[0]
             \ . ' && v:val.line<='. a:function_boundaries[1]
-    else
-      call s:AddOffset(lTags, a:function_boundaries[0] - 1)
+      let lTags = session.tags
     endif
+
     call s:Verbose(cond)
     let lVariables = filter(copy(lTags), cond)
   finally

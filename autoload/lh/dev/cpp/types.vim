@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = '2.0.0'
 " Created:	10th Feb 2009
-" Last Update:	09th Mar 2018
+" Last Update:	13th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 " 	Analysis functions for C++ types.
@@ -293,6 +293,8 @@ function! lh#dev#cpp#types#_of_var(name, ...) abort
       let classname = lh#cpp#AnalysisLib_Class#CurrentScope(line('.'), 'class')
       let defs = filter(copy(tags), 'v:val.name =~ classname."::".pat || (v:val.name =~ pat && s:GetClassName(v:val) =~ classname)')
       call s:Verbose('Attributes of %1 matching %2: %3', classname, pat, defs)
+      " TODO: use the lang kind for local variables from the crt
+      " flavour!
       let t_vars  = lh#list#copy_if(defs, [], 'v:1_.kind =~ "[lvx]"')
       if empty(t_vars)
         return call('s:NoDecl', [a:name]+a:000)

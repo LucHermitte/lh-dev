@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      28th May 2010
-" Last Update:  10th Aug 2018
+" Last Update:  13th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -90,7 +90,7 @@ endfunction
 function! lh#dev#find_function_boundaries(line) abort
   try
     let func_kind = lh#tags#func_kind(&ft)
-    let lTags = lh#dev#start_tag_session({'kinds': func_kind})
+    let lTags = lh#dev#start_tag_session({'extract_functions': 1})
 
     let info = lh#dev#__FindFunctions(a:line)
 
@@ -162,9 +162,20 @@ function! lh#dev#start_tag_session(...) abort
   endif
   let s:tags.count += 1
   if s:tags.count == 1
-    let s:tags.tags = call('lh#dev#__BuildCrtBufferCtags', a:000)
+    call extend(s:tags, call('lh#dev#__BuildCrtBufferCtags', a:000), 'force')
   endif
   return s:tags.tags
+endfunction
+
+function! lh#dev#start_tag_session2(...) abort
+  if s:tags.count < 0
+    let s:tags.count = 0
+  endif
+  let s:tags.count += 1
+  if s:tags.count == 1
+    call extend(s:tags, call('lh#dev#__BuildCrtBufferCtags', a:000), 'force')
+  endif
+  return s:tags
 endfunction
 
 function! lh#dev#end_tag_session() abort
@@ -252,7 +263,7 @@ endif
 function! lh#dev#__FindFunctions(line) abort
   let func_kind = lh#tags#func_kind(&ft)
   try
-    let lTags = lh#dev#start_tag_session({'kinds': func_kind})
+    let lTags = lh#dev#start_tag_session({'extract_functions': 1})
     if empty(lTags)
       throw "No tags found, cannot find function definitions in ".expand('%')
     endif
@@ -311,7 +322,7 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
   let ctags_dirname = fnamemodify(s:temp_tags, ':h')
 
   if &modified || a:0 > 0
-    if a:0 > 0 && type(a:0) == type([])
+    if a:0 > 0 && type(a:1) == type([])
       let s = a:1[0]
       let e = a:1[1]
     else
@@ -334,38 +345,8 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
   endif
   let indexer = lh#tags#indexers#ctags#make()
   call indexer.set_output_file(s:temp_tags)
-  let options = {'force_language':&ft, 'extract_local_variables': 1, 'end': 1, 'extract_prototypes': 0, 'index_file': source_name}
+  let options = extend(args, {'forced_language':&ft, 'extract_local_variables': 1, 'end': 1, 'extract_prototypes': 0, 'analyse_file': source_name}, 'force')
   let cmd_line = join(indexer.cmd_line(options), ' ')
-
-  ""let cmd_line = lh#tags#cmd_line(ctags_pathname)
-  ""let lang = lh#tags#option_force_lang(&ft)
-  ""if lh#option#is_unset(lang)
-  ""  call lh#common#warning_msg("lh-tags may not know how to recognize and parse ".&ft." files")
-  ""else
-  ""  let cmd_line .= ' --language-force='.lang
-
-  ""  let kind_flags = '--'.tolower(lang).'-kinds'
-  ""  if a:0>0 || lh#ft#option#get('ctags_understands_local_variables_in_one_pass', &ft, 1)
-  ""    let cmd_line = s:inject_to_field(cmd_line, kind_flags, 'l')
-  ""    let cmd_line = s:inject_to_field(cmd_line, kind_flags, 'v')
-  ""  endif
-  ""  if has_key(args, 'kinds')
-  ""    for kind in split(substitute(args.kinds, '[[\]]', '', 'g'), '\zs')
-  ""      let cmd_line = s:inject_to_field(cmd_line, kind_flags, kind)
-  ""    endfor
-  ""  endif
-  ""endif
-  """ As we run on a file, we don't need the --languages= option (unless
-  """ may be to force the same thing as --language-force?
-  ""let cmd_line = substitute(cmd_line, '\v --languages\=\S*', '', '')
-
-  """ Make sure to inject line numbers
-  ""let cmd_line = s:inject_to_field(cmd_line, '--fields', 'n') " inject line numbers in fields
-  ""if ctags_has_end_of_functions
-  ""  let cmd_line = s:inject_to_field(cmd_line, '--fields', 'e') " inject end-line numbers in fields
-  ""endif
-  ""let cmd_line = substitute(cmd_line, '\v-kinds\=\S+\zsp', '', '') " remove prototypes, todo: ft-specific
-  "" let cmd_line .= ' ' . shellescape(source_name)
 
   if filereadable(s:temp_tags)
     call delete(s:temp_tags)
@@ -392,7 +373,7 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
   endtry
   call s:EvalLines(lTags)
   call sort(lTags, function('lh#dev#_sort_lines'))
-  return lTags
+  return {'tags': lTags, 'indexer': indexer}
 endfunction
 
 " # s:EvalLines(list) {{{2
