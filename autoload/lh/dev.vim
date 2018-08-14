@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      28th May 2010
-" Last Update:  13th Aug 2018
+" Last Update:  14th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -89,8 +89,8 @@ endfunction
 " @note depend on tags
 function! lh#dev#find_function_boundaries(line) abort
   try
-    let func_kind = lh#tags#func_kind(&ft)
-    let lTags = lh#dev#start_tag_session({'extract_functions': 1})
+    let session = lh#dev#start_tag_session2({'extract_functions': 1})
+    let lTags = session.tags
 
     let info = lh#dev#__FindFunctions(a:line)
 
@@ -261,9 +261,12 @@ endif
 " # lh#dev#__FindFunctions(line) {{{2
 " @note depend on tags
 function! lh#dev#__FindFunctions(line) abort
-  let func_kind = lh#tags#func_kind(&ft)
   try
-    let lTags = lh#dev#start_tag_session({'extract_functions': 1})
+    let session = lh#dev#start_tag_session2({'extract_functions': 1})
+    let fl = session.indexer.flavour()
+    let lang = fl.get_lang_for(&ft)
+    let func_kind = ('['.join(get(fl.get_kind_flags('functions'), lang, ['f']), '').']')
+    let lTags = session.tags
     if empty(lTags)
       throw "No tags found, cannot find function definitions in ".expand('%')
     endif

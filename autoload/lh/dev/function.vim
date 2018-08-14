@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = '2.0.0'
 " Created:      28th May 2010
-" Last Update:  13th Aug 2018
+" Last Update:  14th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       Various helper functions that return ctags information on functions
@@ -183,7 +183,7 @@ function! lh#dev#function#_local_variables(function_boundaries) abort
     let session = lh#dev#start_tag_session2()
     let fl = session.indexer.flavour()
     let lang = fl.get_lang_for(&ft)
-    let var_kind = get(fl.get_kind_flags('variables'), lang, ['v'])
+    let var_kind = get(fl.get_kind_flags('variable'), lang, ['v']) " "get_kind_flags('variable')" => regex
     let cond = 'v:val.kind =~ '.string('['.join(var_kind, '').']')
 
     if ! has_key(fl.get_kind_flags('local_variables'), lang)
