@@ -296,18 +296,6 @@ endfunction
 " # lh#dev#__BuildCrtBufferCtags(...) {{{2
 " arg1: [first-line, last-line] => imply get local variables...
 " @note depend on tags
-function! s:inject_to_field(line, field, value) abort
-  let field = a:field.'='
-  let idx = stridx(a:line, field)
-  if idx == -1
-    return a:line . ' ' . field.a:value
-  elseif match(a:line, '^\v\S+'.a:value, idx+len(field)) == -1
-    return a:line[:idx+len(field)-1].substitute(a:line[idx+len(field):], '\v\S+\zs', a:value, '')
-  else
-    return a:line
-  endif
-endfunction
-
 function! lh#dev#__BuildCrtBufferCtags(...) abort
   " TODO: move to lh-tags as the indexer may change the way it works
   " let temp_tags = tempname()
