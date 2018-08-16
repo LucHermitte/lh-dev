@@ -1,2 +1,2 @@
 flavor 'LucHermitte/lh-vim-lib', '>= 4.6.0'
-flavor 'LucHermitte/lh-tags', '>= 3.0.0'
+flavor 'LucHermitte/lh-tags', branch: 'OO'
