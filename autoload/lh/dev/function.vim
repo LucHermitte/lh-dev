@@ -7,13 +7,14 @@
 " Version:      2.0.0
 let s:k_version = '2.0.0'
 " Created:      28th May 2010
-" Last Update:  14th Aug 2018
+" Last Update:  16th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       Various helper functions that return ctags information on functions
 "
 " History:
-" 	v2.0.0: Deprecate lh#dev#option#get()
+" 	v2.0.0: ~ Deprecate lh#dev#option#get()
+"               ~ Update to lh-tags 3.0 new API
 " 	v0.0.3: default lh#dev#function#_build_param_decl() uses the parameter
 " 	        type if known
 " 	v0.0.2: signature manipulations made overidable
@@ -180,13 +181,11 @@ endfunction
 " taken care of by the calling code
 function! lh#dev#function#_local_variables(function_boundaries) abort
   try
-    let session = lh#dev#start_tag_session2()
-    let fl = session.indexer.flavour()
-    let lang = fl.get_lang_for(&ft)
-    let var_kind = get(fl.get_kind_flags('variable'), lang, ['v']) " "get_kind_flags('variable')" => regex
-    let cond = 'v:val.kind =~ '.string('['.join(var_kind, '').']')
+    let session    = lh#dev#start_tag_session()
+    let [var_kind] = session.indexer.get_kind_flags(&ft, ['variable', 'v', 'l']) " regex
+    let cond       = 'index(var_kind,  v:val.kind)>=0'
 
-    if ! has_key(fl.get_kind_flags('local_variables'), lang)
+    if ! session.indexer.has_kind(&ft, 'local_variables')
       " ctags does not understand local _variables: => work within the
       " sub range
       let lTags = copy(lh#dev#__BuildCrtBufferCtags(a:function_boundaries).tags)

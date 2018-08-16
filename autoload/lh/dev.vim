@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      28th May 2010
-" Last Update:  14th Aug 2018
+" Last Update:  16th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -17,6 +17,7 @@ let s:k_version = 200
 "       v2.0.0: ~ deprecating lh#dev#option#get, lh#dev#reinterpret_escaped_char
 "               + Report ctags execution error
 "               + Fix line field injection for recent uctags version
+"               ~ Update to lh-tags 3.0 new API
 "       v1.6.3: ~ Typo in option
 "       v1.6.2: ~ Minor refatoring
 "       v1.6.1: + lh#dev#_goto_function_begin and end
@@ -89,7 +90,7 @@ endfunction
 " @note depend on tags
 function! lh#dev#find_function_boundaries(line) abort
   try
-    let session = lh#dev#start_tag_session2({'extract_functions': 1})
+    let session = lh#dev#start_tag_session({'extract_functions': 1})
     let lTags = session.tags
 
     let info = lh#dev#__FindFunctions(a:line)
@@ -156,18 +157,7 @@ let s:tags = {
       \ 'tags': [],
       \ 'count': 0
       \ }
-function! lh#dev#start_tag_session(...) abort
-  if s:tags.count < 0
-    let s:tags.count = 0
-  endif
-  let s:tags.count += 1
-  if s:tags.count == 1
-    call extend(s:tags, call('lh#dev#__BuildCrtBufferCtags', a:000), 'force')
-  endif
-  return s:tags.tags
-endfunction
-
-function! lh#dev#start_tag_session2(...) abort
+function! lh#dev#start_tag_session(...) abort " {{{3
   if s:tags.count < 0
     let s:tags.count = 0
   endif
@@ -178,7 +168,7 @@ function! lh#dev#start_tag_session2(...) abort
   return s:tags
 endfunction
 
-function! lh#dev#end_tag_session() abort
+function! lh#dev#end_tag_session() abort " {{{3
   let s:tags.count -= 1
   if s:tags.count == 0
     let s:tags.tags = []
@@ -262,17 +252,15 @@ endif
 " @note depend on tags
 function! lh#dev#__FindFunctions(line) abort
   try
-    let session = lh#dev#start_tag_session2({'extract_functions': 1})
-    let fl = session.indexer.flavour()
-    let lang = fl.get_lang_for(&ft)
-    let func_kind = ('['.join(get(fl.get_kind_flags('functions'), lang, ['f']), '').']')
+    let session = lh#dev#start_tag_session({'extract_functions': 1})
     let lTags = session.tags
     if empty(lTags)
       throw "No tags found, cannot find function definitions in ".expand('%')
     endif
 
     " 1- filter to keep functions only
-    let lFunctions = filter(copy(lTags), 'v:val.kind=~func_kind')
+    let [func_kind] = session.indexer.get_kind_flags(&ft, ['functions', 'f'])
+    let lFunctions = filter(copy(lTags), 'index(func_kind, v:val.kind) >= 0')
 
     " Several cases to consider:
     " - no function starting before => fail

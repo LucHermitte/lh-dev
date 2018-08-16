@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = '2.0.0'
 " Created:	10th Feb 2009
-" Last Update:	14th Aug 2018
+" Last Update:	16th Aug 2018
 "------------------------------------------------------------------------
 " Description:
 " 	Analysis functions for C++ types.
@@ -17,6 +17,7 @@ let s:k_version = '2.0.0'
 " 	v2.0.0: ~ deprecate lh#dev#option#get()
 " 	        - #_of_var cannot work on parameters
 " 	        + Fix lh#dev#cpp#types#const_correct_type() for vim 7.4.152
+"               ~ Update to lh-tags 3.0 new API
 " 	v1.5.0: - #_of_var
 " 	v1.3.9: - better magic/nomagic neutrality
 " 	        - snake_case enforced
@@ -277,19 +278,18 @@ function! lh#dev#cpp#types#_of_var(name, ...) abort
     if a:name =~ '^\s*$'
       return call('s:NoDecl', [a:name]+a:000)
     endif
-    if searchdecl(a:name) == 0
+    if searchdecl(a:name, 1, 1) == 0
       " First: let Vim find the variable definitions
       let def_line = getline('.')
       call s:Verbose('Definition of %1 found line %2: %3', a:name, line('.'), def_line)
     else
       " Then: search in the tags DB (it may be an attribute from the current
       " class)
+      " TODO: Ignore the definitions in an incompatible block!
       let cleanup = cleanup
             \.register('call lh#dev#end_tag_session()')
-      let session = lh#dev#start_tag_session2()
-      let fl = session.indexer.flavour()
-      let lang = fl.get_lang_for(&ft)
-      let tags = session.tags
+      let session    = lh#dev#start_tag_session()
+      let tags       = session.tags
       let pat = '.*\<'.a:name.'\>.*'
       " FIXME: get the scopename of the current function as well=> ClassName::foobar()
       " TODO: And move the function into lh-dev!!!
@@ -298,9 +298,9 @@ function! lh#dev#cpp#types#_of_var(name, ...) abort
       call s:Verbose('Attributes of %1 matching %2: %3', classname, pat, defs)
       " Use the lang kind for all variables from the crt flavour!
       " "get_kind_flags('variable')" => regex
-      let var_kind = '['.join(get(fl.get_kind_flags('variable'), lang, ['l','v']), '').']'
+      let [var_kind] = session.indexer.get_kind_flags(&ft, ['variable', 'v', 'l'])
       call s:Verbose("Filter with variable kind: %1", var_kind)
-      let t_vars  = filter(defs, 'v:val.kind =~ var_kind')
+      let t_vars  = filter(defs, 'index(var_kind,  v:val.kind)>=0')
       if empty(t_vars)
         return call('s:NoDecl', [a:name]+a:000)
       elseif len(t_vars) == 1
