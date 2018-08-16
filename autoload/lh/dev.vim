@@ -14,10 +14,10 @@ let s:k_version = 200
 "
 "------------------------------------------------------------------------
 " History:
+"       v2.2.0: ~ Update to lh-tags 3.0 new API
 "       v2.0.0: ~ deprecating lh#dev#option#get, lh#dev#reinterpret_escaped_char
 "               + Report ctags execution error
 "               + Fix line field injection for recent uctags version
-"               ~ Update to lh-tags 3.0 new API
 "       v1.6.3: ~ Typo in option
 "       v1.6.2: ~ Minor refatoring
 "       v1.6.1: + lh#dev#_goto_function_begin and end
@@ -309,6 +309,7 @@ function! s:inject_to_field(line, field, value) abort
 endfunction
 
 function! lh#dev#__BuildCrtBufferCtags(...) abort
+  " TODO: move to lh-tags as the indexer may change the way it works
   " let temp_tags = tempname()
   let ctags_dirname = fnamemodify(s:temp_tags, ':h')
 
@@ -335,7 +336,7 @@ function! lh#dev#__BuildCrtBufferCtags(...) abort
     call delete(s:temp_tags)
   endif
   let indexer = lh#tags#indexers#ctags#make()
-  call indexer.set_output_file(s:temp_tags)
+  call indexer.s:set_db_file(s:temp_tags)
   let options = extend(args, {'forced_language':&ft, 'extract_local_variables': 1, 'end': 1, 'extract_prototypes': 0, 'analyse_file': source_name}, 'force')
   let cmd_line = join(indexer.cmd_line(options), ' ')
 
