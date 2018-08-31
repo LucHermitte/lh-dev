@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = '2.0.0'
 " Created:      28th May 2010
-" Last Update:  16th Aug 2018
+" Last Update:  31st Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       Various helper functions that return ctags information on functions
@@ -181,14 +181,15 @@ endfunction
 " taken care of by the calling code
 function! lh#dev#function#_local_variables(function_boundaries) abort
   try
-    let session    = lh#dev#start_tag_session()
+    let session    = lh#tags#session#get()
     let [var_kind] = session.indexer.get_kind_flags(&ft, ['variable', 'v', 'l']) " regex
     let cond       = 'index(var_kind,  v:val.kind)>=0'
 
     if ! session.indexer.has_kind(&ft, 'local_variables')
       " ctags does not understand local _variables: => work within the
       " sub range
-      let lTags = copy(lh#dev#__BuildCrtBufferCtags(a:function_boundaries).tags)
+      let bounds = {'firstline': a:function_boundaries[0], 'lastline': a:function_boundaries[1]}
+      let lTags = copy(session.indexer.analyse_buffer(bounds))
       call s:AddOffset(lTags, a:function_boundaries[0] - 1)
     else
       let cond .=
@@ -200,7 +201,7 @@ function! lh#dev#function#_local_variables(function_boundaries) abort
     call s:Verbose(cond)
     let lVariables = filter(copy(lTags), cond)
   finally
-    call lh#dev#end_tag_session()
+    call session.finalize()
   endtry
   return lVariables
 endfunction

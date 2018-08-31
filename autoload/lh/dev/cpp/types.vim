@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = '2.0.0'
 " Created:	10th Feb 2009
-" Last Update:	16th Aug 2018
+" Last Update:	31st Aug 2018
 "------------------------------------------------------------------------
 " Description:
 " 	Analysis functions for C++ types.
@@ -286,9 +286,7 @@ function! lh#dev#cpp#types#_of_var(name, ...) abort
       " Then: search in the tags DB (it may be an attribute from the current
       " class)
       " TODO: Ignore the definitions in an incompatible block!
-      let cleanup = cleanup
-            \.register('call lh#dev#end_tag_session()')
-      let session    = lh#dev#start_tag_session()
+      let session    = lh#tags#session#get()
       let tags       = session.tags
       let pat = '.*\<'.a:name.'\>.*'
       " FIXME: get the scopename of the current function as well=> ClassName::foobar()
@@ -323,6 +321,9 @@ function! lh#dev#cpp#types#_of_var(name, ...) abort
     return var.type
   finally
     call cleanup.finalize()
+    if exists('session')
+      call session.finalize()
+    endif
   endtry
 endfunction
 

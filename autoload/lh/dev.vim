@@ -7,7 +7,7 @@
 " Version:      2.0.0
 let s:k_version = 200
 " Created:      28th May 2010
-" Last Update:  16th Aug 2018
+" Last Update:  31st Aug 2018
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -90,7 +90,7 @@ endfunction
 " @note depend on tags
 function! lh#dev#find_function_boundaries(line) abort
   try
-    let session = lh#dev#start_tag_session({'extract_functions': 1})
+    let session = lh#tags#session#get({'extract_functions': 1})
     let lTags = session.tags
 
     let info = lh#dev#__FindFunctions(a:line)
@@ -122,7 +122,7 @@ function! lh#dev#find_function_boundaries(line) abort
     let fun = {'lines': [first_line, last_line], 'fn':the_function}
     return fun
   finally
-    call lh#dev#end_tag_session()
+    call session.finalize()
   endtry
 endfunction
 
@@ -158,21 +158,14 @@ let s:tags = {
       \ 'count': 0
       \ }
 function! lh#dev#start_tag_session(...) abort " {{{3
-  if s:tags.count < 0
-    let s:tags.count = 0
-  endif
-  let s:tags.count += 1
-  if s:tags.count == 1
-    call extend(s:tags, call('lh#dev#__BuildCrtBufferCtags', a:000), 'force')
-  endif
+  call lh#notify#deprecated('lh#dev#start_tag_session', 'lh#tags#session#get')
+  let s:tags = call('lh#tags#session#get', a:000)
   return s:tags
 endfunction
 
 function! lh#dev#end_tag_session() abort " {{{3
-  let s:tags.count -= 1
-  if s:tags.count == 0
-    let s:tags.tags = []
-  endif
+  call lh#notify#deprecated('lh#dev#end_tag_session', 'lh#tags#session#get().finalize')
+  call s:tags.finalize()
 endfunction
 
 " # Cached Tags
@@ -191,15 +184,15 @@ function! lh#dev#__fetch_tags(id, ...) abort
     try
       " lh#dev#start_tag_session() return all tags from current buffer
       " taglist(id) filter tags matching id in &tags
-      call lh#dev#start_tag_session()
-      let tags = taglist(a:id)
+      let session = lh#tags#session#get()
+      let tags = session.indexer.taglist(a:id)
       if a:0 > 0
         " or lh#function#exe ...
         let tags = call(a:1, tags)
         let s:cached_tags[a:id] = tags
       endif
     finally
-      call lh#dev#end_tag_session()
+      call session.finalize()
     endtry
   else
     call tags.check_up_to_date()
@@ -252,7 +245,7 @@ endif
 " @note depend on tags
 function! lh#dev#__FindFunctions(line) abort
   try
-    let session = lh#dev#start_tag_session({'extract_functions': 1})
+    let session = lh#tags#session#get({'extract_functions': 1})
     let lTags = session.tags
     if empty(lTags)
       throw "No tags found, cannot find function definitions in ".expand('%')
@@ -277,7 +270,7 @@ function! lh#dev#__FindFunctions(line) abort
     endif
     return { 'idx': crt_function, 'fn': lFunctions}
   finally
-    call lh#dev#end_tag_session()
+    call session.finalize()
   endtry
 endfunction
 
@@ -297,86 +290,8 @@ endfunction
 " arg1: [first-line, last-line] => imply get local variables...
 " @note depend on tags
 function! lh#dev#__BuildCrtBufferCtags(...) abort
-  " TODO: move to lh-tags as the indexer may change the way it works
-  " let temp_tags = tempname()
-  let ctags_dirname = fnamemodify(s:temp_tags, ':h')
-
-  if &modified || a:0 > 0
-    if a:0 > 0 && type(a:1) == type([])
-      let s = a:1[0]
-      let e = a:1[1]
-    else
-      let s = 1
-      let e = '$'
-    endif
-    let source_name = tempname()
-    call writefile(getline(s, e), source_name, 'b')
-  else
-    " todo: corriger le path car injecté par défaut...
-    let source_name    = expand('%:p')
-    " let source_name    = lh#path#relative_to(ctags_dirname, expand('%:p'))
-  endif
-  let args = (a:0 > 0 && type(a:1) == type({})) ? a:1 : {}
-  " call s:Verbose("Args: %1, %2", args, a:000)
-  " let ctags_pathname = s:temp_tags
-
-  if filereadable(s:temp_tags)
-    call delete(s:temp_tags)
-  endif
-  let indexer = lh#tags#indexers#ctags#make()
-  call indexer.s:set_db_file(s:temp_tags)
-  let options = extend(args, {'forced_language':&ft, 'extract_local_variables': 1, 'end': 1, 'extract_prototypes': 0, 'analyse_file': source_name}, 'force')
-  let cmd_line = join(indexer.cmd_line(options), ' ')
-
-  if filereadable(s:temp_tags)
-    call delete(s:temp_tags)
-  endif
-  call s:Verbose(cmd_line)
-  let exec = system(cmd_line)
-  if v:shell_error != 0
-    throw "Cannot execute `".cmd_line."`: ".exec
-  endif
-
-  try
-    let tags_save = &tags
-    let &tags = s:temp_tags
-    let lTags = taglist('.')
-  finally
-    let &tags = tags_save
-    if lh#dev#verbose() < 2
-      call delete(s:temp_tags)
-    else
-      let b = bufwinnr('%')
-      call lh#buffer#jump(s:temp_tags, "sp")
-      exe b.'wincmd w'
-    endif
-  endtry
-  call s:EvalLines(lTags)
-  call sort(lTags, function('lh#dev#_sort_lines'))
-  return {'tags': lTags, 'indexer': indexer}
-endfunction
-
-" # s:EvalLines(list) {{{2
-function! s:EvalLines(list) abort
-  for t in a:list
-    if !has_key(t, 'line') " sometimes, VimL declarations are badly understood
-      let fields = split(t.cmd)
-      for field in fields
-        if field =~ '\v^\k+:'
-          let [all, key, value; rest ] = matchlist(field, '\v^(\k+):(.*)')
-          let t[key] = value
-        elseif field =~ '^.$'
-          let t.kind = field
-        elseif field =~ '/.*/";'
-          let t.cmd = field
-        endif
-      endfor
-      let t.file = fields[0]
-    endif
-    " and do evaluate the line eventually
-    let t.line = eval(t.line)
-    unlet t.filename
-  endfor
+  call lh#notify#deprecated('lh#dev#start_tag_session', 'lh#tags#session#get')
+  return call(s:tags.analyse_buffer, a:000)
 endfunction
 
 " # lh#dev#_sort_lines(t1, t2) {{{2
