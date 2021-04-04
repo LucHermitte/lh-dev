@@ -5,7 +5,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      31st May 2010
-" Last Update:  20th Feb 2018
+" Last Update:  04th Apr 2021
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
@@ -194,12 +194,15 @@ endfunction
 " [X] new line before (when analysing non ctags-signatures, but real text)
 " [/] TU
 " [X] variadic parameter "..."
-function! lh#dev#c#function#_analyse_parameter( param, ...) abort
+function! lh#dev#c#function#_analyse_parameter(param, ...) abort
   let mustCleanSpace = a:0 > 0 ? a:1 : 0
+  let param = a:param
   let res = {}
 
   " Merge spaces
-  let param = substitute(a:param, '\v\_s+', ' ', 'g')
+  if mustCleanSpace
+    let param = substitute(param, '\v\_s+', ' ', 'g')
+  endif
   " variadic ?
   if param == '...'
     let res.type    = 'va_list'
