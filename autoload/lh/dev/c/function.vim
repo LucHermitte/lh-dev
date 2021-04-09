@@ -5,7 +5,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      31st May 2010
-" Last Update:  07th Apr 2021
+" Last Update:  09th Apr 2021
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
@@ -221,9 +221,11 @@ function! lh#dev#c#function#_analyse_parameter(param, ...) abort
     return res
   endif
   " Default Value: after = sign
-  if stridx(param, '=') != -1
+  let match_res = matchlist(param, '\v^\s*(.{-}<'.expected_param_name.'>)\s*\=\s*(.{-})\s*$')
+  if !empty(match_res)
+    " Cannot use stridx for types likes `sometype<I==42>`
     " let [all, param, res.default ; rest] = matchlist(param, '\v^\s*([^=]{-})\s*\=\s*(.{-})\s*$')
-    let [all, param, res.default ; rest] = matchlist(param, '\v^\s*(.{-}<'.expected_param_name.'>)\s*\=\s*(.{-})\s*$')
+    let [all, param, res.default ; rest] = match_res
   else
     " trim spaces
     let param = matchstr(param, '\v^\s*\zs.{-}\ze\s*$')
