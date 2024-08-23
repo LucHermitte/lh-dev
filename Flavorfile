@@ -1,0 +1,2 @@
+flavor 'LucHermitte/lh-vim-lib', '>= 5.3.3'
+flavor 'LucHermitte/lh-tags', '>= 3.0.7'

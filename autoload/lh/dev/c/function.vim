@@ -5,7 +5,7 @@
 " Version:      2.0.0
 let s:k_version = 2000
 " Created:      31st May 2010
-" Last Update:  09th Apr 2021
+" Last Update:  23rd Aug 2024
 "------------------------------------------------------------------------
 " Description:
 "       Overridden functions from lh#dev#function, for C and derived languages
@@ -17,6 +17,7 @@ let s:k_version = 2000
 "       (*) Fix lh#dev#c#function#_build_param_call/decl
 "       (*) Support template types in lh#dev#c#function#_analyse_parameter
 "           when the expected parameter name is known
+"       (*) Make _analyse_parameter resilient to &isk
 "       1.6.2
 "       (*) Fix :GOTOIMPL to support operators like +=
 "       1.5.1
@@ -197,90 +198,99 @@ endfunction
 " [/] UT
 " [X] variadic parameter "..."
 function! lh#dev#c#function#_analyse_parameter(param, ...) abort
-  if a:0 > 0 && type(a:1) != type({})
-    " Old API...
-    let must_clean_space    = a:1
-    let expected_param_name = '[^=]{-}'
-  else
-    let opts = get(a:, 1, {})
-    let must_clean_space    = get(opts, 'must_clean_space', 0)
-    let expected_param_name = get(opts, 'expected_param_name', '[^=]{-}')
-  endif
-  let param = a:param
-  let res = {}
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
+    if a:0 > 0 && type(a:1) != type({})
+      " Old API...
+      let must_clean_space    = a:1
+      let expected_param_name = '[^=]{-}'
+    else
+      let opts = get(a:, 1, {})
+      let must_clean_space    = get(opts, 'must_clean_space', 0)
+      let expected_param_name = get(opts, 'expected_param_name', '[^=]{-}')
+    endif
+    let param = a:param
+    let res = {}
 
-  " Merge spaces
-  if must_clean_space
-    let param = substitute(param, '\v\_s+', ' ', 'g')
-  endif
-  " variadic ?
-  if param == '...'
-    let res.type    = 'va_list'
-    let res.default = ''
-    let res.name    = '...'
-    return res
-  endif
-  " Default Value: after = sign
-  let match_res = matchlist(param, '\v^\s*(.{-}<'.expected_param_name.'>)\s*\=\s*(.{-})\s*$')
-  if !empty(match_res)
-    " Cannot use stridx for types likes `sometype<I==42>`
-    " let [all, param, res.default ; rest] = matchlist(param, '\v^\s*([^=]{-})\s*\=\s*(.{-})\s*$')
-    let [all, param, res.default ; rest] = match_res
-  else
-    " trim spaces
-    let param = matchstr(param, '\v^\s*\zs.{-}\ze\s*$')
-    let res.default = ''
-  endif
-  " Special Case: array
-  let purge_inner_dimension = 1
-  let array = match(param, '\v(\s*\[.*\])+$')
-  if array != -1
-    let array_spec = matchstr(param[array : -1], '\v\s*\zs.*')
-    let param = param[ : array-1]
-  else
-    let array_spec = ''
-  endif
-  " Special Case: function pointer
-  if param =~ '\v(.{-})\s*\(\s*\*(\S{-})\s*\)\s*(\(.*\))'
-    let [all, ret_type, res.name, func_type; rest] = matchlist(param, '\v(.{-})\s*\(\s*\*(\S{-})\s*\)\s*(\(.*\))')
-    let res.type = ret_type.' (*)'.func_type
-  elseif param =~ '\v(.{-})\s*\(\s*\*(\S{-})\s*\)'
-    " Special Case: array, (*name)[] syntax
-    let [all, ret_type, res.name; rest] = matchlist(param, '\v(.{-})\s*\(\s*\*(\S{-})\s*\)')
-    let res.type = ret_type.'(*)'
-    let purge_inner_dimension = 0
-  else
-    " Name: last part in usual case, or separated with * or &
-    let res.name = matchstr(param, '\v\S([*& ])+\zs\S+$')
-    " unless the last part is
-    " - "int", "float", "char", "short", ...
-    " - or "something>(::othething)="
-    " - or everything
-    if res.name =~ '\v<(int|char|short|long|float|double)>|\>'
-          " \ || res.type =~ '\v(::)$'   " doesn't exist yet
-      let res.name = ''
-    endif
-    " Type:
-    let res.type = matchstr(param[:strlen(param)-strlen(res.name)-1], '\v.*\S')
-    if res.type =~ '\v(::)$' " merge back
-      let res.name = ''
-      let res.type = param
-    endif
-    " Remove spaces around *, &
-    " TODO: remove space around < and > (in C++11 only?)
+    " Merge spaces
     if must_clean_space
-      let res.type = substitute(res.type, '\v\s*([*&]+)\s*', '\1', 'g')
+      let param = substitute(param, '\v\_s+', ' ', 'g')
     endif
-  endif
+    " variadic ?
+    if param == '...'
+      let res.type    = 'va_list'
+      let res.default = ''
+      let res.name    = '...'
+      return res
+    endif
+    " Default Value: after = sign
+    let match_res = matchlist(param, '\v^\s*(.*<'.expected_param_name.'>)\s*\=\s*(.{-})\s*$')
+    if !empty(match_res)
+      " Cannot use stridx for types likes `sometype<I==42>`
+      " let [all, param, res.default ; rest] = matchlist(param, '\v^\s*([^=]{-})\s*\=\s*(.{-})\s*$')
+      let [all, param, res.default ; rest] = match_res
+    else
+      " trim spaces
+      let param = matchstr(param, '\v^\s*\zs.{-}\ze\s*$')
+      let res.default = ''
+    endif
+    " Special Case: array
+    let purge_inner_dimension = 1
+    let array = match(param, '\v(\s*\[.*\])+$')
+    if array != -1
+      let array_spec = matchstr(param[array : -1], '\v\s*\zs.*')
+      let param = param[ : array-1]
+    else
+      let array_spec = ''
+    endif
+    " Special Case: function pointer
+    if param =~ '\v(.{-})\s*\(\s*\*(\S{-})\s*\)\s*(\(.*\))'
+      let [all, ret_type, res.name, func_type; rest] = matchlist(param, '\v(.{-})\s*\(\s*\*(\S{-})\s*\)\s*(\(.*\))')
+      let res.type = ret_type.' (*)'.func_type
+    elseif param =~ '\v(.{-})\s*\(\s*\*(\S{-})\s*\)'
+      " Special Case: array, (*name)[] syntax
+      let [all, ret_type, res.name; rest] = matchlist(param, '\v(.{-})\s*\(\s*\*(\S{-})\s*\)')
+      let res.type = ret_type.'(*)'
+      let purge_inner_dimension = 0
+    else
+      " Name: last part in usual case, or separated with * or &
+      let res.name = matchstr(param, '\v\S([*& ])+\zs\S+$')
+      " unless the last part is
+      " - "int", "float", "char", "short", ...
+      " - or "something>(::othething)="
+      " - or everything
+      if res.name =~ '\v<(int|char|short|long|float|double)>|\>'
+        " \ || res.type =~ '\v(::)$'   " doesn't exist yet
+        let res.name = ''
+      endif
+      " Type:
+      let res.type = matchstr(param[:strlen(param)-strlen(res.name)-1], '\v.*\S')
+      if res.type =~ '\v(::)$' " merge back
+        let res.name = ''
+        let res.type = param
+      endif
+      " Remove spaces around *, &
+      " TODO: remove space around < and > (in C++11 only?)
+      if must_clean_space
+        let res.type = substitute(res.type, '\v\s*([*&]+)\s*', '\1', 'g')
+      endif
+    endif
 
-  if purge_inner_dimension
-    let array_spec = substitute(array_spec, '\v^\[\zs\d+\ze\]', '', '')
-  endif
-  let res.type .= array_spec
-  " New line before the parameter
-  let res.nl = match(a:param, "\\v^\\s*[\n\r]") >= 0
-  " Result
-  return res
+    if purge_inner_dimension
+      let array_spec = substitute(array_spec, '\v^\[\zs\d+\ze\]', '', '')
+    endif
+    let res.type .= array_spec
+    " New line before the parameter
+    let res.nl = match(a:param, "\\v^\\s*[\n\r]") >= 0
+    " Result
+    return res
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 function! lh#dev#c#function#_type(variable_tag) abort "{{{3

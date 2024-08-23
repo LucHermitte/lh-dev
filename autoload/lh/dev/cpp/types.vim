@@ -7,7 +7,7 @@
 " Version:	2.0.0
 let s:k_version = '2.0.0'
 " Created:	10th Feb 2009
-" Last Update:	09th Mar 2021
+" Last Update:	23rd Aug 2024
 "------------------------------------------------------------------------
 " Description:
 " 	Analysis functions for C++ types.
@@ -26,6 +26,7 @@ let s:k_version = '2.0.0'
 "                 opt: lh#dev#cpp#use_cpp11()
 "               + Fix const related functions to support multi-levels types
 "                 (T**)
+"               + Add resilience to &isk value
 " 	v1.5.0: - #_of_var
 " 	v1.3.9: - better magic/nomagic neutrality
 " 	        - snake_case enforced
@@ -147,25 +148,34 @@ let s:k_types.= '|<nullptr_t>'
 let s:k_types.= '|<size_type>'
 
 function! lh#dev#cpp#types#is_base_type(type, pointerAsWell) abort
-  call s:Verbose('Check lh#dev#cpp#types#is_base_type(%1)', a:type)
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
+    call s:Verbose('Check lh#dev#cpp#types#is_base_type(%1)', a:type)
 
-  let expr = s:ExtractPattern( a:type, s:k_scope )
-  let expr = s:ExtractPattern( expr,   s:k_sign )
-  let expr = s:ExtractPattern( expr,   s:k_size )
-  let expr = s:ExtractPattern( expr,   s:k_types )
-  let user_base_types = lh#ft#option#get('base_type_pattern', 'cpp')
-  call s:Verbose('(cpp_)base_type_pattern: %1', user_base_types)
-  if lh#option#is_set(user_base_types)
-    let expr = s:ExtractPattern( expr, user_base_types)
-  endif
-  if a:pointerAsWell==1
-    if match( substitute(expr,'\s*','','g'), '\v(\*|\&)+$' ) != -1
-      return 1
+    let expr = s:ExtractPattern( a:type, s:k_scope )
+    let expr = s:ExtractPattern( expr,   s:k_sign )
+    let expr = s:ExtractPattern( expr,   s:k_size )
+    let expr = s:ExtractPattern( expr,   s:k_types )
+    let user_base_types = lh#ft#option#get('base_type_pattern', 'cpp')
+    call s:Verbose('(cpp_)base_type_pattern: %1', user_base_types)
+    if lh#option#is_set(user_base_types)
+      let expr = s:ExtractPattern( expr, user_base_types)
     endif
-  endif
-  call s:Verbose('Expr: %1 => %2base_type', expr, (expr=='' ? '' : 'not a '))
-  " return strlen(expr) == 0
-  return expr == ''
+    if a:pointerAsWell==1
+      if match( substitute(expr,'\s*','','g'), '\v(\*|\&)+$' ) != -1
+        return 1
+      endif
+    endif
+    call s:Verbose('Expr: %1 => %2base_type', expr, (expr=='' ? '' : 'not a '))
+    " return strlen(expr) == 0
+    return expr == ''
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 function! lh#dev#cpp#types#IsBaseType(type, pointerAsWell) abort
   " Deprecated function
@@ -204,9 +214,18 @@ endfunction
 
 " Function: lh#dev#cpp#types#is_const(type)                   : bool {{{3
 function! lh#dev#cpp#types#is_const(type) abort
-  call lh#assert#value(a:type).not().empty()
-  let parts = s:DecomposeType(a:type)
-  return parts[-1] =~ '\v<const>'
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
+    call lh#assert#value(a:type).not().empty()
+    let parts = s:DecomposeType(a:type)
+    return parts[-1] =~ '\v<const>'
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 " Function: lh#dev#cpp#types#remove_cv(type)                  : string {{{3
@@ -238,11 +257,20 @@ endfunction
 " # Pointer related functions {{{2
 " Function: lh#dev#cpp#types#is_pointer(type)                 : bool {{{3
 function! lh#dev#cpp#types#is_pointer(type) abort
-  " Special case: owner<T*>
-  if a:type =~ '\v^<owner>\<.*\*\s*\>\s*$'
-    return 1
-  endif
-  return a:type =~ '\v([*]|(pointer|_ptr|Ptr|<nullptr_t>|<not_null>|<span>)(\<.*\>)=)\s*$'
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
+    " Special case: owner<T*>
+    if a:type =~ '\v^<owner>\<.*\*\s*\>\s*$'
+      return 1
+    endif
+    return a:type =~ '\v([*]|(pointer|_ptr|Ptr|<nullptr_t>|<not_null>|<span>)(\<.*\>)=)\s*$'
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 function! lh#dev#cpp#types#IsPointer(type) abort
@@ -252,33 +280,60 @@ endfunction
 " Function: lh#dev#cpp#types#is_view(type)                    : bool {{{3
 " string_view, span, ...
 function! lh#dev#cpp#types#is_view(type) abort
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
   return a:type =~ '\v_view>|<span>'
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 " Function: lh#dev#cpp#types#is_smart_ptr(type)               : bool {{{3
 function! lh#dev#cpp#types#is_smart_ptr(type) abort
-  let regex = lh#ft#option#get('smart_ptr_pattern', 'cpp')
-  if lh#option#is_set(regex) && a:type =~ regex
-    return 1
-  elseif a:type =~ '\v^<owner>\<.*\*\s*\>\s*$'
-    " Special case: owner<T*>
-    return 1
-  endif
-  return a:type =~ '\v(_ptr|<not_null>|<span>)(\<.*\>)=\s*$'
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
+    let regex = lh#ft#option#get('smart_ptr_pattern', 'cpp')
+    if lh#option#is_set(regex) && a:type =~ regex
+      return 1
+    elseif a:type =~ '\v^<owner>\<.*\*\s*\>\s*$'
+      " Special case: owner<T*>
+      return 1
+    endif
+    return a:type =~ '\v(_ptr|<not_null>|<span>)(\<.*\>)=\s*$'
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 " Function: lh#dev#cpp#types#is_not_owning_ptr(type)          : bool {{{3
 function! lh#dev#cpp#types#is_not_owning_ptr(type) abort
-  if     a:type =~ '\v\*\s*$'
-    return lh#ft#option#get('is_following_CppCoreGuideline', 'cpp', 0)
+  let cleanup = lh#on#exit()
+        \.restore('&isk')
+  try
+    setlocal isk-=<
+    setlocal isk-=>
+    setlocal isk-=:
+    if     a:type =~ '\v\*\s*$'
+      return lh#ft#option#get('is_following_CppCoreGuideline', 'cpp', 0)
     " Meaning, own<T*> is defined, and no own<> <=> no need to copy
-  elseif a:type =~ '\v(auto|unique|scoped|shared)_ptr'
-    return 0
-  elseif a:type =~ '\v<owner>'
-    return 0
-  else
-    return 1
-  endif
+    elseif a:type =~ '\v(auto|unique|scoped|shared)_ptr'
+      return 0
+    elseif a:type =~ '\v<owner>'
+      return 0
+    else
+      return 1
+    endif
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 " Function: lh#dev#cpp#types#remove_ptr(type)                 : string {{{3
