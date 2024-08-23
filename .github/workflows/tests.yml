@@ -50,9 +50,9 @@ jobs:
     - name: Run tests on Linux
       if: runner.os == 'Linux' # headless execution is required on Linux
       run: |
+        bundle list
         xvfb-run bundle exec rake ci
     - name: Run tests on ${{ matrix.os }}
       if: runner.os != 'Linux'
       run: |
         bundle exec rake ci
-
