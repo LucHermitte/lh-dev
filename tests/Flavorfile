@@ -1,3 +1,2 @@
-flavor 'LucHermitte/vim-UT', '>= 3.0.7'
-flavor 'LucHermitte/lh-brackets', '>= 3.1.2'
+flavor 'LucHermitte/vim-UT', '>= 2.0.8'
 flavor 'editorconfig/editorconfig-vim'
