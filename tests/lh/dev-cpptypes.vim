@@ -5,7 +5,7 @@
 " Version:      2.0.0.
 let s:k_version = '200'
 " Created:      03rd Dec 2015
-" Last Update:  19th Dec 2019
+" Last Update:  23rd Aug 2024
 "------------------------------------------------------------------------
 " Description:
 "       Tests to autoload/lh/dev/cpp/types.vim functions
@@ -28,7 +28,7 @@ call lh#askvim#scriptnames()
 
 let s:cpo_save=&cpo
 set cpo&vim
-let s:isk_save=&cpo
+let s:isk_save=&isk
 set isk&vim
 
 "------------------------------------------------------------------------
@@ -365,6 +365,6 @@ endfunction
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
-let &isk=s:cpo_save
+let &isk=s:isk_save
 "=============================================================================
 " vim600: set fdm=marker:
