@@ -1,11 +1,10 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/cs/attribute.vim                  {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      001
+"		<URL:http://github.com/LucHermitte/lh-dev>
+" Version:      2.0.0
 " Created:      23rd Aug 2011
-" Last Update:  $Date$
+" Last Update:  02nd Sep 2025
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -42,15 +41,16 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
-" Function: lh#dev#cs#attribute#analyse(definition) {{{3
+" Function: lh#dev#cs#attribute#_analyse(definition) {{{3
 " @return Java's code
-function! lh#dev#cs#attribute#analyse(definition)
-  return lh#dev#java#attribute#analyse(a:definition)
+function! lh#dev#cs#attribute#_analyse(definition)
+  return lh#dev#java#attribute#_analyse(a:definition)
 endfunction
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 
 "------------------------------------------------------------------------
+" }}}1
 let &cpo=s:cpo_save
 "=============================================================================
 " vim600: set fdm=marker:

@@ -1,11 +1,10 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/dev/java/attribute.vim                {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      001
+"		<URL:http://github.com/LucHermitte/lh-dev>
+" Version:      2.0.0
 " Created:      23rd Aug 2011
-" Last Update:  $Date$
+" Last Update:  02nd Sep 2025
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -42,10 +41,10 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
-" Function: lh#dev#java#attribute#analyse(definition) {{{3
+" Function: lh#dev#java#attribute#_analyse(definition) {{{3
 " TODO: this analysis is totally incomplete!
 " - [ ] static
-function! lh#dev#java#attribute#analyse(definition)
+function! lh#dev#java#attribute#_analyse(definition)
   let clean_def = matchstr(a:definition, '^\s*\zs[^;=]*\ze[;=]\=.*$')
   let [dummy, prefix, name;tail] = matchlist(clean_def, '\(.\{-}\)\s\+\(\S\+\)$')
   let words = split(prefix)

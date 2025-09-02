@@ -2,9 +2,10 @@
 " File:         autoload/lh/dev/c/attribute.vim                   {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://github.com/LucHermitte/lh-dev>
-" Version:      1.7.0
+" Version:      2.0.0
+let s:k_version = '200'
 " Created:      22nd Aug 2011
-" Last Update:  27th May 2016
+" Last Update:  02nd Sep 2025
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -16,7 +17,6 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 1
 function! lh#dev#c#attribute#version()
   return s:k_version
 endfunction
@@ -28,9 +28,13 @@ function! lh#dev#c#attribute#verbose(...)
   return s:verbose
 endfunction
 
+function! s:Log(expr, ...) abort
+  call call('lh#log#this',[a:expr]+a:000)
+endfunction
+
 function! s:Verbose(expr)
   if s:verbose
-    echomsg a:expr
+    call call('s:Log',[a:expr]+a:000)
   endif
 endfunction
 
@@ -41,8 +45,8 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
-" Function: lh#dev#c#attribute#analyse(definition) {{{3
-function! lh#dev#c#attribute#analyse(definition)
+" Function: lh#dev#c#attribute#_analyse(definition) {{{3
+function! lh#dev#c#attribute#_analyse(definition)
   let clean_def = matchstr(a:definition, '^\s*\zs[^;=]*\ze[;=]\=.*$')
   let res = lh#dev#c#function#_analyse_parameter(clean_def)
   return res

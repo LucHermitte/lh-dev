@@ -2,9 +2,9 @@
 " File:         autoload/lh/dev/attribute.vim                     {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://github.com/LucHermitte/lh-dev>
-" Version:      001
+" Version:      2.0.0
 " Created:      22nd Aug 2011
-" Last Update:  16th Oct 2017
+" Last Update:  02nd Sep 2025
 "------------------------------------------------------------------------
 " Description:
 "       «description»
@@ -48,7 +48,7 @@ endfunction
 " - "visibility": "public", "protected", "private"
 " - "static"    : boolean (0/1)
 function! lh#dev#attribute#analyse(definition)
-  return lh#dev#option#call('attribute#analyse', &ft, a:definition)
+  return lh#dev#option#call('attribute#_analyse', &ft, a:definition)
 endfunction
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
